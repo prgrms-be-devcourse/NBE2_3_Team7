@@ -64,4 +64,18 @@ data class Board (
     fun changeImgUrls(imageUrls: MutableList<String>) {
         this.imageUrls = imageUrls
     }
+
+    override fun hashCode(): Int {
+        return boardId.hashCode()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is Board) return false
+        return boardId == other.boardId
+    }
+
+    override fun toString(): String {
+        return "Board(boardId=$boardId, title=$title, nickname=$nickname)"
+    }
 }

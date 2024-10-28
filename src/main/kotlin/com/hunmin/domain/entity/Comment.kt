@@ -29,4 +29,18 @@ data class Comment(
     fun changeContent(content: String) {
         this.content = content
     }
+
+    override fun hashCode(): Int {
+        return commentId.hashCode()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is Comment) return false
+        return commentId == other.commentId
+    }
+
+    override fun toString(): String {
+        return "Comment(commentId=$commentId, content=$content)"
+    }
 }
