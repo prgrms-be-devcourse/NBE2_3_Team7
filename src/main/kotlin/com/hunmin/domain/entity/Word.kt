@@ -19,7 +19,7 @@ data class Word (
     var lang: String,
 
     @Column(nullable = false)
-    var tranlation: String,
+    var translation: String,
 
     @Column(nullable = false)
     var definition: String
@@ -33,8 +33,8 @@ data class Word (
         this.lang = lang
     }
 
-    fun changeTranlation(tranlation: String) {
-        this.tranlation = tranlation
+    fun changeTranslation(tranlation: String) {
+        this.translation = tranlation
     }
 
     fun changeDefinition(definition: String) {

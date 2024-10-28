@@ -6,7 +6,7 @@ import jakarta.persistence.*
 data class WordScore (
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val wordScore: Long = 0,
+    val wordScoreId: Long = 0,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn
