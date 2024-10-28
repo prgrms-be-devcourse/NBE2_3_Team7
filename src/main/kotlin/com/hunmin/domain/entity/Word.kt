@@ -33,8 +33,8 @@ data class Word (
         this.lang = lang
     }
 
-    fun changeTranslation(tranlation: String) {
-        this.translation = tranlation
+    fun changeTranslation(translation: String) {
+        this.translation = translation
     }
 
     fun changeDefinition(definition: String) {
