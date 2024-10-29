@@ -6,8 +6,8 @@ import jakarta.validation.constraints.NotEmpty
 @JsonIgnoreProperties(ignoreUnknown = true) //리액트에서 필요한 데이터만 보내는걸로 수정했지만, 백엔드에서도 이중으로 불필요한 데이터 무시
 data class NoticeUpdateDTO(
     @field:NotEmpty(message = "제목을 입력하세요")
-    var title: String = "",
+    val title: String = "",
 
     @field:NotEmpty(message = "내용을 입력하세요")
-    var content: String = ""
+    val content: String = ""
 )

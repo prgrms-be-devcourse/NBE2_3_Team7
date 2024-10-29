@@ -6,14 +6,14 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 
-class NoticePageRequestDTO {
+data class NoticePageRequestDTO(
     @Min(1)
-    private val page = 1
+    var page: Int = 1,
 
     @Min(20)
     @Max(100)
-    private val size = 20
-
+    var size: Int = 20
+) {
     fun getPageable(sort: Sort): Pageable {
         return PageRequest.of(page - 1, size, sort)
     }
