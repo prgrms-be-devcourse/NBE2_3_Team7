@@ -22,8 +22,8 @@ data class NoticeResponseDTO(
     val updatedAt: LocalDateTime
 ) {
     constructor(notice: Notice) : this(
-        noticeId = notice.noticeId ?: 0L,
-        memberId = notice.member?.memberId ?: 0L,
+        noticeId = notice.noticeId ?: throw IllegalArgumentException("NoticeId는 널이 될 수 없습니다. "),
+        memberId = notice.member?.memberId ?: throw IllegalArgumentException("MemberId는 널이 될 수 없습니다."),
         title = notice.title,
         content = notice.content,
         nickname = notice.member!!.nickname,
