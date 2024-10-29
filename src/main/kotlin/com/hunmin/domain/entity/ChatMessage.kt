@@ -37,8 +37,4 @@ data class ChatMessage(
         if (other !is ChatMessage) return false
         return chatMessageId == other.chatMessageId
     }
-
-    fun setChatRoom(chatRoom: ChatRoom) {
-        this.chatRoom = chatRoom
-    }
 }

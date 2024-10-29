@@ -38,9 +38,4 @@ data class ChatRoom(
         if (other !is ChatRoom) return false
         return chatRoomId == other.chatRoomId
     }
-
-    fun add(chatMessage: ChatMessage) {
-        this.chatMessage!!.add(chatMessage)
-        chatMessage.setChatRoom(this)
-    }
 }
