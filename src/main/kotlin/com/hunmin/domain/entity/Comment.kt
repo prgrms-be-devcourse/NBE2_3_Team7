@@ -1,5 +1,6 @@
 package com.hunmin.domain.entity
 
+import com.hunmin.domain.entity.Board.Builder
 import jakarta.persistence.*
 
 @Entity
@@ -26,6 +27,35 @@ data class Comment(
     var children: MutableList<Comment> = mutableListOf()
 
 ) : BaseTimeEntity() {
+    class Builder {
+        private var commentId: Long = 0
+        private var board: Board? = null
+        private var member: Member? = null
+        private var content: String = ""
+        private var parent: Comment? = null
+        private var children: MutableList<Comment> = mutableListOf()
+
+        fun commentId(commentId: Long) = apply { this.commentId = commentId }
+        fun board(board: Board?) = apply { this.board = board }
+        fun member(member: Member?) = apply { this.member = member }
+        fun content(content: String) = apply { this.content = content }
+        fun parent(parent: Comment?) = apply { this.parent = parent }
+        fun children(children: MutableList<Comment>) = apply { this.children = children }
+
+        fun build() = Comment(
+            commentId = commentId,
+            board = board,
+            member = member,
+            content = content,
+            parent = parent,
+            children = children
+        )
+    }
+
+    companion object {
+        fun builder() = Builder()
+    }
+
     fun changeContent(content: String) {
         this.content = content
     }
