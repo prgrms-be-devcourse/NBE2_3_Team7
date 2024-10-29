@@ -41,6 +41,47 @@ data class Board (
     var comments: MutableList<Comment> = mutableListOf()
 
 ) : BaseTimeEntity() {
+    class Builder {
+        private var boardId: Long = 0
+        private var member: Member? = null
+        private lateinit var title: String
+        private lateinit var nickname: String
+        private lateinit var content: String
+        private var location: String? = null
+        private var latitude: Double? = null
+        private var longitude: Double? = null
+        private var imageUrls: MutableList<String> = mutableListOf()
+        private var comments: MutableList<Comment> = mutableListOf()
+
+        fun boardId(boardId: Long) = apply { this.boardId = boardId }
+        fun member(member: Member?) = apply { this.member = member }
+        fun title(title: String) = apply { this.title = title }
+        fun nickname(nickname: String) = apply { this.nickname = nickname }
+        fun content(content: String) = apply { this.content = content }
+        fun location(location: String?) = apply { this.location = location }
+        fun latitude(latitude: Double?) = apply { this.latitude = latitude }
+        fun longitude(longitude: Double?) = apply { this.longitude = longitude }
+        fun imageUrls(imageUrls: MutableList<String>) = apply { this.imageUrls = imageUrls }
+        fun comments(comments: MutableList<Comment>) = apply { this.comments = comments }
+
+        fun build() = Board(
+            boardId = boardId,
+            member = member,
+            title = title,
+            nickname = nickname,
+            content = content,
+            location = location,
+            latitude = latitude,
+            longitude = longitude,
+            imageUrls = imageUrls,
+            comments = comments
+        )
+    }
+
+    companion object {
+        fun builder() = Builder()
+    }
+
     fun changeTitle(title: String) {
         this.title = title
     }
