@@ -1,19 +1,22 @@
 package com.hunmin.domain.dto.word
 
+import com.hunmin.domain.entity.QWord.word
 import com.hunmin.domain.entity.Word
+import com.querydsl.core.types.Projections.constructor
 import java.time.LocalDateTime
 
 data class WordResponseDTO(
     val wordId: Long,
-    val title: String,
-    val lang: String,
-    val translation: String,
-    val definition: String,
+    var title: String,
+    var lang: String,
+    var translation: String,
+    var definition: String,
     val createdAt: LocalDateTime? = null,
-    val updatedAt: LocalDateTime? = null,
+    var updatedAt: LocalDateTime? = null,
 
-    var displayTitle: String,
-    var displayTranslation: String
+    var displayTitle: String = "",
+    var displayTranslation: String = "",
+    var displayTime: Long = 0
 ) {
     constructor(word: Word) : this(
         wordId = word.wordId,
@@ -22,9 +25,7 @@ data class WordResponseDTO(
         translation = word.translation,
         definition = word.definition,
         createdAt = word.createdAt,
-        updatedAt = word.updatedAt,
-        displayTitle = word.title,
-        displayTranslation = word.translation
+        updatedAt = word.updatedAt
     )
 
 }
