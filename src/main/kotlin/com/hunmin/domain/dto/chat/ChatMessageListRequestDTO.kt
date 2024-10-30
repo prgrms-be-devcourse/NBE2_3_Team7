@@ -1,26 +1,17 @@
 package com.hunmin.domain.dto.chat
 
 import com.hunmin.domain.entity.MessageType
-import jakarta.validation.constraints.NotBlank
-import org.jetbrains.annotations.NotNull
+import jakarta.validation.constraints.NotNull
 import java.time.LocalDateTime
 
 data class ChatMessageListRequestDTO(
-    @NotNull
-    var chatMessageId: Long? = null,
-    @NotNull
-    var memberId: Long? = null,
-    @NotBlank
+    @NotNull( message = " 채팅 아이디는 필수입니다.")
+    var chatMessageId: Long,
+    @NotNull( message = " 사용자 아이디는 필수입니다.")
+    var memberId: Long,
+
     var message: String? = null,
-    @NotNull
+
     var createdAt: LocalDateTime? = null,
     var type: MessageType? = null,
-) {
-    constructor(chatMessageListRequestDTO: ChatMessageListRequestDTO) : this(
-        chatMessageListRequestDTO.chatMessageId,
-        chatMessageListRequestDTO.memberId,
-        chatMessageListRequestDTO.message,
-        chatMessageListRequestDTO.createdAt,
-        chatMessageListRequestDTO.type
-    )
-}
+)
