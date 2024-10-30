@@ -67,6 +67,9 @@ dependencies {
 
     // 이미지 처리 라이브러리
     implementation("net.coobird:thumbnailator:0.4.20")
+    
+    // security 관련 라이브러리
+    implementation("org.springframework.boot:spring-boot-starter-security")
 }
 
 kotlin {
