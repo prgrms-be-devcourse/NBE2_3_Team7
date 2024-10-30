@@ -63,6 +63,7 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation("org.springframework:spring-messaging")
 
     // Swagger - springdoc
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
@@ -76,10 +77,9 @@ dependencies {
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.6")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.6")
 
-//    //MockTest 의존성
-//    testImplementation("org.junit.jupiter:junit-jupiter:5.7.0")
-//    testImplementation("org.mockito:mockito-core:3.9.0")
-//    testImplementation("org.mockito:mockito-inline:3.9.0")
+    //Mockito 의존성
+    testImplementation("org.mockito:mockito-inline:3.9.0")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:4.0.0")
 }
 
 kotlin {

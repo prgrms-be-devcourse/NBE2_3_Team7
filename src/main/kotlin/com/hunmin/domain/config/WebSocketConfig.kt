@@ -34,7 +34,7 @@ class WebSocketConfig : WebSocketMessageBrokerConfigurer {
 
     @Bean
     fun mappingJackson2MessageConverter(): MappingJackson2MessageConverter {
-        val jackson2MessageConverter: MappingJackson2MessageConverter = MappingJackson2MessageConverter()
+        val jackson2MessageConverter = MappingJackson2MessageConverter()
         jackson2MessageConverter.setStrictContentTypeMatch(false)
         return jackson2MessageConverter
     }

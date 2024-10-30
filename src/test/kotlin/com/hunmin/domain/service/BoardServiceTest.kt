@@ -7,7 +7,8 @@
 //import com.hunmin.domain.entity.MemberLevel
 //import com.hunmin.domain.repository.BoardRepository
 //import com.hunmin.domain.repository.MemberRepository
-//import org.junit.jupiter.api.Assertions.*
+//import org.junit.jupiter.api.Assertions.assertEquals
+//import org.junit.jupiter.api.Assertions.assertNotNull
 //import org.junit.jupiter.api.BeforeEach
 //import org.junit.jupiter.api.Test
 //import org.mockito.InjectMocks
@@ -15,7 +16,6 @@
 //import org.mockito.Mockito.*
 //import org.mockito.MockitoAnnotations
 //import org.springframework.data.domain.PageImpl
-//import org.springframework.data.domain.PageRequest
 //import org.springframework.data.domain.Sort
 //import java.util.*
 //
