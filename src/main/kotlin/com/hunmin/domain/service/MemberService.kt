@@ -67,7 +67,7 @@ class MemberService(
             nickname = memberDTO.nickname,
             country = memberDTO.country,
             memberRole = MemberRole.USER,
-            level = memberDTO.level ?: MemberLevel.BEGINNER,
+            level = memberDTO.level,
             image = memberDTO.image
         )
         memberRepository.save(member)
