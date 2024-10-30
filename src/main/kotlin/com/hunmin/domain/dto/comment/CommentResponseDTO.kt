@@ -24,6 +24,7 @@ data class CommentResponseDTO(
     val nickname: String = "Unknown",
     val profileImage: String? = null,
     val children: List<CommentResponseDTO> = emptyList(),
+    val likeCount: Int = 0
 ) {
     constructor(comment: Comment) : this(
         commentId = comment.commentId,
@@ -35,5 +36,6 @@ data class CommentResponseDTO(
         nickname = comment.member?.nickname ?: "Unknown",
         profileImage = comment.member?.image,
         children = comment.children?.sortedBy { it.commentId }?.map { CommentResponseDTO(it) } ?: emptyList(),
+        likeCount = comment.likeCount
     )
 }

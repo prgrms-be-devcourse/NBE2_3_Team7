@@ -24,7 +24,9 @@ data class Comment(
     var parent: Comment? = null,
 
     @OneToMany(mappedBy = "parent", orphanRemoval = true)
-    var children: MutableList<Comment> = mutableListOf()
+    var children: MutableList<Comment> = mutableListOf(),
+
+    var likeCount: Int = 0
 
 ) : BaseTimeEntity() {
     class Builder {
@@ -41,6 +43,7 @@ data class Comment(
         fun content(content: String) = apply { this.content = content }
         fun parent(parent: Comment?) = apply { this.parent = parent }
         fun children(children: MutableList<Comment>) = apply { this.children = children }
+        private var likeCount: Int = 0
 
         fun build(): Comment {
             val member = member ?: throw IllegalArgumentException("회원은 필수")
@@ -52,6 +55,7 @@ data class Comment(
                 content = content,
                 parent = parent,
                 children = children,
+                likeCount = likeCount
             )
         }
     }
@@ -62,6 +66,14 @@ data class Comment(
 
     fun changeContent(content: String) {
         this.content = content
+    }
+
+    fun incrementLikeCount() {
+        this.likeCount++
+    }
+
+    fun decrementLikeCount() {
+        if (likeCount > 0) this.likeCount--
     }
 
     override fun hashCode(): Int {
@@ -75,6 +87,6 @@ data class Comment(
     }
 
     override fun toString(): String {
-        return "Comment(commentId=$commentId, content=$content)"
+        return "Comment(commentId=$commentId, content=$content, likeCount=$likeCount)"
     }
 }
