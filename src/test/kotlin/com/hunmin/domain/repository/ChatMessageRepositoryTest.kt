@@ -1,10 +1,7 @@
 package com.hunmin.domain.repository
 
 import com.hunmin.domain.entity.ChatMessage
-import com.hunmin.domain.entity.ChatRoom
 import com.hunmin.domain.entity.MessageType
-import com.hunmin.domain.entity.QChatMessage.chatMessage
-import com.hunmin.domain.entity.QChatRoom.chatRoom
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -19,13 +16,11 @@ import kotlin.test.assertTrue
 @TestPropertySource(locations = ["classpath:application-test.properties"])
 class ChatMessageRepositoryTest {
     @Autowired
-    private lateinit var chatMessageRepository: ChatMessageRepository
-
+    lateinit var chatMessageRepository: ChatMessageRepository
     @Autowired
-    private lateinit var memberRepository: MemberRepository
-
+    lateinit var memberRepository: MemberRepository
     @Autowired
-    private lateinit var chatRoomRepository: ChatRoomRepository
+    lateinit var chatRoomRepository: ChatRoomRepository
 
     @Test
     fun 채팅추가() {

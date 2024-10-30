@@ -10,32 +10,32 @@ import java.time.LocalDateTime
 
 data class FollowRequestDTO (
     @NotNull( message = " 팔로우 아이디는 필수입니다.")
-    var followId: Long,
+    val followId: Long,
     @NotNull( message = " 팔로워 아이디는 필수입니다.")
-    var followerId: Long,
+    val followerId: Long,
     @NotNull( message = " 팔로이 아이디는 필수입니다.")
-    var followeeId: Long,
+    val followeeId: Long,
     @NotNull( message = " 차단설정은 필수입니다.")
-    var isBlock: Boolean,
+    val isBlock: Boolean,
     @NotNull( message = " 알림설정은 필수입니다.")
-    var notification: Boolean,
-    var createdAt: LocalDateTime? = null,
+    val notification: Boolean,
+    val createdAt: LocalDateTime? = null,
     @NotNull( message = " 팔로우 상태는 필수입니다.")
-    var status: FollowStatus,
+    val status: FollowStatus,
     // 팔로워
     @NotNull( message = " 팔로워 닉네임은 필수입니다.")
-    var followerName: String,
+    val followerName: String,
     @NotNull( message = " 팔로워 이메일 필수입니다.")
-    var followerEmail: String,
+    val followerEmail: String,
     @NotNull( message = " 팔로우 이름는 필수입니다.")
-    var followerImage: String? = null,
+    val followerImage: String? = null,
     // 팔로이
     @NotNull( message = " 팔로이 닉네임은 필수입니다.")
-    var followeeEmail: String,
+    val followeeEmail: String,
     @NotNull( message = " 팔로이 이메일 필수입니다.")
-    var followeeImage: String? = null,
+    val followeeImage: String? = null,
     @NotNull( message = " 팔로이 이름는 필수입니다.")
-    var followeeName: String
+    val followeeName: String
 ){
     constructor(follow: Follow) : this(
         follow.followId,
