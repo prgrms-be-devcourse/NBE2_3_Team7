@@ -1,8 +1,6 @@
 package com.hunmin.domain.dto.word
 
-import com.hunmin.domain.entity.QWord.word
 import com.hunmin.domain.entity.Word
-import com.querydsl.core.types.Projections.constructor
 import java.time.LocalDateTime
 
 data class WordResponseDTO(
