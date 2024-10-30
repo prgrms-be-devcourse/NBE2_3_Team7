@@ -30,19 +30,22 @@ data class Notification (
         private var member: Member? = null
         private lateinit var message: String
         private lateinit var notificationType: NotificationType
+        private var isRead: Boolean = false
         private lateinit var url: String
 
-        fun setNotificationId(notificationId: Long) = apply { this.notificationId = notificationId }
-        fun setMember(member: Member) = apply { this.member = member }
-        fun setMessage(message: String) = apply { this.message = message}
-        fun setNotificationType(notificationType: NotificationType) = apply { this.notificationType = notificationType }
-        fun setUrl(url: String) = apply { this.url = url }
+        fun notificationId(notificationId: Long) = apply { this.notificationId = notificationId }
+        fun member(member: Member) = apply { this.member = member }
+        fun message(message: String) = apply { this.message = message}
+        fun notificationType(notificationType: NotificationType) = apply { this.notificationType = notificationType }
+        fun isRead(isRead: Boolean) = apply { this.isRead = isRead }
+        fun url(url: String) = apply { this.url = url }
 
         fun build() = Notification(
             notificationId = notificationId,
             member = member,
             message = message,
             notificationType = notificationType,
+            isRead = isRead,
             url = url
         )
     }
