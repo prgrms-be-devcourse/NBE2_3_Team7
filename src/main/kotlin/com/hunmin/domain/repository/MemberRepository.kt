@@ -12,13 +12,13 @@ import java.util.*
 @Repository
 interface MemberRepository : JpaRepository<Member, Long> {
     // 회원 정보 조회
-    fun findByEmail(email: String): Member? // Member 타입 객체 또는 null
+    fun findByEmail(email: String): Member
 
     // 중복 체크
     fun existsByEmail(email: String): Boolean
 
     // 이름으로 조회
-    fun findByNickname(nickname: String): Member?
+    fun findByNickname(nickname: String): Member
 
     @Query("SELECT cr.member FROM ChatRoom cr WHERE cr.chatRoomId = :chatRoomId")
     fun findByChatRoomId(@Param("chatRoomId") chatRoomId: Long): Optional<Member>
