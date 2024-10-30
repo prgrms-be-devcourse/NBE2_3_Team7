@@ -28,7 +28,6 @@ dependencies {
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     implementation("jakarta.validation:jakarta.validation-api")
     implementation("org.hibernate.validator:hibernate-validator")
-    implementation("jakarta.el:jakarta.el-api:3.0.3")
     implementation("org.glassfish:jakarta.el:3.0.3")
 
     // 코틀린 관련 라이브러리
@@ -36,7 +35,7 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 
-    // DTO -> Entity 바꾸는거 자동화 하게 해주는 model mapper
+    // ModelMapper
     implementation("org.modelmapper:modelmapper:3.1.1")
 
     // Database and QueryDSL
@@ -44,19 +43,22 @@ dependencies {
     implementation("mysql:mysql-connector-java:8.0.33")
     runtimeOnly("com.h2database:h2")
 
-    // 실시간 채팅을 위한 필요 라이브러리들
-    testImplementation("org.springframework.boot:spring-boot-starter-websocket")
-    testImplementation("org.webjars:sockjs-client:1.1.2")
-    testImplementation("org.webjars:stomp-websocket:2.3.3-1")
+    // 실시간 채팅 라이브러리
+    implementation("org.springframework.boot:spring-boot-starter-websocket")
+    implementation("org.webjars:sockjs-client:1.1.2")
+    implementation("org.webjars:stomp-websocket:2.3.3-1")
 
-    // Redis 내장, 외장 라이브러리들
-    testImplementation("org.springframework.boot:spring-boot-starter-data-redis")
-    testImplementation("it.ozimov:embedded-redis:0.7.2")
+    // Redis 라이브러리
+    implementation("org.springframework.boot:spring-boot-starter-data-redis")
+    implementation("it.ozimov:embedded-redis:0.7.2")
 
-    // 쿼리 dsl 라이브러리
-    testImplementation("com.querydsl:querydsl-jpa:5.1.0:jakarta")
+    // QueryDSL
+    implementation("com.querydsl:querydsl-jpa:5.1.0:jakarta")
+    kapt("com.querydsl:querydsl-apt:5.1.0:jakarta")
+    kapt("jakarta.annotation:jakarta.annotation-api")
+    kapt("jakarta.persistence:jakarta.persistence-api")
 
-    // 테스트 관련 라이브러리
+    // 테스트 라이브러리
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
@@ -66,12 +68,16 @@ dependencies {
 
     // 이미지 처리 라이브러리
     implementation("net.coobird:thumbnailator:0.4.20")
+
+    // security 관련 라이브러리
+    implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation("io.jsonwebtoken:jjwt-api:0.12.6")
+    runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.6")
+    runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.6")
 }
 
 kotlin {
-    compilerOptions {
-        freeCompilerArgs.addAll("-Xjsr305=strict")
-    }
+    jvmToolchain(17)
 }
 
 allOpen {
@@ -83,3 +89,4 @@ allOpen {
 tasks.withType<Test> {
     useJUnitPlatform()
 }
+
