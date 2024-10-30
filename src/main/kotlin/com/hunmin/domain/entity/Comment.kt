@@ -9,13 +9,13 @@ data class Comment(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val commentId: Long = 0,
 
+    @JoinColumn(name = "board_id", nullable = false)
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "board_id")
-    var board: Board? = null,
+    var board: Board,
 
+    @JoinColumn(name = "member_id", nullable = false)
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
-    var member: Member? = null,
+    var member: Member,
 
     var content: String,
 
@@ -24,7 +24,9 @@ data class Comment(
     var parent: Comment? = null,
 
     @OneToMany(mappedBy = "parent", orphanRemoval = true)
-    var children: MutableList<Comment> = mutableListOf()
+    var children: MutableList<Comment> = mutableListOf(),
+
+    var likeCount: Int = 0
 
 ) : BaseTimeEntity() {
     class Builder {
@@ -41,15 +43,21 @@ data class Comment(
         fun content(content: String) = apply { this.content = content }
         fun parent(parent: Comment?) = apply { this.parent = parent }
         fun children(children: MutableList<Comment>) = apply { this.children = children }
+        private var likeCount: Int = 0
 
-        fun build() = Comment(
-            commentId = commentId,
-            board = board,
-            member = member,
-            content = content,
-            parent = parent,
-            children = children
-        )
+        fun build(): Comment {
+            val member = member ?: throw IllegalArgumentException("회원은 필수")
+            val board = board ?: throw IllegalArgumentException("게시글은 필수")
+            return Comment(
+                commentId = commentId,
+                board = board,
+                member = member,
+                content = content,
+                parent = parent,
+                children = children,
+                likeCount = likeCount
+            )
+        }
     }
 
     companion object {
@@ -58,6 +66,14 @@ data class Comment(
 
     fun changeContent(content: String) {
         this.content = content
+    }
+
+    fun incrementLikeCount() {
+        this.likeCount++
+    }
+
+    fun decrementLikeCount() {
+        if (likeCount > 0) this.likeCount--
     }
 
     override fun hashCode(): Int {
@@ -71,6 +87,6 @@ data class Comment(
     }
 
     override fun toString(): String {
-        return "Comment(commentId=$commentId, content=$content)"
+        return "Comment(commentId=$commentId, content=$content, likeCount=$likeCount)"
     }
 }
