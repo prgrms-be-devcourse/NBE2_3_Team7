@@ -6,12 +6,12 @@ import java.time.LocalDateTime
 
 data class ChatMessageListRequestDTO(
     @NotNull( message = " 채팅 아이디는 필수입니다.")
-    var chatMessageId: Long,
+    val chatMessageId: Long,
     @NotNull( message = " 사용자 아이디는 필수입니다.")
-    var memberId: Long,
+    val memberId: Long,
 
-    var message: String? = null,
+    val message: String? = null,
 
-    var createdAt: LocalDateTime? = null,
-    var type: MessageType? = null,
+    val createdAt: LocalDateTime? = null,
+    val type: MessageType? = null,
 )

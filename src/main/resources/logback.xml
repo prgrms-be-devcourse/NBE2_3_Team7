@@ -8,4 +8,8 @@
     <root level="debug">
         <appender-ref ref="STDOUT" />
     </root>
+<<<<<<< HEAD
 </configuration>
+=======
+</configuration>
+>>>>>>> 71972aec2ff16d425366985f3a529872949a5f96
