@@ -11,9 +11,9 @@ data class Board (
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val boardId: Long = 0,
 
-    @JoinColumn(name = "member_id")
+    @JoinColumn(name = "member_id", nullable = false)
     @ManyToOne(fetch = FetchType.LAZY)
-    var member: Member? = null,
+    var member: Member,
 
     @Column(nullable = false)
     var title: String,
@@ -64,18 +64,21 @@ data class Board (
         fun imageUrls(imageUrls: MutableList<String>) = apply { this.imageUrls = imageUrls }
         fun comments(comments: MutableList<Comment>) = apply { this.comments = comments }
 
-        fun build() = Board(
-            boardId = boardId,
-            member = member,
-            title = title,
-            nickname = nickname,
-            content = content,
-            location = location,
-            latitude = latitude,
-            longitude = longitude,
-            imageUrls = imageUrls,
-            comments = comments
-        )
+        fun build(): Board {
+            val member = member ?: throw IllegalArgumentException("회원은 필수")
+            return Board(
+                boardId = boardId,
+                member = member,
+                title = title,
+                nickname = nickname,
+                content = content,
+                location = location,
+                latitude = latitude,
+                longitude = longitude,
+                imageUrls = imageUrls,
+                comments = comments
+            )
+        }
     }
 
     companion object {
