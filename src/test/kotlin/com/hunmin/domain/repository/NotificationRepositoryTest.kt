@@ -39,7 +39,7 @@ class NotificationRepositoryTest {
     //알림 조회 테스트
     @Test
     fun testNotificationRead() {
-        val notificationId = 1L
+        val notificationId = 2L
 
         val notification = notificationRepository.findById(notificationId).orElseThrow()
 
@@ -51,7 +51,7 @@ class NotificationRepositoryTest {
     @Transactional
     @Commit
     fun testUpdateNotification() {
-        val notificaitonId = 1L
+        val notificaitonId = 2L
         val isRead = true;
 
         val notification = notificationRepository.findById(notificaitonId).orElseThrow()
@@ -78,7 +78,7 @@ class NotificationRepositoryTest {
     //회원 별 알림 조회
     @Test
     fun testReadNotificationByMember() {
-        val member: Member = memberRepository.findById(1L).get()
+        val member: Member = memberRepository.findById(1).get()
 
         val notifications: List<Notification> = notificationRepository.findByMemberId(member.memberId)
 
