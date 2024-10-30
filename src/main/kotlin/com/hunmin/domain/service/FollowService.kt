@@ -8,11 +8,12 @@ import com.hunmin.domain.entity.FollowStatus
 import com.hunmin.domain.entity.Member
 import com.hunmin.domain.entity.NotificationType
 import com.hunmin.domain.exception.follow.FollowException
+import com.hunmin.domain.handler.SseEmitters
 import com.hunmin.domain.repository.FollowRepository
 import com.hunmin.domain.repository.MemberRepository
+import jdk.internal.joptsimple.internal.Messages.message
 import org.hibernate.query.sqm.tree.SqmNode.log
 import org.springframework.data.domain.Page
-import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -29,9 +30,9 @@ class FollowService(
     private val sseEmitters: SseEmitters
 ) {
     // 팔로워 등록
-    fun register(myEmail: String, memberId: Long): FollowRequestDTO {
+    fun register(myEmail: String, memberIdp: Long): FollowRequestDTO {
         try {
-            var followeep: Member = memberRepository.findById(memberId).orElseThrow()
+            var followeep: Member = memberRepository.findById(memberIdp).orElseThrow()
             val owner: Member = memberRepository.findByEmail(myEmail)
 
             if (followeep.memberId == owner.memberId) {
@@ -39,41 +40,39 @@ class FollowService(
             }
 
             // 중복체크
-            val foundMember = followRepository.findByMemberId(owner.memberId, memberId)
+            val foundMember = followRepository.findByMemberId(owner.memberId, memberIdp)
 
             if (foundMember.isPresent) {
                 throw FollowException.DUPLICATED_FOLLOW.get()
             }
 
             val follow: Follow = Follow().apply {
-                    follower = owner
-                    followee= followeep
+                follower = owner
+                followee = followeep
             }
 
             // 알림
-            val senderId = owner.memberId
             val receiverId = followeep.memberId
 
-            if (receiverId != senderId) {
-                val notificationSendDTO: NotificationSendDTO = NotificationSendDTO.builder()
-                    .memberId(receiverId)
-                    .message(owner.nickname + "님이 팔로우 요청을 보냈습니다.")
-                    .notificationType(NotificationType.FOLLOW)
-                    .url("/follow")
-                    .build()
-                notificationService.send(notificationSendDTO)
+            val notificationSendDTO: NotificationSendDTO = NotificationSendDTO(
+                message = owner.nickname + "님이 팔로우 요청을 보냈습니다.",
+                notificationType = NotificationType.FOLLOW,
+                url = "/follow"
+            ).apply {
+                memberId = receiverId
+            }
+            notificationService.send(notificationSendDTO)
 
-                val emitterId = receiverId.toString() + "_"
-                val emitter: SseEmitter = sseEmitters.findSingleEmitter(emitterId)
+            val emitterId = receiverId.toString() + "_"
+            val emitter = sseEmitters.findSingleEmitter(emitterId)
 
 
-                if (emitter != null) {
-                    try {
-                        emitter.send(notificationSendDTO)
-                    } catch (e: IOException) {
-                        log.error("Error sending comment to client via SSE: {}", e.message)
-                        sseEmitters.delete(emitterId)
-                    }
+            if (emitter != null) {
+                try {
+                    emitter.send(notificationSendDTO)
+                } catch (e: IOException) {
+                    log.error("Error sending comment to client via SSE:")
+                    sseEmitters.delete(emitterId)
                 }
             }
             return FollowRequestDTO(followRepository.save(follow))
@@ -96,7 +95,7 @@ class FollowService(
             }
 
             val follow: Follow = Follow().apply {
-                follower =owner
+                follower = owner
                 followee = followeep
             }
             followRepository.save(follow)

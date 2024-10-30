@@ -10,10 +10,12 @@ import com.hunmin.domain.entity.Member
 import com.hunmin.domain.entity.NotificationType
 import com.hunmin.domain.exception.chat.ChatMessageException
 import com.hunmin.domain.exception.chat.ChatRoomException
+import com.hunmin.domain.handler.SseEmitters
 import com.hunmin.domain.pubsub.RedisSubscriber
 import com.hunmin.domain.repository.ChatMessageRepository
 import com.hunmin.domain.repository.ChatRoomRepository
 import com.hunmin.domain.repository.MemberRepository
+import jdk.internal.joptsimple.internal.Messages.message
 import org.hibernate.query.sqm.tree.SqmNode.log
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -66,17 +68,16 @@ class ChatMessageService(
             }
 
             if (receiverId != senderId) {
-                val notificationSendDTO: NotificationSendDTO = NotificationSendDTO.builder()
-                    .memberId(receiverId)
-                    .message(sender.nickname + "님 : " + chatMessageDTO.message)
-                    .notificationType(NotificationType.CHAT)
-                    .url("/chat-room/" + chatMessageDTO.chatRoomId)
-                    .build()
-
+                val notificationSendDTO: NotificationSendDTO = NotificationSendDTO(
+                    message = sender.nickname + "님 : " + chatMessageDTO.message,
+                    notificationType = NotificationType.CHAT,
+                    url = "/chat-room/" + chatMessageDTO.chatRoomId).apply {
+                    memberId = receiverId
+                }
                 notificationService.send(notificationSendDTO)
 
                 val emitterId = receiverId.toString() + "_"
-                val emitter: SseEmitter = sseEmitters.findSingleEmitter(emitterId)
+                val emitter = sseEmitters.findSingleEmitter(emitterId)
 
                 if (emitter != null) {
                     try {

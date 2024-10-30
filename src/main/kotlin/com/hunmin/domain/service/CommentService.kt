@@ -86,7 +86,7 @@ class CommentService(
         return try {
             commentRepository.delete(comment)
 
-            return CommentResponseDTO(comment)
+            CommentResponseDTO(comment)
         } catch(e: Exception) {
             throw CommentException.NOT_DELETED.toException()
         }
