@@ -6,7 +6,7 @@ import jakarta.persistence.*
 data class Follow (
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val followId: Long? = null,
+    val followId: Long = 0,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "follower_id")
@@ -17,7 +17,7 @@ data class Follow (
     var followee: Member? = null,
 
     @Column(nullable = false)
-    var isBlock: Boolean? = null,
+    var isBlock: Boolean = false,
 
     @Column(nullable = false)
     var notification: Boolean = true,

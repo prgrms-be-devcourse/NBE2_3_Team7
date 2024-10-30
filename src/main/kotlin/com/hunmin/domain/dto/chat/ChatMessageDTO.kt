@@ -1,30 +1,34 @@
 package com.hunmin.domain.dto.chat
 
+import com.hunmin.domain.entity.ChatMessage
 import com.hunmin.domain.entity.MessageType
+import com.hunmin.domain.exception.chat.ChatRoomException
 import jakarta.validation.constraints.NotBlank
-import org.jetbrains.annotations.NotNull
+import jakarta.validation.constraints.NotNull
 import java.time.LocalDateTime
 
-data class ChatMessageDTO (
-    @NotNull
-    var chatMessageId: Long? = null,
-    @NotNull
-    var chatRoomId: Long? = null,
-    @NotNull
-    var memberId: Long? = null,
+data class ChatMessageDTO(
+    @NotNull(message = " 채팅 아이디는 필수입니다.")
+    val chatMessageId: Long,
+    @NotNull(message = " 채팅방 아이디는 필수입니다.")
+    val chatRoomId: Long,
+    @NotNull(message = " 사용자 아이디는 필수입니다.")
+    val memberId: Long,
 
-    @NotBlank
-    var nickName: String? = null,
+    @NotBlank(message = " 사용자 닉네임은 필수입니다.")
+    var nickName: String,
     var message: String? = null,
     var type: MessageType? = null,
-    @NotNull
-    var createdAt: LocalDateTime? = null
-){
-    constructor(chatMessageDTO: ChatMessageDTO): this(chatMessageDTO.chatMessageId,
-        chatMessageDTO.chatRoomId,
-        chatMessageDTO.memberId,
-        chatMessageDTO.nickName,
-        chatMessageDTO.message,
-        chatMessageDTO.type,
-        chatMessageDTO.createdAt)
+    @NotNull(message = " 채팅 사용날짜는 필수 입니다.")
+    var createdAt: LocalDateTime
+) {
+    constructor(chatMessage: ChatMessage) : this(
+        chatMessage.chatMessageId,
+        chatMessage.chatRoom!!.chatRoomId,
+        memberId = chatMessage.member!!.memberId,
+        nickName = chatMessage.member!!.nickname,
+        chatMessage.message,
+        chatMessage.type,
+        chatMessage.createdAt
+    )
 }

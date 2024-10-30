@@ -47,9 +47,7 @@ dependencies {
 
     // Redis 라이브러리
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
-    implementation("it.ozimov:embedded-redis:0.7.2") {
-        exclude(group = "org.slf4j", module = "slf4j-simple")
-    }
+    implementation("it.ozimov:embedded-redis:0.7.2")
 
     // QueryDSL
     implementation("com.querydsl:querydsl-jpa:5.1.0:jakarta")
@@ -70,6 +68,9 @@ dependencies {
     
     // security 관련 라이브러리
     implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation("io.jsonwebtoken:jjwt-api:0.12.6")
+    runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.6")
+    runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.6")
 }
 
 kotlin {
@@ -85,3 +86,4 @@ allOpen {
 tasks.withType<Test> {
     useJUnitPlatform()
 }
+
