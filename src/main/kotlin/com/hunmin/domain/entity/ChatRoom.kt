@@ -7,11 +7,11 @@ import org.hibernate.annotations.BatchSize
 data class ChatRoom(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val chatRoomId: Long? = null,
+    val chatRoomId: Long = 0,
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "member_id")
-    var member: Member? = null,
+    var member: Member,
 
     @BatchSize(size = 50)
     @OneToMany(

@@ -6,21 +6,21 @@ import jakarta.persistence.*
 data class ChatMessage(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val chatMessageId: Long? = null,
+    val chatMessageId: Long = 0,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "chat_room_id")
-    var chatRoom: ChatRoom? = null,
+    var chatRoom: ChatRoom,
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "member_id")
-    var member: Member? = null,
+    var member: Member,
 
     @Column(name = "message", nullable = false, length = 255)
     var message: String? = null,
 
     @Enumerated(EnumType.STRING)
-    var type: MessageType? = null
+    var type: MessageType = MessageType.TALK
 
 ) : BaseTimeEntity() {
 
