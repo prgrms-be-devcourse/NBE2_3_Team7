@@ -2,7 +2,6 @@ package com.hunmin.domain.dto.chat
 
 import com.hunmin.domain.entity.ChatMessage
 import com.hunmin.domain.entity.MessageType
-import com.hunmin.domain.exception.chat.ChatRoomException
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
 import java.time.LocalDateTime
@@ -16,17 +15,17 @@ data class ChatMessageDTO(
     val memberId: Long,
 
     @NotBlank(message = " 사용자 닉네임은 필수입니다.")
-    var nickName: String,
+    val nickName: String,
     var message: String? = null,
     var type: MessageType? = null,
     @NotNull(message = " 채팅 사용날짜는 필수 입니다.")
-    var createdAt: LocalDateTime
+    val createdAt: LocalDateTime
 ) {
     constructor(chatMessage: ChatMessage) : this(
         chatMessage.chatMessageId,
-        chatMessage.chatRoom!!.chatRoomId,
-        memberId = chatMessage.member!!.memberId,
-        nickName = chatMessage.member!!.nickname,
+        chatMessage.chatRoom.chatRoomId,
+        memberId = chatMessage.member.memberId,
+        nickName = chatMessage.member.nickname,
         chatMessage.message,
         chatMessage.type,
         chatMessage.createdAt
