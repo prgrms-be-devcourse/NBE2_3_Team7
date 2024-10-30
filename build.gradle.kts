@@ -4,6 +4,7 @@ plugins {
     id("org.springframework.boot") version "3.3.4"
     id("io.spring.dependency-management") version "1.1.6"
     kotlin("plugin.jpa") version "1.9.25"
+    kotlin("kapt") version "1.9.25"
 }
 
 group = "com.hunmin.domain"
@@ -27,7 +28,8 @@ dependencies {
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     implementation("jakarta.validation:jakarta.validation-api")
     implementation("org.hibernate.validator:hibernate-validator")
-    implementation("org.glassfish:jakarta.el")
+    implementation("jakarta.el:jakarta.el-api:3.0.3")
+    implementation("org.glassfish:jakarta.el:3.0.3")
 
     // 코틀린 관련 라이브러리
     implementation("org.jetbrains.kotlin:kotlin-reflect")
