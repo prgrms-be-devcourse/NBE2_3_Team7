@@ -5,6 +5,7 @@ enum class FollowException(val message: String,val code: Int) {
     IMPOSSIBLE_FOLLOW("팔로우 할 수 없습니다.", 400),
     FAILED_REGISTER_FOLLOW("팔로우 요청에 실패하였습니다", 400),
     FAILED_ACCEPT_FOLLOW("팔로우 수락에 실패하였습니다", 400),
+    FAILED_DELETE_FOLLOW("팔로우 삭제에 실패하였습니다", 400),
     NOT_FOUND("팔로우가 존재하지 않습니다.", 400);
 
     fun get(): FollowTaskException {
