@@ -11,15 +11,11 @@ import com.hunmin.domain.exception.chat.ChatRoomException
 import com.hunmin.domain.handler.SseEmitters
 import com.hunmin.domain.repository.ChatRoomRepository
 import com.hunmin.domain.repository.MemberRepository
-import jdk.internal.joptsimple.internal.Messages.message
 import org.hibernate.query.sqm.tree.SqmNode.log
 import org.springframework.data.redis.core.HashOperations
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter
 import java.io.IOException
-import java.util.*
-import kotlin.NoSuchElementException
 
 @Service
 @Transactional
@@ -94,11 +90,10 @@ class ChatRoomService(
             val chatRoom: ChatRoom = ChatRoom(member = me).apply {}
             val SavedchatRoom: ChatRoom = chatRoomRepository.save(chatRoom)
             val chatRoomRequestDTO: ChatRoomRequestDTO = ChatRoomRequestDTO(
-                chatRoomId = SavedchatRoom.chatRoomId, memberId = me.memberId, nickName = me.nickname
-            ).apply {
-                this.partnerName = partnerName
-                this.createdAt = SavedchatRoom.createdAt
-            }
+                chatRoomId = SavedchatRoom.chatRoomId, memberId = me.memberId, nickName = me.nickname,
+                partnerName = partnerName,
+                createdAt = SavedchatRoom.createdAt
+            )
             roomStorage.put(me.nickname, partnerName, chatRoomRequestDTO)
 
             val partner: Member =
@@ -106,9 +101,11 @@ class ChatRoomService(
 
             val partnerId = partner.memberId
 
-            val notificationSendDTO = NotificationSendDTO(message = "[" + me.nickname + "]님이 새로운 채팅방을 개설",
+            val notificationSendDTO = NotificationSendDTO(
+                message = "[" + me.nickname + "]님이 새로운 채팅방을 개설",
                 notificationType = NotificationType.CHAT,
-                url = "/chat-room/" + SavedchatRoom.chatRoomId).apply {
+                url = "/chat-room/" + SavedchatRoom.chatRoomId
+            ).apply {
                 memberId = partnerId
             }
 
@@ -127,11 +124,10 @@ class ChatRoomService(
             }
             return ChatRoomRequestDTO(
                 chatRoomId = SavedchatRoom.chatRoomId,
-                memberId = me.memberId, nickName = me.nickname
-            ).apply {
-                this.partnerName = partnerName
-                this.createdAt = SavedchatRoom.createdAt
-            }
+                memberId = me.memberId, nickName = me.nickname,
+                partnerName = partnerName,
+                createdAt = SavedchatRoom.createdAt
+            )
         } catch (e: Exception) {
             throw NoSuchElementException("사용자가 존재하지 않습니다")
         }
