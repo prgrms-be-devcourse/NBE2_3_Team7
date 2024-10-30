@@ -7,20 +7,16 @@ import com.hunmin.domain.dto.notice.NoticeUpdateDTO
 import com.hunmin.domain.entity.Member
 import com.hunmin.domain.entity.MemberRole
 import com.hunmin.domain.entity.Notice
-import com.hunmin.domain.exception.MemberException
+import com.hunmin.domain.exception.AdminException
 import com.hunmin.domain.exception.NoticeException
-import com.hunmin.domain.exception.NoticeTaskException
 import com.hunmin.domain.repository.MemberRepository
 import com.hunmin.domain.repository.NoticeRepository
-import org.hibernate.query.sqm.tree.SqmNode.log
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.util.function.Function
-import java.util.function.Supplier
 
 @Service
 @Transactional
@@ -114,7 +110,7 @@ class NoticeService(
 
     private fun getMember(username: String): Member {
         val member: Member = memberRepository.findByEmail(username)
-            ?: throw MemberException.NOT_FOUND.get()
+            ?: throw AdminException.MEMBER_NOT_FOUND.get()
         return member
     }
 }
