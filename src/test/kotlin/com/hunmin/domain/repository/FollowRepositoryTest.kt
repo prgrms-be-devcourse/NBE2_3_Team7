@@ -17,8 +17,7 @@ import kotlin.test.assertTrue
 @TestPropertySource(locations = ["classpath:application-test.properties"])
 class FollowRepositoryTest {
     @Autowired
-    private lateinit var memberRepository: MemberRepository
-
+    lateinit var memberRepository: MemberRepository
     @Autowired
     lateinit var followRepository: FollowRepository
 

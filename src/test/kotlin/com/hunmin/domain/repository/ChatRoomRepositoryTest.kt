@@ -15,16 +15,9 @@ import kotlin.test.assertTrue
 @TestPropertySource(locations = ["classpath:application-test.properties"])
 class ChatRoomRepositoryTest {
     @Autowired
-    private lateinit var chatMessageRepository: ChatMessageRepository
-
+    lateinit var chatRoomRepository: ChatRoomRepository
     @Autowired
-    private lateinit var chatRoomRepository: ChatRoomRepository
-
-    @Autowired
-    private lateinit var memberRepository: MemberRepository
-
-    @Autowired
-    lateinit var followRepository: FollowRepository
+    lateinit var memberRepository: MemberRepository
 
     @Test
     fun 채팅방추가() {
