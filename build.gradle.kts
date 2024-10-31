@@ -32,8 +32,8 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     // kotlin-logging 의존성
-    implementation("io.github.microutils:kotlin-logging-jvm:2.0.11") 
-    implementation("group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.6'")
+    implementation("io.github.microutils:kotlin-logging-jvm:2.0.11")
+    implementation("ch.qos.logback:logback-classic:1.4.14")
 
     // ModelMapper
     implementation("org.modelmapper:modelmapper:3.1.1")
