@@ -1,0 +1,113 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #f0f2f5;
+    margin: 0;
+    padding: 0;
+}
+
+.banner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 20px 10px;
+    background-color: #ffffff;
+    color: black;
+    text-align: center;
+    font-size: 24px;
+    font-weight: 700;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    margin-bottom: 10px;
+}
+
+.icon {
+    width: 100px; /* 아이콘 너비 설정 */
+    height: 100px; /* 아이콘 높이 설정 */
+    background-image: url('./assets/sejong.png'); /* 이미지 경로 설정 */
+    background-size: contain; /* 이미지 크기 설정 */
+    background-position: center; /* 이미지 위치 중앙으로 설정 */
+    background-repeat: no-repeat; /* 이미지 반복 없음 */
+    margin-right: 20px; /* 아이콘과 텍스트 사이의 간격 */
+}
+
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.title {
+    text-align: center;
+    color: #333;
+    margin: 20px;
+    padding: 20px;
+}
+
+.content {
+    white-space: pre-wrap;
+    color: #666;
+    margin: 50px;
+    padding: 50px;
+}
+
+.edit-link {
+    display: block;
+    text-align: center;
+    margin-top: 20px;
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+.edit-link:hover {
+    background-color: #0056b3;
+}
+
+.delete-button {
+    display: block;
+    text-align: center;
+    margin-top: 20px;
+    padding: 10px;
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.delete-button:hover {
+    background-color: #c82333;
+}
+
+.loading {
+    text-align: center;
+    padding: 20px;
+    color: #666;
+}
+.home-button {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: background-color 0.3s ease;
+}
+
+.home-button:hover {
+    background-color: #218838;
+}

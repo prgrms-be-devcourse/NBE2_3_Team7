@@ -65,7 +65,6 @@ class ChatMessageController(
     fun getUserInfo(authentication: Authentication): ResponseEntity<MemberDTO> {
         val email = authentication.name
         return ResponseEntity.ok(memberService.readUserInfo(email))
-
     }
 
     //페이징 채팅 기록 조회

@@ -1,20 +1,27 @@
 package com.hunmin.domain.service
 
+import com.hunmin.domain.dto.comment.CommentResponseDTO
+import com.hunmin.domain.dto.notification.NotificationSendDTO
 import com.hunmin.domain.entity.*
 import com.hunmin.domain.exception.CommentException
 import com.hunmin.domain.exception.LikeCommentException
 import com.hunmin.domain.exception.MemberException
+import com.hunmin.domain.handler.SseEmitters
 import com.hunmin.domain.repository.CommentRepository
 import com.hunmin.domain.repository.LikeCommentRepository
 import com.hunmin.domain.repository.MemberRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.io.IOException
 
 @Service
+@Transactional
 class LikeCommentService(
     private val likeCommentRepository: LikeCommentRepository,
     private val memberRepository: MemberRepository,
-    private val commentRepository: CommentRepository
+    private val commentRepository: CommentRepository,
+    private val notificationService: NotificationService,
+    private val sseEmitters: SseEmitters
 ) {
 
     //좋아요 등록
@@ -30,6 +37,31 @@ class LikeCommentService(
             {
                 likeCommentRepository.save(LikeComment.builder().member(member).comment(comment).build())
                 comment.incrementLikeCount()
+
+                val commentMemberId = comment.member.memberId
+                val message = "[${comment.board.title}] 에 작성한 댓글 '${comment.content}'에 ${member.nickname} 님의 좋아요"
+
+                if (commentMemberId != member.memberId) {
+                    val notificationSendDTO = NotificationSendDTO(
+                        memberId = commentMemberId,
+                        message = message,
+                        notificationType = NotificationType.COMMENT,
+                        url = "/board/${comment.board.boardId}"
+                    )
+
+                    notificationService.send(notificationSendDTO)
+                }
+
+                val emitterId = "${commentMemberId}_"
+                val emitter = sseEmitters.findSingleEmitter(emitterId)
+
+                if (emitter != null) {
+                    try {
+                        emitter.send(CommentResponseDTO(comment))
+                    } catch (e: IOException) {
+                        sseEmitters.delete(emitterId)
+                    }
+                }
             }
         )
     }
