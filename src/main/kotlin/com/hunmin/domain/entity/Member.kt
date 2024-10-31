@@ -48,8 +48,9 @@ data class Member(
     )
     var followees: MutableSet<Follow>? = mutableSetOf(),
 
-//    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
-//    val bookmarks: MutableList<Bookmark> = mutableListOf()
+    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
+    val bookmarks: MutableList<Bookmark> = mutableListOf()
+
 ) : BaseTimeEntity() {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -63,22 +64,22 @@ data class Member(
 
     companion object {
         fun create(
-            nickname: String,
+//            nickname: String,
             email: String,
-            password: String,
-            country: String,
-            level: MemberLevel,
+//            password: String,
+//            country: String,
+//            level: MemberLevel,
             memberRole: MemberRole = MemberRole.USER,
-            image: String? = null,
+//            image: String? = null,
         ): Member {
             return Member(
-                nickname = nickname,
+                nickname = "",
                 email = email,
-                password = password,
-                country = country,
-                level = level,
+                password = "",
+                country = "",
+                level = MemberLevel.BEGINNER,
                 memberRole = memberRole,
-                image = image,
+                image = null,
             ).apply {
                 this.followers = followers
                 this.followees = followees
