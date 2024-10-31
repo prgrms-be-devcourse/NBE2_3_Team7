@@ -30,36 +30,36 @@ class FollowService(
     private val sseEmitters: SseEmitters
 ) {
     // 팔로워 등록
-    fun register(myEmail: String, memberIdp: Long): FollowRequestDTO {
+    fun register(myEmail: String, memberId: Long): FollowRequestDTO {
         try {
-            var followeep: Member = memberRepository.findById(memberIdp).orElseThrow()
+            var followee: Member = memberRepository.findById(memberId).orElseThrow()
             val owner: Member = memberRepository.findByEmail(myEmail)
 
-            if (followeep.memberId == owner.memberId) {
+            if (followee.memberId == owner.memberId) {
                 throw FollowException.IMPOSSIBLE_FOLLOW.get()
             }
 
             // 중복체크
-            val foundMember = followRepository.findByMemberId(owner.memberId, memberIdp)
+            val foundMember = followRepository.findByMemberId(owner.memberId, memberId)
 
             if (foundMember.isPresent) {
                 throw FollowException.DUPLICATED_FOLLOW.get()
             }
 
             val follow: Follow = Follow().apply {
-                follower = owner
-                followee = followeep
+                this.follower = owner
+                this.followee = followee
             }
 
             // 알림
-            val receiverId = followeep.memberId
+            val receiverId = followee.memberId
 
             val notificationSendDTO: NotificationSendDTO = NotificationSendDTO(
                 message = owner.nickname + "님이 팔로우 요청을 보냈습니다.",
                 notificationType = NotificationType.FOLLOW,
                 url = "/follow"
             ).apply {
-                memberId = receiverId
+                this.memberId = receiverId
             }
             notificationService.send(notificationSendDTO)
 
@@ -85,7 +85,7 @@ class FollowService(
     @Transactional // 팔로이 수락
     fun registerAccept(myEmail: String, memberId: Long): FollowRequestDTO {
         try {
-            val followeep: Member = memberRepository.findById(memberId).get()
+            val followee: Member = memberRepository.findById(memberId).get()
             val owner: Member = memberRepository.findByEmail(myEmail)
 
             // 중복체크
@@ -95,8 +95,8 @@ class FollowService(
             }
 
             val follow: Follow = Follow().apply {
-                follower = owner
-                followee = followeep
+                this.follower = owner
+                this.followee = followee
             }
             followRepository.save(follow)
             val follower = followRepository.findByMemberId(memberId, owner.memberId).get()
