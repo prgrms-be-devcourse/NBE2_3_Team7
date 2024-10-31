@@ -62,9 +62,10 @@ class ChatMessageController(
     @GetMapping("/user-info")
     @ResponseBody
     @Operation(summary = "사용자 정보", description = "사용자 정보 호출하는 API")
-    fun getUserInfo(authentication: Authentication): MemberDTO {
+    fun getUserInfo(authentication: Authentication): ResponseEntity<MemberDTO> {
         val email = authentication.name
-        return memberService.readUserInfo(email)
+        return ResponseEntity.ok(memberService.readUserInfo(email))
+
     }
 
     //페이징 채팅 기록 조회
