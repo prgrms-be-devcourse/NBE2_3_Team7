@@ -26,14 +26,18 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-web")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
+    implementation("org.hibernate.validator:hibernate-validator")
+    implementation("org.glassfish:jakarta.el:3.0.3")
 
     // 코틀린 관련 라이브러리
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    
     // kotlin-logging 의존성
-    implementation("io.github.microutils:kotlin-logging-jvm:2.0.11") 
-    implementation("group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.6'")
+    implementation("io.github.microutils:kotlin-logging-jvm:2.0.11")
+    implementation("ch.qos.logback:logback-classic:1.4.14")
+
 
     // ModelMapper
     implementation("org.modelmapper:modelmapper:3.1.1")
@@ -68,7 +72,7 @@ dependencies {
 
     // 이미지 처리 라이브러리
     implementation("net.coobird:thumbnailator:0.4.20")
-    
+
     // security 관련 라이브러리
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("io.jsonwebtoken:jjwt-api:0.12.6")

@@ -20,4 +20,9 @@ data class WordScoreRequestDTO (
         testScore = testScore,
         testRankScore = testRankScore
     )
+
+    fun setScore(finalScore: Int, penaltyScore: Double) {
+        this.testScore = finalScore
+        this.testRankScore = penaltyScore
+    }
 }
