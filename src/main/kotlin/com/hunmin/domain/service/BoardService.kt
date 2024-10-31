@@ -8,7 +8,6 @@ import com.hunmin.domain.exception.BoardException
 import com.hunmin.domain.exception.MemberException
 import com.hunmin.domain.repository.BoardRepository
 import com.hunmin.domain.repository.MemberRepository
-import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
@@ -31,7 +30,6 @@ class BoardService(
     private val boardRepository: BoardRepository,
     private val redisTemplate: RedisTemplate<String, Any>
 ) {
-    private val log = LoggerFactory.getLogger(this::class.java)
 
     //Redis에 저장된 게시글을 읽기
     private fun readBoardFromRedis(boardId: String): BoardResponseDTO? {
@@ -101,8 +99,6 @@ class BoardService(
 
             BoardResponseDTO(board)
         } catch (e: Exception) {
-            log.info("_!__!_~_@!@_!@)~!_!~_12")
-            log.error(e.toString())
             throw BoardException.NOT_CREATED.toException()
         }
     }
@@ -150,8 +146,6 @@ class BoardService(
 
             BoardResponseDTO(board)
         } catch (e: Exception) {
-            log.info("_!__!_~_@!@_!@)~!_!~_12")
-            log.error(e.toString())
             throw BoardException.NOT_UPDATED.toException()
         }
     }
