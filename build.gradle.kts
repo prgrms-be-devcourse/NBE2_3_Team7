@@ -26,6 +26,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-web")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
+    implementation("org.hibernate.validator:hibernate-validator")
+    implementation("org.glassfish:jakarta.el:3.0.3")
 
     // 코틀린 관련 라이브러리
     implementation("org.jetbrains.kotlin:kotlin-reflect")
@@ -68,7 +70,7 @@ dependencies {
 
     // 이미지 처리 라이브러리
     implementation("net.coobird:thumbnailator:0.4.20")
-    
+
     // security 관련 라이브러리
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("io.jsonwebtoken:jjwt-api:0.12.6")
