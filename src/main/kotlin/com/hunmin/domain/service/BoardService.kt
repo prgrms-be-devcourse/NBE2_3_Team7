@@ -8,9 +8,12 @@ import com.hunmin.domain.exception.BoardException
 import com.hunmin.domain.exception.MemberException
 import com.hunmin.domain.repository.BoardRepository
 import com.hunmin.domain.repository.MemberRepository
+import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
+import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
@@ -25,8 +28,16 @@ import kotlin.collections.ArrayList
 @Transactional
 class BoardService(
     private val memberRepository: MemberRepository,
-    private val boardRepository: BoardRepository
+    private val boardRepository: BoardRepository,
+    private val redisTemplate: RedisTemplate<String, Any>
 ) {
+    private val log = LoggerFactory.getLogger(this::class.java)
+
+    //Redis에 저장된 게시글을 읽기
+    private fun readBoardFromRedis(boardId: String): BoardResponseDTO? {
+        return redisTemplate.opsForHash<Any, BoardResponseDTO>().get("board", boardId) as? BoardResponseDTO
+    }
+
     // 게시글 이미지 첨부
     @Throws(IOException::class)
     fun uploadImage(file: MultipartFile): String {
@@ -85,17 +96,26 @@ class BoardService(
 
             boardRepository.save(board)
 
+            val responseDTO = BoardResponseDTO(board)
+            redisTemplate.opsForHash<Any, BoardResponseDTO>().put("board", board.boardId.toString(), responseDTO)
+
             BoardResponseDTO(board)
         } catch (e: Exception) {
+            log.info("_!__!_~_@!@_!@)~!_!~_12")
+            log.error(e.toString())
             throw BoardException.NOT_CREATED.toException()
         }
     }
 
     //게시글 조회
     fun readBoard(boardId: Long): BoardResponseDTO {
-        val board = boardRepository.findByIdWithComments(boardId).orElseThrow { BoardException.NOT_FOUND.toException() }
-
-        return BoardResponseDTO(board)
+        val cachedBoard = readBoardFromRedis(boardId.toString())
+        return cachedBoard ?: run {
+            val board = boardRepository.findByIdWithComments(boardId).orElseThrow { BoardException.NOT_FOUND.toException() }
+            val responseDTO = BoardResponseDTO(board)
+            redisTemplate.opsForHash<Any, BoardResponseDTO>().put("board", board.boardId.toString(), responseDTO)
+            responseDTO
+        }
     }
 
     //게시글 수정
@@ -125,8 +145,13 @@ class BoardService(
 
             boardRepository.save(board)
 
+            val responseDTO = BoardResponseDTO(board)
+            redisTemplate.opsForHash<Any, BoardResponseDTO>().put("board", board.boardId.toString(), responseDTO)
+
             BoardResponseDTO(board)
         } catch (e: Exception) {
+            log.info("_!__!_~_@!@_!@)~!_!~_12")
+            log.error(e.toString())
             throw BoardException.NOT_UPDATED.toException()
         }
     }
@@ -137,8 +162,9 @@ class BoardService(
 
         return try {
             boardRepository.delete(board)
+            redisTemplate.opsForHash<Any, BoardResponseDTO>().delete("board", boardId.toString())
 
-            return BoardResponseDTO(board)
+            BoardResponseDTO(board)
         } catch (e: Exception) {
             throw BoardException.NOT_DELETED.toException()
         }
@@ -146,18 +172,71 @@ class BoardService(
 
     //게시글 목록 조회
     fun readBoardList(pageRequestDTO: PageRequestDTO): Page<BoardResponseDTO> {
-        val sort = Sort.by(Sort.Direction.DESC, "createdAt")
-        val pageable: Pageable = pageRequestDTO.getPageable(sort)
-        val boards: Page<Board> = boardRepository.findAll(pageable)
+        val pageable: Pageable = pageRequestDTO.getPageable(Sort.by(Sort.Direction.DESC, "createdAt"))
+        val boardResponseDTOs = mutableListOf<BoardResponseDTO>()
 
-        return boards.map { BoardResponseDTO(it) }
+        //Redis에서 조회
+        for (boardIdObj in redisTemplate.opsForHash<Any, BoardResponseDTO>().keys("board")) {
+            if (boardIdObj is String) {
+                val cachedBoard = readBoardFromRedis(boardIdObj)
+                if (cachedBoard != null) {
+                    boardResponseDTOs.add(cachedBoard)
+                }
+            }
+        }
+
+        //Redis에 없을 경우 DB에서 조회
+        if (boardResponseDTOs.size < pageable.pageSize) {
+            val boards = boardRepository.findAll(pageable)
+            boards.content.mapTo(boardResponseDTOs) { BoardResponseDTO(it) }
+
+            //새로 조회된 게시글을 Redis에 저장
+            boards.content.forEach { board ->
+                redisTemplate.opsForHash<Any, BoardResponseDTO>().put("board", board.boardId.toString(), BoardResponseDTO(board))
+            }
+        }
+
+        boardResponseDTOs.sortByDescending { it.createdAt }
+
+        val start = pageable.offset.toInt()
+        val end = Math.min(start + pageable.pageSize.toInt(), boardResponseDTOs.size)
+        val pagedResponse = boardResponseDTOs.subList(start, end)
+
+        return PageImpl(pagedResponse, pageable, boardResponseDTOs.size.toLong())
     }
 
     //회원 별 작성글 목록 조회
     fun readBoardListByMember(memberId: Long, pageRequestDTO: PageRequestDTO): Page<BoardResponseDTO> {
-        val sort = Sort.by(Sort.Direction.DESC, "createdAt")
-        val pageable: Pageable = pageRequestDTO.getPageable(sort)
+        val pageable: Pageable = pageRequestDTO.getPageable(Sort.by(Sort.Direction.DESC, "createdAt"))
+        val boardResponseDTOs = mutableListOf<BoardResponseDTO>()
 
-        return boardRepository.findByMemberId(memberId, pageable).map { BoardResponseDTO(it) }
+        //Redis에서 조회
+        for (boardIdObj in redisTemplate.opsForHash<Any, BoardResponseDTO>().keys("board")) {
+            if (boardIdObj is String) {
+                val cachedBoard = readBoardFromRedis(boardIdObj)
+                if (cachedBoard != null && cachedBoard.memberId == memberId) {
+                    boardResponseDTOs.add(cachedBoard)
+                }
+            }
+        }
+
+        //Redis에 없을 경우 DB에서 조회
+        if (boardResponseDTOs.size < pageable.pageSize) {
+            val boards = boardRepository.findByMemberId(memberId, pageable)
+            boards.content.mapTo(boardResponseDTOs) { BoardResponseDTO(it) }
+
+            // 새로 조회된 게시글을 Redis에 저장
+            boards.content.forEach { board ->
+                redisTemplate.opsForHash<Any, BoardResponseDTO>().put("board", board.boardId.toString(), BoardResponseDTO(board))
+            }
+        }
+
+        boardResponseDTOs.sortByDescending { it.createdAt }
+
+        val start = pageable.offset.toInt()
+        val end = Math.min(start + pageable.pageSize.toInt(), boardResponseDTOs.size)
+        val pagedResponse = boardResponseDTOs.subList(start, end)
+
+        return PageImpl(pagedResponse, pageable, boardResponseDTOs.size.toLong())
     }
 }
