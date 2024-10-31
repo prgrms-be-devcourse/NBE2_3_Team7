@@ -5,6 +5,7 @@ import com.hunmin.domain.dto.board.BoardResponseDTO
 import com.hunmin.domain.dto.page.PageRequestDTO
 import com.hunmin.domain.entity.Board
 import com.hunmin.domain.exception.BoardException
+import com.hunmin.domain.exception.MemberException
 import com.hunmin.domain.repository.BoardRepository
 import com.hunmin.domain.repository.MemberRepository
 import org.springframework.data.domain.Page
@@ -69,7 +70,7 @@ class BoardService(
     //게시글 등록
     fun createBoard(boardRequestDTO: BoardRequestDTO): BoardResponseDTO {
         return try {
-            val member = memberRepository.findById(boardRequestDTO.memberId).orElseThrow()
+            val member = memberRepository.findById(boardRequestDTO.memberId).orElseThrow{ MemberException.NOT_FOUND.get() }
 
             val board = Board.builder()
                 .member(member)

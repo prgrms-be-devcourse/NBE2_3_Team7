@@ -3,6 +3,7 @@ package com.hunmin.domain.service
 import com.hunmin.domain.entity.*
 import com.hunmin.domain.exception.CommentException
 import com.hunmin.domain.exception.LikeCommentException
+import com.hunmin.domain.exception.MemberException
 import com.hunmin.domain.repository.CommentRepository
 import com.hunmin.domain.repository.LikeCommentRepository
 import com.hunmin.domain.repository.MemberRepository
@@ -19,7 +20,7 @@ class LikeCommentService(
     //좋아요 등록
     @Transactional
     fun createLikeComment(memberId: Long, commentId: Long) {
-        val member = memberRepository.findById(memberId).orElseThrow()
+        val member = memberRepository.findById(memberId).orElseThrow { MemberException.NOT_FOUND.get() }
         val comment = commentRepository.findById(commentId).orElseThrow { CommentException.NOT_FOUND.toException() }
 
         likeCommentRepository.findByMemberAndComment(member, comment).ifPresentOrElse(
@@ -36,7 +37,7 @@ class LikeCommentService(
     //좋아요 삭제
     @Transactional
     fun deleteLikeComment(memberId: Long, commentId: Long) {
-        val member = memberRepository.findById(memberId).orElseThrow()
+        val member = memberRepository.findById(memberId).orElseThrow { MemberException.NOT_FOUND.get() }
         val comment = commentRepository.findById(commentId).orElseThrow { CommentException.NOT_FOUND.toException() }
         val likeComment = likeCommentRepository.findByMemberAndComment(member, comment).orElseThrow { LikeCommentException.NOT_FOUND.toException() }
 
@@ -50,7 +51,7 @@ class LikeCommentService(
 
     //좋아요 여부 확인
     fun isLikeComment(memberId: Long, commentId: Long): Boolean {
-        val member = memberRepository.findById(memberId).orElseThrow()
+        val member = memberRepository.findById(memberId).orElseThrow { MemberException.NOT_FOUND.get() }
         val comment = commentRepository.findById(commentId).orElseThrow { CommentException.NOT_FOUND.toException() }
 
         return likeCommentRepository.existsByMemberAndComment(member, comment)

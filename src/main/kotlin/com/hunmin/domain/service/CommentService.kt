@@ -6,6 +6,7 @@ import com.hunmin.domain.dto.page.PageRequestDTO
 import com.hunmin.domain.entity.Comment
 import com.hunmin.domain.exception.BoardException
 import com.hunmin.domain.exception.CommentException
+import com.hunmin.domain.exception.MemberException
 import com.hunmin.domain.repository.BoardRepository
 import com.hunmin.domain.repository.CommentRepository
 import com.hunmin.domain.repository.MemberRepository
@@ -25,7 +26,7 @@ class CommentService(
     //댓글 등록
     fun createComment(commentRequestDTO: CommentRequestDTO): CommentResponseDTO {
         return try{
-            val member = memberRepository.findById(commentRequestDTO.memberId).orElseThrow()
+            val member = memberRepository.findById(commentRequestDTO.memberId).orElseThrow { MemberException.NOT_FOUND.get() }
             val board = boardRepository.findById(commentRequestDTO.boardId).orElseThrow{ BoardException.NOT_FOUND.toException() }
 
             val comment = Comment.builder()
@@ -45,7 +46,7 @@ class CommentService(
     //대댓글 등록
     fun createCommentChild(boardId: Long, commentId: Long, commentRequestDTO: CommentRequestDTO): CommentResponseDTO {
         return try{
-            val member = memberRepository.findById(commentRequestDTO.memberId).orElseThrow()
+            val member = memberRepository.findById(commentRequestDTO.memberId).orElseThrow { MemberException.NOT_FOUND.get() }
             val board = boardRepository.findById(boardId).orElseThrow{ BoardException.NOT_FOUND.toException() }
             val parent = commentRepository.findById(commentId).orElseThrow{ CommentException.NOT_FOUND.toException() }
 
