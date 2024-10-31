@@ -31,7 +31,6 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-
     // kotlin-logging 의존성
     implementation("io.github.microutils:kotlin-logging-jvm:2.0.11") 
     implementation("group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.6'")
@@ -63,7 +62,6 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    testImplementation("org.springframework:spring-messaging")
 
     // Swagger - springdoc
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
@@ -77,9 +75,9 @@ dependencies {
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.6")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.6")
 
-    //Mockito 의존성
-    testImplementation("org.mockito:mockito-inline:3.9.0")
-    testImplementation("org.mockito.kotlin:mockito-kotlin:4.0.0")
+    // kotlin-logging 의존성
+    implementation("io.github.microutils:kotlin-logging-jvm:2.0.11")
+    implementation("group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.6'")
 }
 
 kotlin {
