@@ -32,13 +32,13 @@ class TestTaskExecutor: ApplicationRunner {
 	private lateinit var followRepository: FollowRepository
 
 	override fun run(args: ApplicationArguments?) {
-//		// member 추가
-//		for(i in 1L..100L) {
-//			val member = Member(nickname = "testMember"+i, password = "1234"+i,
-//				country = "Korea", email = "test"+i+"@test.com", level = MemberLevel.BEGINNER).apply{
-//			}
-//			memberRepository.save(member)
-//		}
+		// member 추가
+		for(i in 1L..100L) {
+			val member = Member(nickname = "testMember"+i, password = "1234"+i,
+				country = "Korea", email = "test"+i+"@test.com", level = MemberLevel.BEGINNER).apply{
+			}
+			memberRepository.save(member)
+		}
 		// follow 추가
 		for(i in 1L..99L) {
 			val follow = Follow().apply{
