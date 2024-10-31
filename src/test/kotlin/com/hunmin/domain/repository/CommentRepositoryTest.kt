@@ -15,13 +15,11 @@ import org.springframework.transaction.annotation.Transactional
 @Transactional
 class CommentRepositoryTest {
     @Autowired
-    private lateinit var memberRepository: MemberRepository
-
+    lateinit var memberRepository: MemberRepository
     @Autowired
-    private lateinit var boardRepository: BoardRepository
-
+    lateinit var boardRepository: BoardRepository
     @Autowired
-    private lateinit var commentRepository: CommentRepository
+    lateinit var commentRepository: CommentRepository
 
     //댓글 등록 테스트
     @Test

@@ -13,7 +13,7 @@ import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
 
 class FollowSearchImpl(em: EntityManager) : FollowSearch {
-    private val queryFactory: JPQLQueryFactory
+    val queryFactory: JPQLQueryFactory
 
     init {
         this.queryFactory = JPAQueryFactory(em)
