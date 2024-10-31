@@ -7,7 +7,7 @@ import jakarta.persistence.*
 data class Notice(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val noticeId: Long? = null,
+    val noticeId: Long = 0,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
