@@ -8,6 +8,7 @@ import org.springframework.messaging.simp.stomp.StompFrameHandler
 import org.springframework.messaging.simp.stomp.StompHeaders
 import org.springframework.messaging.simp.stomp.StompSession
 import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter
+import org.springframework.test.context.TestPropertySource
 import org.springframework.web.socket.client.standard.StandardWebSocketClient
 import org.springframework.web.socket.messaging.WebSocketStompClient
 import java.lang.reflect.Type
@@ -17,6 +18,7 @@ import java.util.concurrent.TimeUnit
 import kotlin.test.Test
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@TestPropertySource(locations = ["classpath:application-test.properties"])
 class WebSocketTest {
 
     private val stompClient: WebSocketStompClient = WebSocketStompClient(StandardWebSocketClient()).apply {
@@ -27,11 +29,12 @@ class WebSocketTest {
 
     @BeforeEach
     fun setup() {
+
         messageQueue = ArrayBlockingQueue(1)
         // WebSocketStompClient 인스턴스 생성
         stompClient.messageConverter = MappingJackson2MessageConverter() // JSON 메시지 전환
         // WebSocket 연결
-        session = stompClient.connect("ws://localhost:8050/ws-stomp", object : StompSessionHandlerAdapter() {}).get()
+        session = stompClient.connect("ws://localhost:8080/ws-stomp", object : StompSessionHandlerAdapter() {}).get()
     }
 
     @Test

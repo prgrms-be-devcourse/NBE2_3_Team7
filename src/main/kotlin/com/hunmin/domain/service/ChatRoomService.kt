@@ -43,13 +43,15 @@ class ChatRoomService(
             val partnerNameAndChatRoom: MutableList<Any> = roomStorage.values(me.nickname)
 
             val chatRoomIds: MutableSet<Long> = HashSet()
-            val chatRoomRequestDTOList: MutableList<ChatRoomRequestDTO> = ArrayList<ChatRoomRequestDTO>()
+            val chatRoomRequestDTOList: MutableList<ChatRoomRequestDTO> = ArrayList()
 
             for (chatRoomRequestDTO in partnerNameAndChatRoom) {
-                val chatRoomRequest: ChatRoomRequestDTO =
+                val chatRoomRequest: ChatRoomRequestDTO? =
                     objectMapper.convertValue(chatRoomRequestDTO, ChatRoomRequestDTO::class.java)
-                chatRoomIds.add(chatRoomRequest.chatRoomId)
-                chatRoomRequestDTOList.add(chatRoomRequest)
+                chatRoomRequest?.let {
+                    chatRoomIds.add(it.chatRoomId)
+                    chatRoomRequestDTOList.add(it)
+                }
             }
 
             val allMembers: List<Member> = memberRepository.findAll()
@@ -57,7 +59,7 @@ class ChatRoomService(
                 val rawChatRoom = roomStorage.get(member.nickname, me.nickname)
                 val chatRoomRequestDTO =
                     objectMapper.convertValue(rawChatRoom, ChatRoomRequestDTO::class.java)
-                chatRoomRequestDTO.let {
+                chatRoomRequestDTO?.let {
                     if (!chatRoomIds.contains(it.chatRoomId)) {
                         chatRoomIds.add(it.chatRoomId)
                         chatRoomRequestDTOList.add(it)
