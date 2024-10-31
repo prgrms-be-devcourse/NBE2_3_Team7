@@ -12,10 +12,10 @@ data class ChatRoomDTO(
     @NotNull( message = " 사용자 닉네임은 필수입니다.")
     val nickName: String,
 
-    var userCount: Long? = null,
-    var chatMessageIds: MutableList<Long>? = mutableListOf(),
-    var latestMessageContent: String? = null,
-    var latestMessageDate: LocalDateTime? = null
+    val userCount: Long? = null,
+    val chatMessageIds: MutableList<Long>? = mutableListOf(),
+    val latestMessageContent: String? = null,
+    val latestMessageDate: LocalDateTime? = null
 ){
     constructor(chatRoom: ChatRoom): this(
         chatRoom.chatRoomId,

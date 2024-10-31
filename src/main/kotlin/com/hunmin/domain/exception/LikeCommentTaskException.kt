@@ -1,6 +1,6 @@
-package com.hunmin.domain.exception.follow
+package com.hunmin.domain.exception
 
-class FollowTaskException(
+class LikeCommentTaskException(
     override val message: String,
     val code: Int
 ) : RuntimeException(message)
