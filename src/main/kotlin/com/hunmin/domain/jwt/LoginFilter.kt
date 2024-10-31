@@ -23,14 +23,16 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import java.io.IOException
 import java.util.*
 
-private val logger = KotlinLogging.logger {}
-
 // 로그인 요청 처리 클래스
 class LoginFilter(
     private val authenticationManager: AuthenticationManager,
     private val jwtUtil: JWTUtil,
     private val refreshRepository: RefreshRepository
 ) : UsernamePasswordAuthenticationFilter() {
+
+    companion object{
+        private val logger = KotlinLogging.logger {}
+    }
 
     init {
         setFilterProcessesUrl("/api/members/login")
@@ -65,7 +67,7 @@ class LoginFilter(
 
     // 로그인 성공 시 사용자 정보를 기반으로 JWT 토큰을 생성하고, 이를 Authorization 헤더에 추가
     @Throws(IOException::class)
-    protected override fun successfulAuthentication(
+    override fun successfulAuthentication(
         request: HttpServletRequest, response: HttpServletResponse,
         chain: FilterChain, authentication: Authentication
     ) {

@@ -1,6 +1,6 @@
 package com.hunmin.domain.exception.follow
 
 class FollowTaskException(
-    message: String,
+    override val message: String,
     val code: Int
 ) : RuntimeException(message)

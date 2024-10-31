@@ -8,10 +8,6 @@ data class Word (
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val wordId: Long = 0,
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
-    var member: Member? = null,
-
     @Column(nullable = false)
     var title: String,
 

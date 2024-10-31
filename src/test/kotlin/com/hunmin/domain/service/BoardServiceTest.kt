@@ -63,9 +63,11 @@ class BoardServiceTest {
     //게시글 조회 테스트
     @Test
     fun readBoard() {
+        val member = Member(memberId = 1L, nickname = "tester", email = "test@test.com", country = "Korea", level = MemberLevel.BEGINNER, password = "123")
         val boardId = 1L
         val board = Board(
             boardId = boardId,
+            member = member,
             title = "테스트 제목",
             nickname = "tester",
             content = "테스트 내용",
@@ -85,9 +87,11 @@ class BoardServiceTest {
     //게시글 수정 테스트
     @Test
     fun updateBoard() {
+        val member = Member(memberId = 1L, nickname = "tester", email = "test@test.com", country = "Korea", level = MemberLevel.BEGINNER, password = "123")
         val boardId = 1L
         val board = Board(
             boardId = boardId,
+            member = member,
             title = "테스트 제목",
             nickname = "tester",
             content = "테스트 내용",
@@ -118,9 +122,11 @@ class BoardServiceTest {
     //게시글 삭제 테스트
     @Test
     fun deleteBoard() {
+        val member = Member(memberId = 1L, nickname = "tester", email = "test@test.com", country = "Korea", level = MemberLevel.BEGINNER, password = "123")
         val boardId = 1L
         val board = Board(
             boardId = boardId,
+            member = member,
             title = "테스트 제목",
             nickname = "tester",
             content = "테스트 내용",
@@ -139,9 +145,10 @@ class BoardServiceTest {
     //게시글 목록 조회 테스트
     @Test
     fun readBoardList() {
+        val member = Member(memberId = 1L, nickname = "tester", email = "test@test.com", country = "Korea", level = MemberLevel.BEGINNER, password = "123")
         val boards = listOf(
-            Board(boardId = 1L, title = "제목1", nickname = "tester1", content = "내용1", location = "위치1", latitude = 0.0, longitude = 0.0),
-            Board(boardId = 2L, title = "제목2", nickname = "tester2", content = "내용2", location = "위치2", latitude = 1.0, longitude = 1.0)
+            Board(boardId = 1L, member = member, title = "제목1", nickname = "tester1", content = "내용1", location = "위치1", latitude = 0.0, longitude = 0.0),
+            Board(boardId = 2L, member = member, title = "제목2", nickname = "tester2", content = "내용2", location = "위치2", latitude = 1.0, longitude = 1.0)
         )
         val pageRequestDTO = PageRequestDTO(page = 1, size = 10)
         val pageable = pageRequestDTO.getPageable(Sort.by(Sort.Direction.DESC, "createdAt"))
@@ -158,20 +165,20 @@ class BoardServiceTest {
     //회원 별 작성글 목록 조회 테스트
     @Test
     fun readBoardListByMember() {
-        val memberId = 1L
+        val member = Member(memberId = 1L, nickname = "tester", email = "test@test.com", country = "Korea", level = MemberLevel.BEGINNER, password = "123")
         val boards = listOf(
-            Board(boardId = 1L, title = "제목1", nickname = "tester1", content = "내용1", location = "위치1", latitude = 0.0, longitude = 0.0),
-            Board(boardId = 2L, title = "제목2", nickname = "tester2", content = "내용2", location = "위치2", latitude = 1.0, longitude = 1.0)
+            Board(boardId = 1L, member = member, title = "제목1", nickname = "tester1", content = "내용1", location = "위치1", latitude = 0.0, longitude = 0.0),
+            Board(boardId = 2L, member = member, title = "제목2", nickname = "tester2", content = "내용2", location = "위치2", latitude = 1.0, longitude = 1.0)
         )
         val pageRequestDTO = PageRequestDTO(page = 1, size = 10)
         val pageable = pageRequestDTO.getPageable(Sort.by(Sort.Direction.DESC, "createdAt"))
 
-        `when`(boardRepository.findByMemberId(memberId, pageable)).thenReturn(PageImpl(boards))
+        `when`(boardRepository.findByMemberId(1L, pageable)).thenReturn(PageImpl(boards))
 
-        val responsePage = boardService.readBoardListByMember(memberId, pageRequestDTO)
+        val responsePage = boardService.readBoardListByMember(1L, pageRequestDTO)
 
         assertEquals(2, responsePage.totalElements)
         assertEquals(boards[0].title, responsePage.content[0].title)
-        verify(boardRepository, times(1)).findByMemberId(memberId, pageable)
+        verify(boardRepository, times(1)).findByMemberId(1L, pageable)
     }
 }

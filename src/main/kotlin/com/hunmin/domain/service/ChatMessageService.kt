@@ -72,7 +72,7 @@ class ChatMessageService(
                     message = sender.nickname + "님 : " + chatMessageDTO.message,
                     notificationType = NotificationType.CHAT,
                     url = "/chat-room/" + chatMessageDTO.chatRoomId).apply {
-                    memberId = receiverId
+                    this.memberId = receiverId
                 }
                 notificationService.send(notificationSendDTO)
 

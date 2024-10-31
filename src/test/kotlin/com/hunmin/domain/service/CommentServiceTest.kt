@@ -81,9 +81,11 @@ class CommentServiceTest {
     //댓글 수정 테스트
     @Test
     fun updateComment() {
+        val member = Member(memberId = 1L, nickname = "tester", email = "test@test.com", country = "Korea", level = MemberLevel.BEGINNER, password = "123")
+        val board = Board(1L, member, "테스트 제목", "tester", "테스트 내용", "위치 이름", 0.0, 0.0)
         val commentId = 1L
         val commentRequestDTO = CommentRequestDTO(commentId = commentId, memberId = 1L, boardId = 2L, content = "댓글 내용 수정")
-        val existingComment = Comment(content = "Old content")
+        val existingComment = Comment(member = member, board = board, content = "Old content")
 
         `when`(commentRepository.findById(commentId)).thenReturn(Optional.of(existingComment))
         `when`(commentRepository.save(any(Comment::class.java))).thenReturn(existingComment)
@@ -97,8 +99,10 @@ class CommentServiceTest {
     //댓글 삭제 테스트
     @Test
     fun deleteComment() {
+        val member = Member(memberId = 1L, nickname = "tester", email = "test@test.com", country = "Korea", level = MemberLevel.BEGINNER, password = "123")
+        val board = Board(1L, member, "테스트 제목", "tester", "테스트 내용", "위치 이름", 0.0, 0.0)
         val commentId = 1L
-        val comment = Comment(content = "댓글 내용 삭제")
+        val comment = Comment(member = member, board = board, content = "댓글 내용 삭제")
 
         `when`(commentRepository.findById(commentId)).thenReturn(Optional.of(comment))
         doNothing().`when`(commentRepository).delete(comment)
@@ -112,20 +116,21 @@ class CommentServiceTest {
     //게시글 별 댓글 목록 조회 테스트
     @Test
     fun readCommentList() {
-        val boardId = 1L
+        val member = Member(memberId = 1L, nickname = "tester", email = "test@test.com", country = "Korea", level = MemberLevel.BEGINNER, password = "123")
+        val board = Board(1L, member, "테스트 제목", "tester", "테스트 내용", "위치 이름", 0.0, 0.0)
         val comments = listOf(
-            Comment(content = "댓글1"),
-            Comment(content = "댓글2")
+            Comment(member = member, board = board, content = "댓글1"),
+            Comment(member = member, board = board, content = "댓글2")
         )
         val pageRequestDTO = PageRequestDTO(page = 1, size = 10)
         val pageable: Pageable = pageRequestDTO.getPageable(Sort.by("commentId").ascending())
 
-        `when`(commentRepository.findByBoardId(boardId, pageable)).thenReturn(PageImpl(comments, pageable, comments.size.toLong()))
+        `when`(commentRepository.findByBoardId(1L, pageable)).thenReturn(PageImpl(comments, pageable, comments.size.toLong()))
 
-        val responsePage = commentService.readCommentList(boardId, pageRequestDTO)
+        val responsePage = commentService.readCommentList(1L, pageRequestDTO)
 
         assertEquals(2, responsePage.totalElements)
         assertEquals(comments[0].content, responsePage.content[0].content)
-        verify(commentRepository, times(1)).findByBoardId(boardId, pageable)
+        verify(commentRepository, times(1)).findByBoardId(1L, pageable)
     }
 }
