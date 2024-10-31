@@ -77,15 +77,15 @@ class ChatRoomService(
 
 
     // 채팅방 생성
-    fun createChatRoomByNickName(partnerNamep: String, myEmail: String): ChatRoomRequestDTO {
+    fun createChatRoomByNickName(partnerName: String, myEmail: String): ChatRoomRequestDTO {
         try {
-            var byNickname = memberRepository.findByNickname(partnerNamep)
+            var byNickname = memberRepository.findByNickname(partnerName)
 
             val me = memberRepository.findByEmail(myEmail)
             val myNickname = me.nickname
 
-            if (roomStorage.get(myNickname, partnerNamep) != null || roomStorage.get(
-                    partnerNamep,
+            if (roomStorage.get(myNickname, partnerName) != null || roomStorage.get(
+                    partnerName,
                     myNickname
                 ) != null
             ) {
@@ -96,13 +96,13 @@ class ChatRoomService(
             val chatRoomRequestDTO: ChatRoomRequestDTO = ChatRoomRequestDTO(
                 chatRoomId = SavedchatRoom.chatRoomId, memberId = me.memberId, nickName = me.nickname
             ).apply {
-                partnerName = partnerNamep
-                createdAt = SavedchatRoom.createdAt
+                this.partnerName = partnerName
+                this.createdAt = SavedchatRoom.createdAt
             }
-            roomStorage.put(me.nickname, partnerNamep, chatRoomRequestDTO)
+            roomStorage.put(me.nickname, partnerName, chatRoomRequestDTO)
 
             val partner: Member =
-                memberRepository.findByNickname(partnerNamep)
+                memberRepository.findByNickname(partnerName)
 
             val partnerId = partner.memberId
 
@@ -129,8 +129,8 @@ class ChatRoomService(
                 chatRoomId = SavedchatRoom.chatRoomId,
                 memberId = me.memberId, nickName = me.nickname
             ).apply {
-                partnerName = partnerNamep
-                createdAt = SavedchatRoom.createdAt
+                this.partnerName = partnerName
+                this.createdAt = SavedchatRoom.createdAt
             }
         } catch (e: Exception) {
             throw NoSuchElementException("사용자가 존재하지 않습니다")

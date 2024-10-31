@@ -10,6 +10,6 @@ data class ChatRoomRequestDTO (
     val memberId: Long,
     @NotNull( message = " 사용자 닉네임은 필수입니다.")
     val nickName: String,
-    var partnerName: String? = null,
-    var createdAt: LocalDateTime? = null,
+    val partnerName: String? = null,
+    val createdAt: LocalDateTime? = null,
 )
