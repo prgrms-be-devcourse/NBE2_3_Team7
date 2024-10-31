@@ -18,10 +18,10 @@ import kotlin.test.assertEquals
 @Transactional
 class BoardRepositoryTest {
     @Autowired
-    lateinit var memberRepository: MemberRepository
+    private lateinit var memberRepository: MemberRepository
 
     @Autowired
-    lateinit var boardRepository: BoardRepository
+    private lateinit var boardRepository: BoardRepository
 
     //게시글 등록 테스트
     @Test
@@ -42,7 +42,7 @@ class BoardRepositoryTest {
     // 게시글 조회 테스트
     @Test
     fun testBoardRead() {
-        val boardId = 1L
+        val boardId = 2L
 
         val board = boardRepository.findById(boardId).orElseThrow()
 
@@ -54,11 +54,11 @@ class BoardRepositoryTest {
     @Transactional
     @Commit
     fun testUpdateBoard() {
-        val boardId = 1L
+        val boardId = 3L
         val title = "수정 제목"
         val content = "수정 내용"
 
-        val board = boardRepository.findById(1).orElseThrow()
+        val board = boardRepository.findById(boardId).orElseThrow()
 
         board.changeTitle(title)
         board.changeContent(content)
@@ -93,7 +93,7 @@ class BoardRepositoryTest {
     // 회원 별 작성글 목록 조회
     @Test
     fun testReadBoardListByMember() {
-        val member: Member = memberRepository.findById(1L).get()
+        val member: Member = memberRepository.findById(1).get()
         val pageable: Pageable = PageRequest.of(0, 20)
         val boards: Page<Board> = boardRepository.findByMemberId(member.memberId, pageable)
 
