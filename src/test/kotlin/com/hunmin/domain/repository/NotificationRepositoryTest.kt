@@ -68,11 +68,11 @@ class NotificationRepositoryTest {
     @Transactional
     @Commit
     fun testDeleteNotification() {
-        val notificaitonId = 1L
+        val notificationId = 1L
 
-        notificationRepository.deleteById(notificaitonId)
+        notificationRepository.deleteById(notificationId)
 
-        assertTrue(notificationRepository.findById(notificaitonId).isEmpty)
+        assertTrue(notificationRepository.findById(notificationId).isEmpty)
     }
 
     //회원 별 알림 조회
