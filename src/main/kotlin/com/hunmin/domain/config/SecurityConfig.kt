@@ -4,6 +4,7 @@ import com.hunmin.domain.jwt.CustomLogoutFilter
 import com.hunmin.domain.jwt.JWTFilter
 import com.hunmin.domain.jwt.JWTUtil
 import com.hunmin.domain.jwt.LoginFilter
+import com.hunmin.domain.repository.MemberRepository
 import com.hunmin.domain.repository.RefreshRepository
 import com.hunmin.domain.service.MemberService
 import org.springframework.context.annotation.Bean
@@ -24,7 +25,8 @@ import org.springframework.web.cors.CorsConfiguration
 class SecurityConfig(
     private val authenticationConfiguration: AuthenticationConfiguration,
     private val jwtUtil: JWTUtil,
-    private val refreshRepository: RefreshRepository
+    private val refreshRepository: RefreshRepository,
+    private val memberRepository: MemberRepository
 ) {
     @Bean
     fun bCryptPasswordEncoder(): BCryptPasswordEncoder =
@@ -40,6 +42,7 @@ class SecurityConfig(
         val loginFilter = LoginFilter(authenticationManager(), jwtUtil, refreshRepository).apply {
             setFilterProcessesUrl("/api/members/login")
         }
+
         http
             .cors { corsCustomizer ->
                 corsCustomizer.configurationSource {
@@ -77,9 +80,12 @@ class SecurityConfig(
             .sessionManagement { session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             }
-            .addFilterBefore(loginFilter, UsernamePasswordAuthenticationFilter::class.java)
-            .addFilterAfter(
-                JWTFilter(jwtUtil, memberService),
+            .addFilterBefore(
+                JWTFilter(jwtUtil, memberRepository),
+                UsernamePasswordAuthenticationFilter::class.java
+            )
+            .addFilterBefore(
+                loginFilter,
                 UsernamePasswordAuthenticationFilter::class.java
             )
             .addFilterBefore(
@@ -90,4 +96,3 @@ class SecurityConfig(
         return http.build()
     }
 }
-
