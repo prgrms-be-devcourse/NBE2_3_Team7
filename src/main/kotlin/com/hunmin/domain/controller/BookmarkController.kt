@@ -20,11 +20,8 @@ class BookmarkController(
     //북마크 등록
     @PostMapping("/{boardId}")
     @Operation(summary = "북마크 등록", description = "게시글 북마크를 등록할 때 사용하는 API")
-    fun createBookmark(@PathVariable boardId: Long,
-//                       authentication: Authentication
-    ): ResponseEntity<String> {
-//        val memberId = memberRepository.findByEmail(authentication.name).memberId
-        val memberId = 1L
+    fun createBookmark(@PathVariable boardId: Long, authentication: Authentication): ResponseEntity<String> {
+        val memberId = memberRepository.findByEmail(authentication.name).memberId
         bookmarkService.createBookmark(boardId, memberId)
         return ResponseEntity.ok("북마크 등록")
     }
@@ -32,11 +29,8 @@ class BookmarkController(
     //북마크 삭제
     @DeleteMapping("/{boardId}")
     @Operation(summary = "북마크 삭제", description = "게시글 북마크를 삭제할 때 사용하는 API")
-    fun deleteBookmark(@PathVariable boardId: Long,
-//                       authentication: Authentication
-    ): ResponseEntity<String> {
-//        val memberId = memberRepository.findByEmail(authentication.name).memberId
-        val memberId = 1L
+    fun deleteBookmark(@PathVariable boardId: Long, authentication: Authentication): ResponseEntity<String> {
+        val memberId = memberRepository.findByEmail(authentication.name).memberId
         bookmarkService.deleteBookmark(boardId, memberId)
         return ResponseEntity.ok("북마크 삭제")
     }

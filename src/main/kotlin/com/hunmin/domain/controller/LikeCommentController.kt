@@ -19,11 +19,8 @@ class LikeCommentController(
     //좋아요 등록
     @PostMapping("/{commentId}")
     @Operation(summary = "좋아요 등록", description = "댓글 좋아요를 등록할 때 사용하는 API")
-    fun createLikeComment(@PathVariable commentId: Long,
-//                          authentication: Authentication
-    ): ResponseEntity<String> {
-//        val memberId = memberRepository.findByEmail(authentication.name).memberId
-        val memberId = 1L
+    fun createLikeComment(@PathVariable commentId: Long, authentication: Authentication): ResponseEntity<String> {
+        val memberId = memberRepository.findByEmail(authentication.name).memberId
         likeCommentService.createLikeComment(memberId, commentId)
         return ResponseEntity.ok().build()
     }
@@ -31,11 +28,8 @@ class LikeCommentController(
     //좋아요 삭제
     @DeleteMapping("/{commentId}")
     @Operation(summary = "좋아요 삭제", description = "댓글 좋아요를 삭제할 때 사용하는 API")
-    fun deleteLikeComment(@PathVariable commentId: Long,
-//                          authentication: Authentication
-    ): ResponseEntity<String> {
-//        val memberId = memberRepository.findByEmail(authentication.name).memberId
-        val memberId = 1L
+    fun deleteLikeComment(@PathVariable commentId: Long, authentication: Authentication): ResponseEntity<String> {
+        val memberId = memberRepository.findByEmail(authentication.name).memberId
         likeCommentService.deleteLikeComment(memberId, commentId)
         return ResponseEntity.ok().build()
     }

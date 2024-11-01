@@ -1,5 +1,6 @@
 package com.hunmin.domain.dto.board
 
+import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer
@@ -8,7 +9,7 @@ import com.hunmin.domain.dto.comment.CommentResponseDTO
 import com.hunmin.domain.entity.Board
 import java.time.LocalDateTime
 
-data class BoardResponseDTO(
+data class BoardResponseDTO @JsonCreator constructor(
     val boardId: Long,
     val memberId: Long? = null,
     val title: String,
