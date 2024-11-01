@@ -40,7 +40,6 @@ class SecurityConfig(
         val loginFilter = LoginFilter(authenticationManager(), jwtUtil, refreshRepository).apply {
             setFilterProcessesUrl("/api/members/login")
         }
-
         http
             .cors { corsCustomizer ->
                 corsCustomizer.configurationSource {
@@ -57,15 +56,6 @@ class SecurityConfig(
             .csrf { it.disable() }
             .formLogin { it.disable() }
             .httpBasic { it.disable() }
-            .addFilterBefore(loginFilter, UsernamePasswordAuthenticationFilter::class.java)
-            .addFilterAfter(
-                JWTFilter(jwtUtil, memberService),
-                UsernamePasswordAuthenticationFilter::class.java
-            )
-            .addFilterBefore(
-                CustomLogoutFilter(jwtUtil, refreshRepository),
-                LogoutFilter::class.java
-            )
             .authorizeHttpRequests { auth ->
                 auth
                     .requestMatchers("/api/members/register").permitAll()
@@ -87,6 +77,16 @@ class SecurityConfig(
             .sessionManagement { session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             }
+            .addFilterBefore(loginFilter, UsernamePasswordAuthenticationFilter::class.java)
+            .addFilterAfter(
+                JWTFilter(jwtUtil, memberService),
+                UsernamePasswordAuthenticationFilter::class.java
+            )
+            .addFilterBefore(
+                CustomLogoutFilter(jwtUtil, refreshRepository),
+                LogoutFilter::class.java
+            )
+
         return http.build()
     }
 }
