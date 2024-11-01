@@ -80,12 +80,12 @@ class SecurityConfig(
             .sessionManagement { session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             }
-            .addFilterBefore(
-                JWTFilter(jwtUtil, memberRepository),
+            .addFilterAfter(
+                loginFilter,
                 UsernamePasswordAuthenticationFilter::class.java
             )
             .addFilterBefore(
-                loginFilter,
+                JWTFilter(jwtUtil, memberRepository),
                 UsernamePasswordAuthenticationFilter::class.java
             )
             .addFilterBefore(
