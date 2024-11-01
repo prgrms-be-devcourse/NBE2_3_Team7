@@ -128,7 +128,7 @@ class FollowService(
             val pageable = pageRequestDTO.getPageable(sort)
             return followRepository.getFollowPage(member.memberId, pageable)
         } catch (e: RuntimeException) {
-            log.error("페이징 실패")
+            log.error("페이징 실패 ${e.message}")
             throw FollowException.NOT_FOUND.get()
         }
     }

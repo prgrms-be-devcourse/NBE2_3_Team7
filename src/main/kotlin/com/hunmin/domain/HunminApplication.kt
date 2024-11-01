@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing
 
 @SpringBootApplication
 @EnableJpaAuditing
+
 class Nbe23Team7Application
 
 fun main(args: Array<String>) {
