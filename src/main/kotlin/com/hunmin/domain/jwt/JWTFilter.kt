@@ -2,6 +2,7 @@ package com.hunmin.domain.jwt
 
 import com.hunmin.domain.dto.member.CustomUserDetails
 import com.hunmin.domain.entity.Member
+import com.hunmin.domain.entity.MemberLevel
 import com.hunmin.domain.entity.MemberRole
 import com.hunmin.domain.service.MemberService
 import io.jsonwebtoken.ExpiredJwtException
@@ -57,8 +58,13 @@ class JWTFilter(private val jwtUtil: JWTUtil, memberService: MemberService) : On
 
                     // Member 객체 생성 시 모든 필수 필드 설정
                     val member = Member.create(
+                        nickname = "",
                         email = email,
-                        memberRole = MemberRole.valueOf(role.removePrefix("ROLE_"))
+                        password = "",
+                        country = "",
+                        level = MemberLevel.BEGINNER,
+                        memberRole = MemberRole.valueOf(role.removePrefix("ROLE_")),
+                        image = null
                     )
 
                     val customUserDetails = CustomUserDetails(member)

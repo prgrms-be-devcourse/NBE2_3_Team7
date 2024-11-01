@@ -96,6 +96,16 @@ const LoginForm = ({ setToken }) => {
                         로그인
                     </Button>
 
+                    <Button
+                        variant="text"
+                        color="primary"
+                        onClick={() => navigate('/register')}
+                        sx={{ mt: 2 }}
+                        fullWidth
+                    >
+                        회원가입
+                    </Button>
+
                     {/* 비밀번호 재설정 버튼 */}
                     <Button
                         onClick={handlePasswordReset}
