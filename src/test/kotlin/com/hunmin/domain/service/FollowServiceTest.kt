@@ -1,9 +1,16 @@
 package com.hunmin.domain.service
 
+import com.hunmin.domain.dto.board.BoardRequestDTO
+import com.hunmin.domain.dto.notification.NotificationSendDTO
 import com.hunmin.domain.dto.page.PageRequestDTO
+import com.hunmin.domain.entity.Follow
+import com.hunmin.domain.entity.FollowStatus
+import com.hunmin.domain.entity.NotificationType
+import com.hunmin.domain.entity.QBoard.board
 import com.hunmin.domain.exception.follow.FollowTaskException
 import com.hunmin.domain.repository.FollowRepository
 import com.hunmin.domain.repository.MemberRepository
+import com.hunmin.domain.repository.NotificationRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
@@ -16,6 +23,15 @@ import kotlin.test.*
 @TestPropertySource(locations = ["classpath:application-test.properties"])
 @Transactional
 class FollowServiceTest {
+
+    @Autowired
+    private lateinit var notificationService: NotificationService
+
+    @Autowired
+    private lateinit var notificationRepository: NotificationRepository
+
+    @Autowired
+    private lateinit var boardService: BoardService
 
     @Autowired
     private lateinit var followRepository: FollowRepository
@@ -32,6 +48,8 @@ class FollowServiceTest {
         val newFollow = followService.register("test2@test.com", 8)
         //then
         assertNotNull(newFollow)
+        assertEquals(newFollow.followerEmail, "test2@test.com")
+        assertEquals(newFollow.followeeId, 8)
     }
 
     @Test
@@ -42,6 +60,8 @@ class FollowServiceTest {
         val acceptFollow = followService.registerAccept("test8@test.com", 2)
         //then
         assertNotNull(acceptFollow)
+        assertEquals(acceptFollow.followerEmail, "test2@test.com")
+        assertEquals(acceptFollow.followeeId, 8)
     }
 
     @Test
@@ -66,13 +86,16 @@ class FollowServiceTest {
     }
     @Test
     fun 팔로우리스트조회() {
+        //given
+        val newFollow = followService.register("test2@test.com", 8)
+        val acceptFollow = followService.registerAccept("test8@test.com", 2)
         //when
         var pageRequestDTO = PageRequestDTO(page = 1, size = 10)
-        val newFollow = followService.readPage(pageRequestDTO, "test1@test.com")
+        val newFollowList = followService.readPage(pageRequestDTO, "test1@test.com")
         //then
-        assertNotNull(newFollow)
-        assertThat(newFollow.totalPages).isEqualTo(0)
-        assertThat(newFollow.totalElements).isEqualTo(0)
+        assertNotNull(newFollowList)
+        assertThat(newFollowList.totalPages).isEqualTo(1)
+        assertThat(newFollowList.totalElements).isEqualTo(2)
     }
 
     @Test
@@ -85,7 +108,7 @@ class FollowServiceTest {
         val foundFollow = followRepository.findById(acceptFollow.followId).get()
         //then
         assertTrue(newFollow)
-        assertEquals(foundFollow.notification,false)
+        assertEquals(foundFollow.notification,true)
 
     }
 
@@ -99,7 +122,7 @@ class FollowServiceTest {
         val foundFollow = followRepository.findById(acceptFollow.followId).get()
         //then
         assertTrue(newFollow)
-        assertEquals(foundFollow.isBlock,true)
+        assertEquals(foundFollow.isBlock,false)
     }
 
     @Test
@@ -109,5 +132,35 @@ class FollowServiceTest {
         //then
         assertNotNull(newFollow)
         assertTrue(newFollow)
+    }
+    @Test
+    fun `게시글 등록시 팔로우에게 알림 보내기`(){
+        //given
+        val foundMemberA =memberRepository.findById(1).get()
+
+        val newFollow = followService.register("test2@test.com", 8)
+        val acceptFollow = followService.registerAccept("test8@test.com", 2)
+
+        val foundFollowA = followRepository.findById(1).get()
+        foundFollowA.status = FollowStatus.ACCEPTED
+        followRepository.save(foundFollowA)
+
+        val boardRequestDTO = BoardRequestDTO(
+            boardId = 1L,
+            memberId = foundMemberA.memberId,
+            title = "테스트 제목",
+            content = "테스트 내용",
+            location = "위치 이름",
+            latitude = 0.0,
+            longitude = 0.0,
+            imageUrls = listOf("image1.png", "image2.png").toMutableList()
+        )
+
+        //when
+        val boardResponseDTO = boardService.createBoard(boardRequestDTO)
+        val notification = notificationRepository.findById(1).get()
+        //then
+        assertThat(boardResponseDTO)
+        assertNotNull(notification)
     }
 }

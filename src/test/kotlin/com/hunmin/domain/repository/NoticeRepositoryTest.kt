@@ -66,7 +66,6 @@ class NoticeRepositoryTest {
     fun testFindAllNotices() {
         // Given:
 
-
         // When: Pageable 객체를 사용하여 findAllNotices 호출
         val pageable: Pageable = PageRequest.of(0, 10)
         val result = noticeRepository.findAllNotices(pageable)

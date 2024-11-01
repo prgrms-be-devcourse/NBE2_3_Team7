@@ -1,7 +1,6 @@
 package com.hunmin.domain
 
 import com.hunmin.domain.entity.*
-import com.hunmin.domain.entity.QFollow.follow
 import com.hunmin.domain.repository.ChatMessageRepository
 import com.hunmin.domain.repository.ChatRoomRepository
 import com.hunmin.domain.repository.FollowRepository
@@ -12,8 +11,10 @@ import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.stereotype.Component
+import org.springframework.test.context.TestPropertySource
 
 @SpringBootTest
+@TestPropertySource(locations = ["classpath:application-test.properties"])
 class Nbe23Team7ApplicationTests {
 
 	@Test
