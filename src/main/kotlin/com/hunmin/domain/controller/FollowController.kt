@@ -2,7 +2,6 @@ package com.hunmin.domain.controller
 
 import com.hunmin.domain.dto.follow.FollowRequestDTO
 import com.hunmin.domain.dto.page.PageRequestDTO
-import com.hunmin.domain.exception.follow.FollowException
 import com.hunmin.domain.service.FollowService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
