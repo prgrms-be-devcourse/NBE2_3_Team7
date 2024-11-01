@@ -2,17 +2,26 @@ package com.hunmin.domain.service
 
 import com.hunmin.domain.dto.board.BoardRequestDTO
 import com.hunmin.domain.dto.board.BoardResponseDTO
+import com.hunmin.domain.dto.chat.ChatMessageDTO
+import com.hunmin.domain.dto.follow.FollowRequestDTO
+import com.hunmin.domain.dto.notification.NotificationSendDTO
 import com.hunmin.domain.dto.page.PageRequestDTO
 import com.hunmin.domain.entity.Board
+import com.hunmin.domain.entity.NotificationType
+import com.hunmin.domain.entity.QChatMessage.chatMessage
 import com.hunmin.domain.exception.BoardException
+import com.hunmin.domain.handler.SseEmitters
 import com.hunmin.domain.repository.BoardRepository
+import com.hunmin.domain.repository.FollowRepository
 import com.hunmin.domain.repository.MemberRepository
+import org.hibernate.query.sqm.tree.SqmNode.log
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter
 import java.io.File
 import java.io.IOException
 import java.nio.file.Files
@@ -24,7 +33,10 @@ import kotlin.collections.ArrayList
 @Transactional
 class BoardService(
     private val memberRepository: MemberRepository,
-    private val boardRepository: BoardRepository
+    private val boardRepository: BoardRepository,
+    private val followRepository: FollowRepository,
+    private val notificationService: NotificationService,
+    private val sseEmitters: SseEmitters
 ) {
     // 게시글 이미지 첨부
     @Throws(IOException::class)
@@ -68,7 +80,7 @@ class BoardService(
 
     //게시글 등록
     fun createBoard(boardRequestDTO: BoardRequestDTO): BoardResponseDTO {
-        return try {
+        try {
             val member = memberRepository.findById(boardRequestDTO.memberId).orElseThrow()
 
             val board = Board.builder()
@@ -82,9 +94,39 @@ class BoardService(
                 .imageUrls(boardRequestDTO.imageUrls ?: ArrayList())
                 .build()
 
-            boardRepository.save(board)
+            val savedBoard = boardRepository.save(board)
 
-            BoardResponseDTO(board)
+            // 알림
+            val sender = member
+            val senderId = member.memberId
+
+            val followers= followRepository.getFollowList(senderId)
+            // 알림 메세지 구현 -> return 방식은 emitter send로
+            for (follower in followers) {
+                if (!follower.isBlock) {
+                    val notificationSendDTO = NotificationSendDTO(
+                        message = sender.nickname + "님 : " + "새로운 게시글을 등록하였습니다",
+                        notificationType = NotificationType.BOARD,
+                        url = "/board/" + board.boardId
+                    ).apply {
+                        this.memberId = follower.followerId
+                    }
+                    notificationService.send(notificationSendDTO)
+                    // emitter
+                    val emitterId = follower.followerId.toString() + "_"
+                    val emitter = sseEmitters.findSingleEmitter(emitterId)
+
+                    if (emitter != null) {
+                        try {
+                            emitter.send(BoardResponseDTO(board))
+                        } catch (e: IOException) {
+                            log.error("Error sending comment to client via SSE: ${e.message}")
+                            sseEmitters.delete(emitterId)
+                        }
+                    }
+                }
+            }
+            return BoardResponseDTO(board)
         } catch (e: Exception) {
             throw BoardException.NOT_CREATED.toException()
         }

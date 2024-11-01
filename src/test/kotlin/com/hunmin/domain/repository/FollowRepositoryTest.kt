@@ -1,5 +1,6 @@
 package com.hunmin.domain.repository
 
+import com.hunmin.domain.dto.page.PageRequestDTO
 import com.hunmin.domain.entity.Follow
 import com.hunmin.domain.entity.FollowStatus
 import com.hunmin.domain.entity.MemberLevel
@@ -8,6 +9,7 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.data.domain.Sort
 import org.springframework.test.context.TestPropertySource
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -80,5 +82,28 @@ class FollowRepositoryTest {
         //then
         assertTrue(foundFollow.isEmpty)
     }
+    @Test
+    fun `팔로우 가진 리스트 반환 테스트`(){
+        //when
+        // 페이저블
+        val sort = Sort.by("followId").descending()
+        val pageRequestDTO = PageRequestDTO(page=1, size=10)
+        val pageable = pageRequestDTO.getPageable(sort)
 
+        //팔로우 팔로워
+        val foundMemberA =memberRepository.findById(1).get()
+        val foundMemberB =memberRepository.findById(2).get()
+
+        // 서로 팔로우 하기
+        Follow(follower = foundMemberB, followee =foundMemberA, isBlock = false, status = FollowStatus.ACCEPTED, notification = true )
+        val foundFollowA = followRepository.findById(1).get()
+        foundFollowA.status = FollowStatus.ACCEPTED
+        followRepository.save(foundFollowA)
+
+        //when
+        var foundFollow = followRepository.getFollowPage(foundMemberA.memberId, pageable)
+        //then
+        assertEquals(foundFollow.totalElements, 1)
+        assertEquals(foundFollow.totalPages, 1)
+    }
 }
