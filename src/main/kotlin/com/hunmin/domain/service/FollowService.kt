@@ -11,13 +11,11 @@ import com.hunmin.domain.exception.follow.FollowException
 import com.hunmin.domain.handler.SseEmitters
 import com.hunmin.domain.repository.FollowRepository
 import com.hunmin.domain.repository.MemberRepository
-import jdk.internal.joptsimple.internal.Messages.message
 import org.hibernate.query.sqm.tree.SqmNode.log
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter
 import java.io.IOException
 import java.util.*
 
@@ -85,27 +83,25 @@ class FollowService(
     @Transactional // 팔로이 수락
     fun registerAccept(myEmail: String, memberId: Long): FollowRequestDTO {
         try {
-            val followee: Member = memberRepository.findById(memberId).get()
+            val followee: Member = memberRepository.findById(memberId)
+                .orElseThrow { throw FollowException.NOT_FOUND_MEMBER.get() }
             val owner: Member = memberRepository.findByEmail(myEmail)
-
             // 중복체크
             val foundMember: Optional<Follow> = followRepository.findByMemberId(owner.memberId, memberId)
-            if (foundMember.isPresent()) {
+            if (foundMember.isPresent) {
                 throw FollowException.DUPLICATED_FOLLOW.get()
             }
 
-            val follow: Follow = Follow().apply {
-                this.follower = owner
-                this.followee = followee
-            }
+            val follow = Follow(follower = owner, followee = followee)
             followRepository.save(follow)
-            val follower = followRepository.findByMemberId(memberId, owner.memberId).get()
+            val follower = followRepository.findByMemberId(memberId, owner.memberId)
+                .orElseThrow { throw FollowException.NOT_FOUND.get() }
             follower.status = FollowStatus.ACCEPTED
             followRepository.save(follower)
 
-            return FollowRequestDTO(followRepository.save(follow))
+            return FollowRequestDTO(follower)
         } catch (e: RuntimeException) {
-            log.error("팔로우 수락 실패")
+            log.error("팔로우 수락 실패 "+e.message)
             throw FollowException.FAILED_ACCEPT_FOLLOW.get()
         }
     }
@@ -168,7 +164,7 @@ class FollowService(
             throw FollowException.NOT_FOUND.get()
         }
     }
-
+    //팔로우 상태확인
     fun isFollowing(memberId: Long, followeeId: Long): Boolean {
         return followRepository.existsByFollowerMemberIdAndFolloweeMemberId(memberId, followeeId)
     }

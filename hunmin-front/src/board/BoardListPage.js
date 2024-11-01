@@ -296,7 +296,7 @@ const BoardListPage = () => {
             <Grid container spacing={2} mt={2}>
                 <Grid item xs={12} md={6}>
                     <List>
-                        {(showBookmarkedBoards ? bookmarkedBoards : filteredBoards).map((board) => (
+                        {(showBookmarkedBoards ? bookmarkedBoards : filteredBoards || []).map((board) => (
                             <ListItem key={board.boardId}>
                                 <Grid container alignItems="center">
                                     <Grid item xs={10}>
@@ -306,7 +306,7 @@ const BoardListPage = () => {
                                                     <strong>{board.title}</strong> -
                                                     {isValidProfileImage(board.profileImage) ? (
                                                         <img
-                                                            src={board.profileImage} // Remove curly braces around board.profileImage
+                                                            src={board.profileImage}
                                                             alt="프로필"
                                                             style={{
                                                                 width: '30px',
@@ -316,7 +316,7 @@ const BoardListPage = () => {
                                                             }}
                                                         />
                                                     ) : (
-                                                        <FaUserCircle size={30} style={{ color: '#fff' }} /> // 프로필 아이콘 표시
+                                                        <FaUserCircle size={30} style={{ color: '#fff' }} />
                                                     )} {board.nickname}
                                                 </Link>
                                             }
@@ -344,7 +344,6 @@ const BoardListPage = () => {
                                         </Grid>
                                     ) : (
                                         <Grid item xs={2}>
-                                            {/* 이미지가 없는 경우 빈 공간으로 유지 */}
                                             <div style={{
                                                 width: '100%',
                                                 height: '100%',

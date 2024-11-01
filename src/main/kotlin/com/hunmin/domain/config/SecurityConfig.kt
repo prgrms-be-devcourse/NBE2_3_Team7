@@ -1,11 +1,16 @@
 package com.hunmin.domain.config
 
+import com.hunmin.domain.jwt.CustomLogoutFilter
+import com.hunmin.domain.jwt.JWTFilter
+import com.hunmin.domain.jwt.JWTUtil
+import com.hunmin.domain.jwt.LoginFilter
+import com.hunmin.domain.repository.MemberRepository
+import com.hunmin.domain.repository.RefreshRepository
 import com.hunmin.domain.service.MemberService
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.http.SessionCreationPolicy
@@ -17,30 +22,26 @@ import org.springframework.web.cors.CorsConfiguration
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity(securedEnabled = true, prePostEnabled = true)
 class SecurityConfig(
     private val authenticationConfiguration: AuthenticationConfiguration,
-//    private val jwtUtil: JWTUtil,
-//    private val refreshRepository: RefreshRepository
+    private val jwtUtil: JWTUtil,
+    private val refreshRepository: RefreshRepository,
+    private val memberRepository: MemberRepository
 ) {
-    // AuthenticationManager Bean 등록
-    @Bean
-    fun authenticationManager(configuration: AuthenticationConfiguration): AuthenticationManager =
-        configuration.getAuthenticationManager()
-
-    // BCryptPasswordEncoder Bean 등록
     @Bean
     fun bCryptPasswordEncoder(): BCryptPasswordEncoder =
         BCryptPasswordEncoder()
 
+    @Bean
+    fun authenticationManager(): AuthenticationManager =
+        authenticationConfiguration.authenticationManager
+
     // SecurityFilterChain 구성
     @Bean
     fun filterChain(http: HttpSecurity, memberService: MemberService): SecurityFilterChain {
-        val authManager = authenticationManager(authenticationConfiguration)
-
-//        val loginFilter = LoginFilter(authManager, jwtUtil, refreshRepository).apply {
-//            setFilterProcessesUrl("/api/members/login")
-//        }
+        val loginFilter = LoginFilter(authenticationManager(), jwtUtil, refreshRepository).apply {
+            setFilterProcessesUrl("/api/members/login")
+        }
 
         http
             .cors { corsCustomizer ->
@@ -79,15 +80,18 @@ class SecurityConfig(
             .sessionManagement { session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             }
-//            .addFilterAt(loginFilter, UsernamePasswordAuthenticationFilter::class.java)
-//            .addFilterBefore(
-//                JWTFilter(jwtUtil, memberService),
-//                UsernamePasswordAuthenticationFilter::class.java
-//            )
-//            .addFilterBefore(
-//                CustomLogoutFilter(jwtUtil, refreshRepository),
-//                LogoutFilter::class.java
-//            )
+            .addFilterAfter(
+                loginFilter,
+                UsernamePasswordAuthenticationFilter::class.java
+            )
+            .addFilterBefore(
+                JWTFilter(jwtUtil, memberRepository),
+                UsernamePasswordAuthenticationFilter::class.java
+            )
+            .addFilterBefore(
+                CustomLogoutFilter(jwtUtil, refreshRepository),
+                LogoutFilter::class.java
+            )
 
         return http.build()
     }

@@ -33,7 +33,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-    
+
     // kotlin-logging 의존성
     implementation("io.github.microutils:kotlin-logging-jvm:2.0.11")
     implementation("ch.qos.logback:logback-classic:1.4.14")
@@ -79,9 +79,8 @@ dependencies {
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.6")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.6")
 
-    // kotlin-logging 의존성
-    implementation("io.github.microutils:kotlin-logging-jvm:2.0.11")
-    implementation("group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.6'")
+    // LocalDateTime 역직렬화 해결
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 }
 
 kotlin {

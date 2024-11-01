@@ -1,5 +1,6 @@
 package com.hunmin.domain.service
 
+import com.hunmin.domain.dto.member.CustomUserDetails
 import com.hunmin.domain.dto.member.MemberDTO
 import com.hunmin.domain.dto.member.PasswordFindRequestDto
 import com.hunmin.domain.dto.member.PasswordUpdateRequestDto
@@ -7,8 +8,12 @@ import com.hunmin.domain.entity.Member
 import com.hunmin.domain.entity.MemberLevel
 import com.hunmin.domain.entity.MemberRole
 import com.hunmin.domain.repository.MemberRepository
+import mu.KotlinLogging
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.core.userdetails.UserDetails
+import org.springframework.security.core.userdetails.UserDetailsService
+import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -24,7 +29,12 @@ import java.util.*
 class MemberService(
     private val memberRepository: MemberRepository,
     private val bCryptPasswordEncoder: BCryptPasswordEncoder
-) {
+) : UserDetailsService {
+
+    companion object {
+        private val logger = KotlinLogging.logger {}
+    }
+
     // 이미지 업로드
     @Throws(IOException::class)
     fun uploadImage(file: MultipartFile): String {
@@ -59,6 +69,9 @@ class MemberService(
         val email = memberDTO.email
         val password = memberDTO.password
 
+        logger.info("=== 회원가입 서비스 시작 ===")
+        logger.info("Email: ${memberDTO.email}")
+
         require(!memberRepository.existsByEmail(memberDTO.email)) { "이미 존재하는 이메일입니다." }
 
         val member = Member(
@@ -70,7 +83,10 @@ class MemberService(
             level = memberDTO.level,
             image = memberDTO.image
         )
+        logger.info("Member 엔티티 생성: $member")
+
         memberRepository.save(member)
+        logger.info("=== DB 저장 완료 ===")
     }
 
     // 회원 정보 업데이트
@@ -125,5 +141,10 @@ class MemberService(
         } catch (e: Exception) {
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.message)
         }
+    }
+
+    override fun loadUserByUsername(email: String): UserDetails {
+        val member = memberRepository.findByEmail(email)
+        return CustomUserDetails(member)
     }
 }

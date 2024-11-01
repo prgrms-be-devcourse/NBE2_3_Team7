@@ -11,11 +11,13 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.test.annotation.Commit
+import org.springframework.test.context.TestPropertySource
 import org.springframework.transaction.annotation.Transactional
 import kotlin.test.assertEquals
 
 @SpringBootTest
 @Transactional
+@TestPropertySource(locations = ["classpath:application-test.properties"])
 class BoardRepositoryTest {
     @Autowired
     private lateinit var memberRepository: MemberRepository

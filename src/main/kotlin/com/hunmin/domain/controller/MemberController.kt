@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.servlet.http.Cookie
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import mu.KotlinLogging
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -28,7 +29,12 @@ class MemberController(
     private val memberService: MemberService,
     private val jwtUtil: JWTUtil,
     private val refreshRepository: RefreshRepository
+
 ) {
+    companion object {
+        private val logger = KotlinLogging.logger {}
+    }
+
     @PostMapping("/uploads")
     @Operation(summary = "프로필 사진 등록", description = "회원 가입 시 프로필 사진을 등록할 때 사용하는 API")
     fun uploadImage(@RequestParam("image") image: MultipartFile): ResponseEntity<String> {
@@ -44,10 +50,13 @@ class MemberController(
     @Operation(summary = "회원 가입", description = "회원 가입할 때 사용하는 API")
     fun registerProcess(@RequestBody memberDTO: MemberDTO): ResponseEntity<String> {
         return try {
+            logger.info("=== 회원가입 시작: ${memberDTO.email} ===")
             memberService.registerProcess(memberDTO)
+            logger.info("=== 회원가입 성공 ===")
             ResponseEntity.status(HttpStatus.CREATED).body("회원 가입 완료")
         } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("회원 가입 실패")
+            logger.error("=== 회원가입 실패 (유효성 검사): ${e.message} ===")
+            ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.message)
         }
     }
 

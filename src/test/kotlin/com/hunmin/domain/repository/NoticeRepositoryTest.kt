@@ -26,7 +26,7 @@ class NoticeRepositoryTest {
     @BeforeEach
     fun setup() {
         // 테스트용 Member 객체 생성
-        val member1 = Member.create(
+        val member1 = Member(
             nickname = "member1",
             email = "member1@example.com",
             password = "password",
@@ -34,7 +34,7 @@ class NoticeRepositoryTest {
             level = MemberLevel.BEGINNER
         )
 
-        val member2 = Member.create(
+        val member2 = Member(
             nickname = "member2",
             email = "member2@example.com",
             password = "password",
@@ -65,7 +65,6 @@ class NoticeRepositoryTest {
     @Test
     fun testFindAllNotices() {
         // Given:
-
 
         // When: Pageable 객체를 사용하여 findAllNotices 호출
         val pageable: Pageable = PageRequest.of(0, 10)

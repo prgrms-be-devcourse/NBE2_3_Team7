@@ -9,7 +9,6 @@ import com.hunmin.domain.service.MemberService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import mu.KotlinLogging
-import org.hibernate.query.Page.page
 import org.springframework.data.domain.Page
 import org.springframework.http.ResponseEntity
 import org.springframework.messaging.handler.annotation.MessageMapping
