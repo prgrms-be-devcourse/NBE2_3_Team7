@@ -1,12 +1,12 @@
 package com.hunmin.domain.dto.word
 
+import com.hunmin.domain.entity.Member
 import com.hunmin.domain.entity.Word
 import jakarta.validation.constraints.NotBlank
-import jakarta.validation.constraints.NotNull
 
-data class WordRequestDTO (
-    @field:NotNull(message = "단어 ID는 필수항목입니다.")
-    val wordId: Long,
+data class WordRequestDTO(
+//    @field:NotNull(message = "단어 ID는 필수항목입니다.")
+//    val wordId: Long,
 
     @field:NotBlank(message = "명칭은 필수 입력값입니다.")
     var title: String,
@@ -20,12 +20,23 @@ data class WordRequestDTO (
     @field:NotBlank(message = "언어는 필수 입력값입니다.")
     var lang: String
 ) {
-    fun toEntity(): Word {
+    fun toEntity(member: Member): Word {
         return Word(
+            member = member, // 추가
             title = title,
             translation = translation,
             definition = definition,
             lang = lang
+        )
+    }
+
+    // 테스트
+    fun testEntity(): Word {
+        return Word(
+            title = this.title,
+            translation = this.translation,
+            definition = this.definition,
+            lang = this.lang
         )
     }
 }

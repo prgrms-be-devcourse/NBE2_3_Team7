@@ -16,31 +16,29 @@ const LearningPage = () => {
     const [showEndMessage, setShowEndMessage] = useState(false);
     const [fixedWordDisplays, setFixedWordDisplays] = useState([]);
 
-    // 레벨에 따라 시간을 설정하는 함수
     const getTimeForLevel = (level) => {
         switch (level) {
-            case '1':
-                return 30; // 30초
-            case '2':
-                return 20; // 20초
-            case '3':
-                return 10; // 10초
-            default:
-                return 30; // 기본값 30초
+            case '1': return 30;
+            case '2': return 20;
+            case '3': return 10;
+            default: return 30;
         }
     };
 
     useEffect(() => {
         const fetchWords = async () => {
             try {
-                console.log(`Fetching words for lang: ${lang}, level: ${level}`); // 로그 추가
+                console.log(`Fetching words for lang: ${lang}, level: ${level}`);
                 const response = await api.get(`/words/learning/start`, {
                     params: { lang, level },
                 });
-                console.log("Response data:", response.data); // 응답 로그 추가
                 setWords(response.data.words);
-                const initialTimeLeft = getTimeForLevel(level); // 레벨에 따른 초기화
-                setTimeLeft(initialTimeLeft); // 초기 시간 설정
+                console.log("Response data:", response.data);
+                response.data.words.forEach((word, index) => {
+                    console.log(`Word ${index + 1}: Title: ${word.displayTitle}, Translation: ${word.displayTranslation}`);
+                });
+                const initialTimeLeft = getTimeForLevel(level);
+                setTimeLeft(initialTimeLeft);
                 setShowTranslation(false);
                 setShowEndMessage(false);
             } catch (error) {
@@ -70,15 +68,18 @@ const LearningPage = () => {
     };
 
     const getRandomWordDisplay = (word) => {
-        return Math.random() < 0.5 ? word.displayWord : word.displayTranslation;
+        // displayWord와 displayTranslation 모두가 존재할 때만 랜덤으로 선택
+        if (word.displayWord && word.displayTranslation) {
+            return Math.random() < 0.5 ? word.displayWord : word.displayTranslation;
+        }
+        return word.displayWord || word.displayTranslation || ""; // 대체 텍스트 반환
     };
 
     useEffect(() => {
         if (words.length > 0) {
-            const newFixedDisplays = words.map((word) => {
-                return getRandomWordDisplay(word);
-            });
+            const newFixedDisplays = words.map((word) => getRandomWordDisplay(word));
             setFixedWordDisplays(newFixedDisplays);
+            console.log("Fixed word displays:", newFixedDisplays);
         }
     }, [words]);
 
@@ -96,14 +97,16 @@ const LearningPage = () => {
             <Button variant="contained" color="primary" onClick={handleRetry} sx={{ display: showEndMessage ? 'block' : 'none', margin: '20px auto' }}>다시하기</Button>
             <Box className="word-list" marginTop={2}>
                 {words.map((word, index) => (
-                    <Box key={index} sx={{ padding: 2, borderBottom: '1px solid #ccc', transition: 'background-color 0.3s ease', '&:hover': { backgroundColor: '#f1f1f1' } }}>
+                    <Box key={index} sx={{ padding: 2, borderBottom: '1px solid #ccc' }}>
                         <Typography variant="body1" fontWeight="bold">{fixedWordDisplays[index]}</Typography>
                         {showTranslation && (
                             <Box>
                                 <Typography variant="body2" color="textSecondary">
-                                    {fixedWordDisplays[index] === word.displayWord ? word.displayTranslation : word.displayWord}
+                                    {word.displayTitle} {/* 단어 제목 */}
                                 </Typography>
-                                <Typography variant="body2" color="textSecondary">{word.definition}</Typography>
+                                <Typography variant="body2" color="textSecondary">
+                                    {word.definition} {/* 정의 */}
+                                </Typography>
                             </Box>
                         )}
                     </Box>

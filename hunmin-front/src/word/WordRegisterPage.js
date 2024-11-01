@@ -47,6 +47,7 @@ const WordRegisterPage = () => {
 
             // 단어 등록 API 호출
             const response = await api.post('/words', wordRequestDTO);
+            console.log(response.data); // 응답 데이터 확인
             setRegisteredWord(response.data); // 등록된 단어 상태 업데이트
             // 성공 시 홈으로 리다이렉트
             // navigate('/word-management'); // 필요 시 주석 해제
