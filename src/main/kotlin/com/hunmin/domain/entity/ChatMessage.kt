@@ -16,7 +16,7 @@ data class ChatMessage(
     @JoinColumn(name = "member_id")
     var member: Member,
 
-    @Column(name = "message", nullable = false, length = 255)
+    @Column(name = "message", length = 255)
     var message: String? = null,
 
     @Enumerated(EnumType.STRING)

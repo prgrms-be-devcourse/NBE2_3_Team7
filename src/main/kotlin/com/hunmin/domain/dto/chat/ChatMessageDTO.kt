@@ -16,8 +16,8 @@ data class ChatMessageDTO(
 
     @NotBlank(message = " 사용자 닉네임은 필수입니다.")
     val nickName: String,
-    val message: String? = null,
-    val type: MessageType? = null,
+    var message: String? = null,
+    var type: MessageType? = null,
     @NotNull(message = " 채팅 사용날짜는 필수 입니다.")
     val createdAt: LocalDateTime
 ) {

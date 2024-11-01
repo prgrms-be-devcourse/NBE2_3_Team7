@@ -5,6 +5,7 @@ enum class FollowException(val followTaskException: FollowTaskException) {
     IMPOSSIBLE_FOLLOW("팔로우 할 수 없습니다.", 400),
     FAILED_REGISTER_FOLLOW("팔로우 요청에 실패하였습니다", 400),
     FAILED_ACCEPT_FOLLOW("팔로우 수락에 실패하였습니다", 400),
+    NOT_FOUND_MEMBER("팔로우한 멤버가 존재하지 않습니다.", 400),
     NOT_FOUND("팔로우가 존재하지 않습니다.", 400);
 
     constructor(message: String, code: Int) : this(FollowTaskException(message, code))
