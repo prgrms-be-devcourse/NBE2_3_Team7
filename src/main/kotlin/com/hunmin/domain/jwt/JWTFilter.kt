@@ -2,6 +2,7 @@ package com.hunmin.domain.jwt
 
 import com.hunmin.domain.dto.member.CustomUserDetails
 import com.hunmin.domain.entity.Member
+import com.hunmin.domain.entity.MemberLevel
 import com.hunmin.domain.entity.MemberRole
 import com.hunmin.domain.service.MemberService
 import io.jsonwebtoken.ExpiredJwtException
@@ -40,8 +41,8 @@ class JWTFilter(private val jwtUtil: JWTUtil, memberService: MemberService) : On
         logger.info("*********************")
         logger.info(request.getHeader("Authorization"))
 
-        val authorizationHeader: String = request.getHeader("Authorization")
-        if (authorizationHeader.startsWith("Bearer ")) {
+        val authorizationHeader: String? = request.getHeader("Authorization")
+        if (authorizationHeader?.startsWith("Bearer ") == true) {
             val accessToken = authorizationHeader.substring(7)
 
             logger.info(accessToken)
@@ -51,45 +52,38 @@ class JWTFilter(private val jwtUtil: JWTUtil, memberService: MemberService) : On
             // 토큰이 있다면,
             // 토큰 만료 여부 확인, 만료시 다음 필터로 넘기지 않음: return
             try {
-                jwtUtil.isExpired(accessToken)
-            } catch (e: ExpiredJwtException) {
-                // 만료되면 다음 필터로 넘기지 않고 만료됐다는 메세지 출력: response body
+                if (!jwtUtil.isExpired(accessToken) && jwtUtil.getCategory(accessToken) == "access") {
+                    val email = jwtUtil.getEmail(accessToken)
+                    val role = jwtUtil.getRole(accessToken)
+
+                    // Member 객체 생성 시 모든 필수 필드 설정
+                    val member = Member.create(
+                        nickname = "",
+                        email = email,
+                        password = "",
+                        country = "",
+                        level = MemberLevel.BEGINNER,
+                        memberRole = MemberRole.valueOf(role.removePrefix("ROLE_")),
+                        image = null
+                    )
+
+                    val customUserDetails = CustomUserDetails(member)
+                    val authToken = UsernamePasswordAuthenticationToken(
+                        customUserDetails,
+                        null,
+                        customUserDetails.getAuthorities()
+                    )
+
+                    SecurityContextHolder.getContext().authentication = authToken
+                }
+            } catch (e: Exception) {
+                logger.error("Token validation failed", e)
                 response.apply {
-                    writer.print("===== 액세스 토큰 만료 =====")
                     status = HttpServletResponse.SC_UNAUTHORIZED
+                    writer.write("토큰 검증 실패: ${e.message}")
                 }
                 return
             }
-
-            // 토큰이 만료가 안되었으면,
-            // 토큰이 access인지 확인 (발급시 페이로드에 명시)
-            if (jwtUtil.getCategory(accessToken) != "access") {
-                // response body
-                response.apply{
-                    writer.print("유효한 토큰이 아닙니다.")
-                    status = HttpServletResponse.SC_UNAUTHORIZED
-                }
-            }
-
-            // 토큰에서 email, role 값으로 일시적인 세션 생성
-            val email = jwtUtil.getEmail(accessToken)
-            // role 값에서 "ROLE_" 제거
-            val role = jwtUtil.getRole(accessToken).removePrefix("ROLE_")
-
-            logger.info("===========================")
-            logger.info(email)
-
-            val member: Member = Member.create(
-                email = email,
-                memberRole = MemberRole.valueOf(role)
-            )
-
-            val customUserDetails = CustomUserDetails(member)
-            val authToken: Authentication =
-                UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities())
-
-            SecurityContextHolder.getContext().authentication = authToken
         }
-        filterChain.doFilter(request, response)
     }
 }

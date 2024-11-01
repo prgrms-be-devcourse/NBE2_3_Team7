@@ -13,6 +13,7 @@ import com.hunmin.domain.exception.follow.FollowTaskException
 import jakarta.validation.ConstraintViolationException
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
+import com.hunmin.domain.exception.*
 import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.messaging.handler.annotation.support.MethodArgumentNotValidException
@@ -95,6 +96,20 @@ class APIControllerAdvice {
     // 팔로우 예외 처리
     @ExceptionHandler(FollowTaskException::class)
     fun handleFollowException(e: FollowTaskException): ResponseEntity<Map<String, String>> {
+        val map = mapOf("error" to e.message)
+        return ResponseEntity.status(e.code).body(map)
+    }
+
+    // 공지사항 예외 처리
+    @ExceptionHandler(NoticeTaskException::class)
+    fun handleNoticeTaskException(e: NoticeTaskException): ResponseEntity<Map<String, String>> {
+        val map = mapOf("error" to e.message)
+        return ResponseEntity.status(e.code).body(map)
+    }
+
+    // 관리자 예외 처리
+    @ExceptionHandler(AdminTaskException::class)
+    fun handleAdminTaskException(e: AdminTaskException): ResponseEntity<Map<String, String>> {
         val map = mapOf("error" to e.message)
         return ResponseEntity.status(e.code).body(map)
     }

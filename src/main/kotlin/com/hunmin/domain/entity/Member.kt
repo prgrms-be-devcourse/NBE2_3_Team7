@@ -64,13 +64,13 @@ data class Member(
 
     companion object {
         fun create(
-//            nickname: String,
+            nickname: String,
             email: String,
-//            password: String,
-//            country: String,
-//            level: MemberLevel,
+            password: String,
+            country: String,
+            level: MemberLevel,
             memberRole: MemberRole = MemberRole.USER,
-//            image: String? = null,
+            image: String? = null,
         ): Member {
             return Member(
                 nickname = "",

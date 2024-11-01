@@ -20,6 +20,7 @@ import org.springframework.security.core.Authentication
 import org.springframework.security.core.AuthenticationException
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
+import org.springframework.security.web.authentication.WebAuthenticationDetails
 import java.io.IOException
 import java.util.*
 
@@ -48,26 +49,35 @@ class LoginFilter(
     override fun attemptAuthentication(request: HttpServletRequest, response: HttpServletResponse): Authentication {
         logger.info("========= attemptAuthentication 시작 =========")
         try {
+            val requestBody = request.reader.readText()
+            logger.info("===== Request Body: $requestBody =====")
+
             val requestMap = ObjectMapper().readValue(
-                request.inputStream,
+                requestBody,
                 object : TypeReference<Map<String, String>>() {}
             )
-            val email = requestMap["email"]
-            val password = requestMap["password"]
+
+            val email = requestMap["email"] ?: throw AuthenticationServiceException("이메일이 없습니다.")
+            val password = requestMap["password"] ?: throw AuthenticationServiceException("비밀번호가 없습니다.")
+
             logger.info("===== 이메일: $email =====")
             logger.info("===== 비밀번호: $password =====")
-            val authToken: UsernamePasswordAuthenticationToken =
-                UsernamePasswordAuthenticationToken(email, password, null)
-            logger.info("===== 인증 결과: $authToken =====")
+
+            val authToken = UsernamePasswordAuthenticationToken(email, password)
+            authToken.details = WebAuthenticationDetails(request)
+
+            logger.info("===== 인증 토큰 생성: $authToken =====")
+
             return authenticationManager.authenticate(authToken)
-        } catch (e: IOException) {
-            throw AuthenticationServiceException("===== 잘못된 요청 폼 =====")
+        } catch (e: Exception) {
+            logger.error("Authentication failed", e)
+            throw AuthenticationServiceException("인증 실패: ${e.message}")
         }
     }
 
     // 로그인 성공 시 사용자 정보를 기반으로 JWT 토큰을 생성하고, 이를 Authorization 헤더에 추가
     @Throws(IOException::class)
-    override fun successfulAuthentication(
+    public override fun successfulAuthentication(
         request: HttpServletRequest, response: HttpServletResponse,
         chain: FilterChain, authentication: Authentication
     ) {
@@ -119,6 +129,7 @@ class LoginFilter(
                 }
             """.trimIndent()
             )
+            logger.info("===== 응답 완료 =====")
         }
 
         //응답 설정
@@ -138,7 +149,7 @@ class LoginFilter(
     }
 
     // 로그인 실패 시 HTTP 응답 401로 설정(유효한 자격 증명 미제공 시 요청 거부)
-    override fun unsuccessfulAuthentication(
+    public override fun unsuccessfulAuthentication(
         request: HttpServletRequest, response: HttpServletResponse,
         failed: AuthenticationException
     ) {
