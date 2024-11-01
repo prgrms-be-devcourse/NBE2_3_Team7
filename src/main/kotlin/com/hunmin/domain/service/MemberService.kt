@@ -1,5 +1,6 @@
 package com.hunmin.domain.service
 
+import com.hunmin.domain.dto.member.CustomUserDetails
 import com.hunmin.domain.dto.member.MemberDTO
 import com.hunmin.domain.dto.member.PasswordFindRequestDto
 import com.hunmin.domain.dto.member.PasswordUpdateRequestDto
@@ -9,6 +10,9 @@ import com.hunmin.domain.entity.MemberRole
 import com.hunmin.domain.repository.MemberRepository
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.core.userdetails.UserDetails
+import org.springframework.security.core.userdetails.UserDetailsService
+import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -24,7 +28,7 @@ import java.util.*
 class MemberService(
     private val memberRepository: MemberRepository,
     private val bCryptPasswordEncoder: BCryptPasswordEncoder
-) {
+) : UserDetailsService {
     // 이미지 업로드
     @Throws(IOException::class)
     fun uploadImage(file: MultipartFile): String {
@@ -125,5 +129,10 @@ class MemberService(
         } catch (e: Exception) {
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.message)
         }
+    }
+
+    override fun loadUserByUsername(email: String): UserDetails {
+        val member = memberRepository.findByEmail(email)
+        return CustomUserDetails(member)
     }
 }
