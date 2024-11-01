@@ -1,27 +1,11 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <!-- Custom Highlight Converter -->
-    <conversionRule conversionWord="highlight" converterClass="com.sscanner.team.global.configure.CustomHighlightConverter"/>
-    <timestamp key="BY_DATE" datePattern="yyyy-MM-dd" timeZone="Asia/Seoul"/>
-    <property name ="LOG_PATTERN" value="%cyan(%d{yyyy-MM-dd HH:mm:ss.SSS, Asia/Seoul}) [%thread] [traceId=%X{traceId}] %highlight(%-5level) %magenta(%logger{36}) - %msg %n" />
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} MDC=%X{user} - %msg%n</pattern>
+        </encoder>
+    </appender>
 
-    <springProfile name="!prod">
-        <include resource="console-appender.xml"/>
-
-        <root level="DEBUG">
-            <appender-ref ref="CONSOLE"/>
-        </root>
-    </springProfile>
-
-    <springProfile name="prod">
-        <include resource="file-info-appender.xml"/>
-        <include resource="file-warn-appender.xml"/>
-        <include resource="file-error-appender.xml"/>
-
-        <root level="INFO">
-            <appender-ref ref="FILE-INFO"/>
-            <appender-ref ref="FILE-WARN"/>
-            <appender-ref ref="FILE-ERROR"/>
-        </root>
-    </springProfile>
+    <root level="info">
+        <appender-ref ref="STDOUT" />
+    </root>
 </configuration>

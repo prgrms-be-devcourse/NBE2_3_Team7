@@ -15,6 +15,7 @@ import com.hunmin.domain.pubsub.RedisSubscriber
 import com.hunmin.domain.repository.ChatMessageRepository
 import com.hunmin.domain.repository.ChatRoomRepository
 import com.hunmin.domain.repository.MemberRepository
+import mu.KotlinLogging
 import org.hibernate.query.sqm.tree.SqmNode.log
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -32,6 +33,10 @@ class ChatMessageService(
     private val redisSubscriber: RedisSubscriber,
     private val notificationService: NotificationService,
     private val sseEmitters: SseEmitters){
+
+    companion object {
+        private val logger = KotlinLogging.logger {}
+    }
 
     // 채팅방에 메시지 발송
     fun sendChatMessage(chatMessageDTO: ChatMessageDTO) {
@@ -139,7 +144,9 @@ class ChatMessageService(
         try {
             val sort = Sort.by("createdAt").descending()
             val pageable: Pageable = pageRequestDTO.getPageable(sort)
-            return chatMessageRepository.chatMessageList(pageable, chatRoomId)
+            val result = chatMessageRepository.chatMessageList(pageable, chatRoomId)
+            logger.info("=== 페이징 결과 {${result.toList()}}")
+            return result
         } catch (e: Exception) {
             log.error("쳇서비스 페이징 실패 $e.message")
             throw ChatMessageException.NOT_FETCHED.get()
