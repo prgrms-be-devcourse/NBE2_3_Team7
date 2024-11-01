@@ -26,7 +26,7 @@ class NoticeRepositoryTest {
     @BeforeEach
     fun setup() {
         // 테스트용 Member 객체 생성
-        val member1 = Member.create(
+        val member1 = Member(
             nickname = "member1",
             email = "member1@example.com",
             password = "password",
@@ -34,7 +34,7 @@ class NoticeRepositoryTest {
             level = MemberLevel.BEGINNER
         )
 
-        val member2 = Member.create(
+        val member2 = Member(
             nickname = "member2",
             email = "member2@example.com",
             password = "password",
