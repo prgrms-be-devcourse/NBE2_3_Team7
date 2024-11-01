@@ -3,6 +3,7 @@ package com.hunmin.domain.service
 import com.hunmin.domain.dto.notification.NotificationResponseDTO
 import com.hunmin.domain.dto.notification.NotificationSendDTO
 import com.hunmin.domain.entity.Notification
+import com.hunmin.domain.exception.MemberException
 import com.hunmin.domain.exception.NotificationException
 import com.hunmin.domain.handler.SseEmitters
 import com.hunmin.domain.repository.MemberRepository
@@ -75,7 +76,7 @@ class NotificationService(
     @Transactional
     fun send(notificationSendDTO: NotificationSendDTO) {
         try {
-            val member = memberRepository.findById(notificationSendDTO.memberId).orElseThrow()
+            val member = memberRepository.findById(notificationSendDTO.memberId).orElseThrow { MemberException.NOT_FOUND.get() }
 
             val notification = Notification.builder()
                 .member(member)

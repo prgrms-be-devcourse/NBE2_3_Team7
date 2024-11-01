@@ -15,14 +15,12 @@ import com.hunmin.domain.pubsub.RedisSubscriber
 import com.hunmin.domain.repository.ChatMessageRepository
 import com.hunmin.domain.repository.ChatRoomRepository
 import com.hunmin.domain.repository.MemberRepository
-import jdk.internal.joptsimple.internal.Messages.message
 import org.hibernate.query.sqm.tree.SqmNode.log
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter
 import java.io.IOException
 
 @Service
@@ -89,7 +87,7 @@ class ChatMessageService(
                 }
             }
         } catch (e: Exception) {
-            log.error("채팅 메세지 전송에 실패하였습니다.")
+            log.error("채팅 메세지 전송에 실패하였습니다. $e.message")
             throw ChatRoomException.FAILED_REGISTER.get()
         }
     }
@@ -106,7 +104,7 @@ class ChatMessageService(
 
         return chatLists
         }catch (e:RuntimeException){
-            log.error("모든 채팅기록 불러오는데 실패했습니다.")
+            log.error("모든 채팅기록 불러오는데 실패했습니다. $e.message")
             throw ChatMessageException.NOT_FOUND.get()
         }
     }
@@ -143,7 +141,7 @@ class ChatMessageService(
             val pageable: Pageable = pageRequestDTO.getPageable(sort)
             return chatMessageRepository.chatMessageList(pageable, chatRoomId)
         } catch (e: Exception) {
-            log.error("쳇서비스 페이징 실패")
+            log.error("쳇서비스 페이징 실패 $e.message")
             throw ChatMessageException.NOT_FETCHED.get()
         }
     }

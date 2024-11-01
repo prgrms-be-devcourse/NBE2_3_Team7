@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport
 
 class ChatMessageSearchImpl : QuerydslRepositorySupport(ChatMessage::class.java), ChatMessageSearch {
+
     override fun chatMessageList(pageable: Pageable, chatRoomId: Long): Page<ChatMessageListRequestDTO> {
         val chatMessage = QChatMessage.chatMessage
         val chatRoom = QChatRoom.chatRoom
@@ -19,11 +20,11 @@ class ChatMessageSearchImpl : QuerydslRepositorySupport(ChatMessage::class.java)
             .where(chatRoom.chatRoomId.eq(chatRoomId))
 
         val dtoQuery = query.select(
-            Projections.bean(
+            Projections.constructor(
                 ChatMessageListRequestDTO::class.java,
+                chatMessage.chatMessageId,
+                chatMessage.member.memberId,
                 chatMessage.message,
-                chatMessage.chatMessageId.`as`("chatMessageId"),
-                chatMessage.member.memberId.`as`("memberId"),
                 chatMessage.createdAt,
                 chatMessage.type
             )

@@ -22,7 +22,7 @@ data class BoardRequestDTO(
     val location: String? = null,
     val latitude: Double? = null,
     val longitude: Double? = null,
-    val imageUrls: MutableList<String> = mutableListOf()
+    val imageUrls: MutableList<String>? = null
 ) {
     fun toEntity(member: Member): Board = Board(
         boardId = boardId,
@@ -33,6 +33,6 @@ data class BoardRequestDTO(
         location = location,
         latitude = latitude,
         longitude = longitude,
-        imageUrls = imageUrls
+        imageUrls = imageUrls ?: mutableListOf()
     )
 }

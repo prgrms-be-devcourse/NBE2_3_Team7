@@ -6,6 +6,7 @@ import org.hibernate.query.sqm.tree.SqmNode.log
 import org.springframework.data.redis.connection.Message
 import org.springframework.data.redis.connection.MessageListener
 import org.springframework.data.redis.core.RedisTemplate
+import org.springframework.lang.Nullable
 import org.springframework.messaging.simp.SimpMessageSendingOperations
 import org.springframework.stereotype.Service
 
@@ -26,9 +27,9 @@ class RedisSubscriber(
     }
 
     //stomp이용해서 구독자들에게 송신
-    override fun onMessage(message: Message, pattern: ByteArray) {
+    override fun onMessage(message: Message, @Nullable pattern: ByteArray?) {
         try {
-            val publishMessage = redisTemplate.getStringSerializer().deserialize(message.body) as String
+            val publishMessage = redisTemplate.stringSerializer.deserialize(message.body) as String
 
             val chatMessage = objectMapper.readValue(publishMessage, ChatMessageDTO::class.java)
 
