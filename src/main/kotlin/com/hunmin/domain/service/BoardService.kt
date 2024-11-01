@@ -2,19 +2,13 @@ package com.hunmin.domain.service
 
 import com.hunmin.domain.dto.board.BoardRequestDTO
 import com.hunmin.domain.dto.board.BoardResponseDTO
-import com.hunmin.domain.dto.chat.ChatMessageDTO
-import com.hunmin.domain.dto.follow.FollowRequestDTO
 import com.hunmin.domain.dto.notification.NotificationSendDTO
 import com.hunmin.domain.dto.page.PageRequestDTO
 import com.hunmin.domain.entity.Board
 import com.hunmin.domain.entity.NotificationType
-import com.hunmin.domain.entity.QChatMessage.chatMessage
 import com.hunmin.domain.exception.BoardException
-<<<<<<< HEAD
-import com.hunmin.domain.handler.SseEmitters
-=======
 import com.hunmin.domain.exception.MemberException
->>>>>>> develop
+import com.hunmin.domain.handler.SseEmitters
 import com.hunmin.domain.repository.BoardRepository
 import com.hunmin.domain.repository.FollowRepository
 import com.hunmin.domain.repository.MemberRepository
@@ -27,26 +21,22 @@ import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter
 import java.io.File
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.*
-import kotlin.collections.ArrayList
 
 @Service
 @Transactional
 class BoardService(
     private val memberRepository: MemberRepository,
     private val boardRepository: BoardRepository,
-<<<<<<< HEAD
     private val followRepository: FollowRepository,
     private val notificationService: NotificationService,
-    private val sseEmitters: SseEmitters
-=======
+    private val sseEmitters: SseEmitters,
     private val redisTemplate: RedisTemplate<String, Any>
->>>>>>> develop
+
 ) {
 
     //Redis에 저장된 게시글을 읽기
@@ -96,13 +86,10 @@ class BoardService(
 
     //게시글 등록
     fun createBoard(boardRequestDTO: BoardRequestDTO): BoardResponseDTO {
-<<<<<<< HEAD
+
         try {
-            val member = memberRepository.findById(boardRequestDTO.memberId).orElseThrow()
-=======
-        return try {
             val member = memberRepository.findById(boardRequestDTO.memberId).orElseThrow{ MemberException.NOT_FOUND.get() }
->>>>>>> develop
+
 
             val board = Board.builder()
                 .member(member)
@@ -117,7 +104,6 @@ class BoardService(
 
             val savedBoard = boardRepository.save(board)
 
-<<<<<<< HEAD
             // 알림
             val sender = member
             val senderId = member.memberId
@@ -148,13 +134,9 @@ class BoardService(
                     }
                 }
             }
-            return BoardResponseDTO(board)
-=======
             val responseDTO = BoardResponseDTO(board)
             redisTemplate.opsForHash<Any, BoardResponseDTO>().put("board", board.boardId.toString(), responseDTO)
-
-            BoardResponseDTO(board)
->>>>>>> develop
+            return BoardResponseDTO(board)
         } catch (e: Exception) {
             throw BoardException.NOT_CREATED.toException()
         }
