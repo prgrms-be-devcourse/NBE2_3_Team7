@@ -2,12 +2,17 @@ package com.hunmin.domain.service
 
 import com.hunmin.domain.dto.board.BoardRequestDTO
 import com.hunmin.domain.dto.board.BoardResponseDTO
+import com.hunmin.domain.dto.notification.NotificationSendDTO
 import com.hunmin.domain.dto.page.PageRequestDTO
 import com.hunmin.domain.entity.Board
+import com.hunmin.domain.entity.NotificationType
 import com.hunmin.domain.exception.BoardException
 import com.hunmin.domain.exception.MemberException
+import com.hunmin.domain.handler.SseEmitters
 import com.hunmin.domain.repository.BoardRepository
+import com.hunmin.domain.repository.FollowRepository
 import com.hunmin.domain.repository.MemberRepository
+import org.hibernate.query.sqm.tree.SqmNode.log
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
@@ -21,14 +26,17 @@ import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.*
-import kotlin.collections.ArrayList
 
 @Service
 @Transactional
 class BoardService(
     private val memberRepository: MemberRepository,
     private val boardRepository: BoardRepository,
+    private val followRepository: FollowRepository,
+    private val notificationService: NotificationService,
+    private val sseEmitters: SseEmitters,
     private val redisTemplate: RedisTemplate<String, Any>
+
 ) {
 
     //Redis에 저장된 게시글을 읽기
@@ -78,8 +86,10 @@ class BoardService(
 
     //게시글 등록
     fun createBoard(boardRequestDTO: BoardRequestDTO): BoardResponseDTO {
-        return try {
+
+        try {
             val member = memberRepository.findById(boardRequestDTO.memberId).orElseThrow{ MemberException.NOT_FOUND.get() }
+
 
             val board = Board.builder()
                 .member(member)
@@ -92,12 +102,41 @@ class BoardService(
                 .imageUrls(boardRequestDTO.imageUrls ?: ArrayList())
                 .build()
 
-            boardRepository.save(board)
+            val savedBoard = boardRepository.save(board)
 
+            // 알림
+            val sender = member
+            val senderId = member.memberId
+
+            val followers= followRepository.getFollowList(senderId)
+            // 알림 메세지 구현 -> return 방식은 emitter send로
+            for (follower in followers) {
+                if (!follower.isBlock) {
+                    val notificationSendDTO = NotificationSendDTO(
+                        message = sender.nickname + "님 : " + "새로운 게시글을 등록하였습니다",
+                        notificationType = NotificationType.BOARD,
+                        url = "/board/" + board.boardId
+                    ).apply {
+                        this.memberId = follower.followerId
+                    }
+                    notificationService.send(notificationSendDTO)
+                    // emitter
+                    val emitterId = follower.followerId.toString() + "_"
+                    val emitter = sseEmitters.findSingleEmitter(emitterId)
+
+                    if (emitter != null) {
+                        try {
+                            emitter.send(BoardResponseDTO(board))
+                        } catch (e: IOException) {
+                            log.error("Error sending comment to client via SSE: ${e.message}")
+                            sseEmitters.delete(emitterId)
+                        }
+                    }
+                }
+            }
             val responseDTO = BoardResponseDTO(board)
             redisTemplate.opsForHash<Any, BoardResponseDTO>().put("board", board.boardId.toString(), responseDTO)
-
-            BoardResponseDTO(board)
+            return BoardResponseDTO(board)
         } catch (e: Exception) {
             throw BoardException.NOT_CREATED.toException()
         }

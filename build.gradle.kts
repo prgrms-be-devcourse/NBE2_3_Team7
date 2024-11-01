@@ -26,6 +26,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-web")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
+    implementation("org.hibernate.validator:hibernate-validator")
+    implementation("org.glassfish:jakarta.el:3.0.3")
 
     // 코틀린 관련 라이브러리
     implementation("org.jetbrains.kotlin:kotlin-reflect")
