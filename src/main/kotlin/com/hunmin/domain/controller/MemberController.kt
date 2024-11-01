@@ -56,7 +56,7 @@ class MemberController(
             ResponseEntity.status(HttpStatus.CREATED).body("회원 가입 완료")
         } catch (e: Exception) {
             logger.error("=== 회원가입 실패 (유효성 검사): ${e.message} ===")
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("회원 가입 실패")
+            ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.message)
         }
     }
 

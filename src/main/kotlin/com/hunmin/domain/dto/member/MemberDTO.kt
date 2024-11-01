@@ -4,7 +4,7 @@ import com.hunmin.domain.entity.Member
 import com.hunmin.domain.entity.MemberLevel
 
 data class MemberDTO(
-    var memberId: Long,
+    var memberId: Long = 0,
     var email: String,
     var password: String,
     var nickname: String,
