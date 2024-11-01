@@ -3,14 +3,17 @@ package com.hunmin.domain.controller
 import com.hunmin.domain.dto.board.BoardRequestDTO
 import com.hunmin.domain.dto.board.BoardResponseDTO
 import com.hunmin.domain.dto.page.PageRequestDTO
+import com.hunmin.domain.exception.BoardException
 import com.hunmin.domain.repository.BoardRepository
 import com.hunmin.domain.repository.MemberRepository
 import com.hunmin.domain.service.BoardService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import jakarta.validation.Valid
 import org.springframework.data.domain.Page
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 import java.io.IOException
@@ -44,7 +47,7 @@ class BoardController(
     // 게시글 등록
     @PostMapping
     @Operation(summary = "게시글 등록", description = "게시글을 등록할 때 사용하는 API")
-    fun createBoard(@RequestBody boardRequestDTO: BoardRequestDTO): ResponseEntity<BoardResponseDTO> {
+    fun createBoard(@Valid @RequestBody boardRequestDTO: BoardRequestDTO): ResponseEntity<BoardResponseDTO> {
         return ResponseEntity.ok(boardService.createBoard(boardRequestDTO))
     }
 
@@ -58,28 +61,22 @@ class BoardController(
     // 게시글 수정
     @PutMapping("/{boardId}")
     @Operation(summary = "게시글 수정", description = "게시글을 수정할 때 사용하는 API")
-    fun updateBoard(
-        @PathVariable boardId: Long,
-        @RequestBody boardRequestDTO: BoardRequestDTO,
-//        authentication: Authentication
-    ): ResponseEntity<BoardResponseDTO> {
-//        val id = memberRepository.findByEmail(authentication.name).memberId
-//        if (id != boardRequestDTO.memberId) {
-//            throw BoardException.NOT_UPDATED.get()
-//        }
+    fun updateBoard(@PathVariable boardId: Long, @Valid @RequestBody boardRequestDTO: BoardRequestDTO, authentication: Authentication): ResponseEntity<BoardResponseDTO> {
+        val id = memberRepository.findByEmail(authentication.name).memberId
+        if (id != boardRequestDTO.memberId) {
+            throw BoardException.NOT_UPDATED.toException()
+        }
         return ResponseEntity.ok(boardService.updateBoard(boardId, boardRequestDTO))
     }
 
     // 게시글 삭제
     @DeleteMapping("/{boardId}")
     @Operation(summary = "게시글 삭제", description = "게시글을 삭제할 때 사용하는 API")
-    fun deleteBoard(@PathVariable boardId: Long,
-//                    authentication: Authentication
-    ): ResponseEntity<Map<String, String>> {
-//        val id = memberRepository.findByEmail(authentication.name).memberId
-//        if (id != boardRepository.findById(boardId).get().member.memberId) {
-//            throw BoardException.NOT_DELETED.get()
-//        }
+    fun deleteBoard(@PathVariable boardId: Long, authentication: Authentication): ResponseEntity<Map<String, String>> {
+        val id = memberRepository.findByEmail(authentication.name).memberId
+        if (id != boardRepository.findById(boardId).get().member.memberId) {
+            throw BoardException.NOT_DELETED.toException()
+        }
         boardService.deleteBoard(boardId)
         return ResponseEntity.ok(mapOf("result" to "success"))
     }
