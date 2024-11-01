@@ -4,6 +4,7 @@ import com.hunmin.domain.dto.board.BoardResponseDTO
 import com.hunmin.domain.entity.Bookmark
 import com.hunmin.domain.exception.BoardException
 import com.hunmin.domain.exception.BookmarkException
+import com.hunmin.domain.exception.MemberException
 import com.hunmin.domain.repository.BookmarkRepository
 import com.hunmin.domain.repository.BoardRepository
 import com.hunmin.domain.repository.MemberRepository
@@ -19,7 +20,7 @@ class BookmarkService(
     //북마크 등록
     fun createBookmark(boardId: Long, memberId: Long) {
         return try {
-            val member = memberRepository.findById(memberId).orElseThrow()
+            val member = memberRepository.findById(memberId).orElseThrow { MemberException.NOT_FOUND.get() }
             val board = boardRepository.findById(boardId).orElseThrow { BoardException.NOT_FOUND.toException() }
 
             bookmarkRepository.findByMemberAndBoard(member, board).ifPresentOrElse(
@@ -34,7 +35,7 @@ class BookmarkService(
     //북마크 삭제
     fun deleteBookmark(boardId: Long, memberId: Long) {
         return try {
-            val member = memberRepository.findById(memberId).orElseThrow()
+            val member = memberRepository.findById(memberId).orElseThrow { MemberException.NOT_FOUND.get() }
             val board = boardRepository.findById(boardId).orElseThrow { BoardException.NOT_FOUND.toException() }
 
             val bookmark = bookmarkRepository.findByMemberAndBoard(member, board).orElseThrow { BookmarkException.NOT_FOUND.toException() }
@@ -54,7 +55,7 @@ class BookmarkService(
 
     // 북마크 여부 확인
     fun isBookmarked(boardId: Long, memberId: Long): Boolean {
-        val member = memberRepository.findById(memberId).orElseThrow()
+        val member = memberRepository.findById(memberId).orElseThrow { MemberException.NOT_FOUND.get() }
         val board = boardRepository.findById(boardId).orElseThrow { BoardException.NOT_FOUND.toException() }
 
         return bookmarkRepository.existsByMemberAndBoard(member, board)
