@@ -10,22 +10,23 @@ import redis.embedded.RedisServer
 //로컬 환경일경우 내장 레디스가 실행된다.
 @Profile("local")
 @Configuration
-class EmbeddedRedisConfig {
+class EmbeddedRedisConfig(
     @Value("\${spring.data.redis.port}")
-    val redisPort = 0
+    private val redisPort: Int
+) {
 
-    var redisServer: RedisServer? = null
+    private lateinit var redisServer: RedisServer
 
     @PostConstruct
-    fun redisServer() {
+    fun startRedisServer() {
         redisServer = RedisServer(redisPort)
-        redisServer!!.start()
+        redisServer.start()
     }
 
     @PreDestroy
-    fun stopRedis() {
-        if (redisServer != null) {
-            redisServer!!.stop()
+    fun stopRedisServer() {
+        if (::redisServer.isInitialized) {
+            redisServer.stop()
         }
     }
 }
