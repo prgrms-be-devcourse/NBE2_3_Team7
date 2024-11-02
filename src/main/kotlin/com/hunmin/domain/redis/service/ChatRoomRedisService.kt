@@ -44,8 +44,8 @@ class ChatRoomRedisService(
             val me: Member = memberRepository.findByEmail(myEmail)
 
             // 중복확인
-            val allChatRooms = chatRoomRedisRepository.findAll()
-            for (chatRooms in allChatRooms) {
+            val redisChatRooms = chatRoomRedisRepository.findAll()
+            for (chatRooms in redisChatRooms) {
                 if (chatRooms.member.nickname == me.nickname && chatRooms.partner.nickname == partner.nickname) {
                     throw ChatRoomException.CHATROOM_ALREADY_EXIST.get()
                 } else if (chatRooms.member.nickname == partner.nickname && chatRooms.partner.nickname == me.nickname) {
@@ -79,9 +79,9 @@ class ChatRoomRedisService(
 
             // redis에 저장
             val save = chatRoomRedisRepository.save(chatRoom)
-
-            // 캐싱전략 설계 10개 10개 이상이면 -> DB저장
-            if ((increasedId % 11).toInt() == 0) {
+            val allChatRooms = chatRoomRedisRepository.findAll()
+            // 캐싱전략 설계 10개 이상이면 -> DB저장
+            if ((increasedId % 10).toInt() == 0) {
                 for (chatRooms in allChatRooms) {
                     // 새로운 ChatRoom 생성
                     val newMember = modelMapper.map(chatRooms.member, Member::class.java)
@@ -142,23 +142,25 @@ class ChatRoomRedisService(
             throw Exception("채팅룸 만들기 실패 ${e.message}")
         }
     }
-//
-//    // 채팅방 삭제
-//    fun deleteChatRoom(chatRoomId: Long, partnerName: String, meEmail: String): Boolean {
-//        try {
-//            val me = memberRepository.findByEmail(meEmail)
-//            val chatRoom = chatRoomRepository.findById(chatRoomId)
-//                .orElseThrow(ChatRoomException.NOT_FOUND::get)
-//
-//            if (roomStorage.get(me.nickname, partnerName) != null) {
-//                roomStorage.delete(me.nickname, partnerName)
-//            } else if (roomStorage.get(partnerName, me.nickname) != null) {
-//                roomStorage.delete(partnerName, me.nickname)
-//            } else return false
-//            chatRoomRepository.delete(chatRoom)
-//            return true
-//        } catch (e: Exception) {
-//            throw NoSuchElementException("사용자가 존재하지 않습니다")
-//        }
-//    }
+
+    // 채팅방 삭제
+    fun deleteChatRoom(chatRoomId: Long): Boolean {
+        try {
+            val currentId = redisTemplate.opsForValue().get("chatRoomRedisId") ?: "0"
+            // 너무 큰 숫자가 들어온 경우
+            if (chatRoomId < 0 || currentId.toInt() < chatRoomId) return false
+            if (currentId.first().toString().toInt()*10 >= chatRoomId) {
+                chatRoomRepository.findById(chatRoomId).orElseThrow(ChatRoomException.NOT_FOUND::get)
+                chatRoomRepository.deleteById(chatRoomId)
+                return true
+            } else {
+                val foundChatRoom = chatRoomRedisRepository.findById(chatRoomId).orElseThrow(ChatRoomException.NOT_FOUND::get)
+                chatRoomRedisRepository.delete(foundChatRoom)
+                return true
+            }
+        } catch (e: Exception) {
+            log.info("채팅방 삭제에 실패하였습니다. ${e.message}")
+            throw ChatRoomException.NOT_FOUND.get()
+        }
+    }
 }

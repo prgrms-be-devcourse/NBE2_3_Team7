@@ -46,14 +46,14 @@ class ChatRoomController(
     }
 
     //채팅방 삭제
-    @DeleteMapping("/{chatRoomId}/{partnerName}")
+    @DeleteMapping("/{chatRoomId}")
     @Operation(summary = "채팅방 삭제", description = "삭제하고 싶은 채팅방을 삭제하는 API")
     fun deleteRoom(
         @Validated
-        @PathVariable chatRoomId: Long,
-        @PathVariable partnerName: String,
-        authentication: Authentication
+        @PathVariable chatRoomId: Long
     ): ResponseEntity<Boolean> {
-        return ResponseEntity.ok(chatRoomService.deleteChatRoom(chatRoomId, partnerName, authentication.name))
+//        return ResponseEntity.ok(chatRoomService.deleteChatRoom(chatRoomId, partnerName, authentication.name))
+        return ResponseEntity.ok(chatRoomRedisService.deleteChatRoom(chatRoomId))
+
     }
 }
