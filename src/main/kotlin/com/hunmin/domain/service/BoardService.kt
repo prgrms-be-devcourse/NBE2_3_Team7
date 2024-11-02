@@ -272,4 +272,16 @@ class BoardService(
 
         return PageImpl(pagedResponse, pageable, boardResponseDTOs.size.toLong())
     }
+
+    // 게시글 제목별 검색기능
+    fun searchBoardByTitle(pageable: PageRequestDTO, title: String): Page<BoardResponseDTO> {
+        val title = title
+        try {
+            val sort = Sort.by(Sort.Direction.DESC, "title")
+            return boardRepository.searchBoard(pageable.getPageable(sort), title)
+        } catch (e: Exception) {
+            log.error("게시글 검색 실패 $e.message")
+            throw BoardException.NOT_FOUND.toException()
+        }
+    }
 }

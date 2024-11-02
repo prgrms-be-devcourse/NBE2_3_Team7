@@ -24,15 +24,16 @@ class FollowSearchImpl(em: EntityManager) : FollowSearch {
         val followeeFollow = QFollow("followeeFollow")
         val followerFollow = QFollow("followerFollow")
 
-        val results: List<FollowRequestDTO> = queryFactory
+        val results = queryFactory
             .select(
-                Projections.bean(
+                Projections.constructor(
                     FollowRequestDTO::class.java,
                     followeeFollow.followId,
                     followeeFollow.follower.memberId.`as`("followerId"),
                     followeeFollow.followee.memberId.`as`("followeeId"),
-                    followeeFollow.notification,
                     followeeFollow.isBlock,
+                    followeeFollow.notification,
+                    followeeFollow.createdAt,
                     followeeFollow.status,
                     followeeFollow.follower.nickname.`as`("followerName"),
                     followeeFollow.follower.email.`as`("followerEmail"),
@@ -40,7 +41,6 @@ class FollowSearchImpl(em: EntityManager) : FollowSearch {
                     followeeFollow.followee.nickname.`as`("followeeName"),
                     followeeFollow.followee.email.`as`("followeeEmail"),
                     followeeFollow.followee.image.`as`("followeeImage"),
-                    followeeFollow.createdAt
                 )
             ).distinct()
             .from(QMember.member)
@@ -51,16 +51,15 @@ class FollowSearchImpl(em: EntityManager) : FollowSearch {
             .limit(pageable.pageSize.toLong())
             .fetch()
 
-        log.info("results${results.toTypedArray()}")
+        log.info("results페이징${results}")
 
-        // 전체 갯수 계산 시 특정 요건에 맞게 쿼리 수정 필요할 수 있음
         val total: Long = queryFactory
             .select(followeeFollow.count())
             .from(QMember.member)
             .leftJoin(QMember.member.followees, followeeFollow)
             .leftJoin(QMember.member.followers, followerFollow)
             .where(QMember.member.memberId.eq(memberId))
-            .fetchOne() ?: throw RuntimeException("follow total is null")
+            .fetchOne()?:0
 
         return PageImpl(results, pageable, total)
     }
@@ -70,15 +69,16 @@ class FollowSearchImpl(em: EntityManager) : FollowSearch {
         val followeeFollow = QFollow("followeeFollow")
         val followerFollow = QFollow("followerFollow")
 
-        val results: List<FollowRequestDTO> = queryFactory
+        val results = queryFactory
             .select(
-                Projections.bean(
+                Projections.constructor(
                     FollowRequestDTO::class.java,
                     followeeFollow.followId,
                     followeeFollow.follower.memberId.`as`("followerId"),
                     followeeFollow.followee.memberId.`as`("followeeId"),
-                    followeeFollow.notification,
                     followeeFollow.isBlock,
+                    followeeFollow.notification,
+                    followeeFollow.createdAt,
                     followeeFollow.status,
                     followeeFollow.follower.nickname.`as`("followerName"),
                     followeeFollow.follower.email.`as`("followerEmail"),
@@ -86,15 +86,15 @@ class FollowSearchImpl(em: EntityManager) : FollowSearch {
                     followeeFollow.followee.nickname.`as`("followeeName"),
                     followeeFollow.followee.email.`as`("followeeEmail"),
                     followeeFollow.followee.image.`as`("followeeImage"),
-                    followeeFollow.createdAt
                 )
             ).distinct()
             .from(QMember.member)
             .leftJoin(QMember.member.followees, followeeFollow)
             .leftJoin(QMember.member.followers, followerFollow)
             .where(QMember.member.memberId.eq(memberId))
-            .fetch() ?: throw RuntimeException("follow total is null")
+            .fetch() ?: emptyList()
 
+        log.info("results 팔로우 리스트${results}")
 
         return results
     }

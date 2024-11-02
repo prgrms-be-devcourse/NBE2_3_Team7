@@ -14,6 +14,7 @@ import org.springframework.data.domain.Page
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.Authentication
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 import java.io.IOException
@@ -102,5 +103,19 @@ class BoardController(
     ): ResponseEntity<Page<BoardResponseDTO>> {
         val pageRequestDTO = PageRequestDTO(page = page, size = size)
         return ResponseEntity.ok(boardService.readBoardListByMember(memberId, pageRequestDTO))
+    }
+
+    //검색별 게시글 조회
+    @GetMapping("/search")
+    @Operation(summary = "검색 별 작성글 목록", description = "검색별 작성글 목록을 조회할 때 사용하는 API")
+    fun searchBoard(
+        @Validated
+        @RequestParam("title") title: String,
+        @RequestParam(value = "page", defaultValue = "1") page: Int,
+        @RequestParam(value = "size", defaultValue = "10") size: Int
+    ): ResponseEntity<Page<BoardResponseDTO>> {
+        val pageRequestDTO = PageRequestDTO(page = page, size = size)
+        val boardResponseDTOS: Page<BoardResponseDTO> = boardService.searchBoardByTitle(pageRequestDTO, title)
+        return ResponseEntity.ok().body(boardResponseDTOS)
     }
 }

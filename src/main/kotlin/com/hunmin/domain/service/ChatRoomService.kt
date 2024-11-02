@@ -35,40 +35,48 @@ class ChatRoomService(
     }
 
     //관련 채팅방 조회
-    fun findRoomByEmail(email: String): MutableList<ChatRoomRequestDTO> {
+    fun findRoomByEmail(email: String): List<ChatRoomRequestDTO> {
         try {
 
-            val me: Member = memberRepository.findByEmail(email)
-
-            val partnerNameAndChatRoom: MutableList<Any> = roomStorage.values(me.nickname)
+            val me = memberRepository.findByEmail(email)
+            log.info("me : ${me}")
+            val partnerNameAndChatRoom = roomStorage.values(me.nickname)
 
             val chatRoomIds: MutableSet<Long> = HashSet()
+            log.info("chatRoomIds : ${chatRoomIds}")
             val chatRoomRequestDTOList: MutableList<ChatRoomRequestDTO> = ArrayList()
+            log.info("chatRoomRequestDTOList : ${chatRoomRequestDTOList}")
 
             for (chatRoomRequestDTO in partnerNameAndChatRoom) {
+                log.info("chatRoomRequestDTO : ${chatRoomRequestDTO}")
                 val chatRoomRequest: ChatRoomRequestDTO? =
                     objectMapper.convertValue(chatRoomRequestDTO, ChatRoomRequestDTO::class.java)
                 chatRoomRequest?.let {
+                    log.info("it : ${it}")
                     chatRoomIds.add(it.chatRoomId)
                     chatRoomRequestDTOList.add(it)
                 }
             }
 
             val allMembers: List<Member> = memberRepository.findAll()
+            log.info("allMembers : ${allMembers}")
             for (member in allMembers) {
                 val rawChatRoom = roomStorage.get(member.nickname, me.nickname)
                 val chatRoomRequestDTO =
                     objectMapper.convertValue(rawChatRoom, ChatRoomRequestDTO::class.java)
+                log.info("chatRoomRequestDTO : ${chatRoomRequestDTO}")
                 chatRoomRequestDTO?.let {
                     if (!chatRoomIds.contains(it.chatRoomId)) {
+                        log.info("it : ${it}")
                         chatRoomIds.add(it.chatRoomId)
                         chatRoomRequestDTOList.add(it)
                     }
                 }
             }
+            log.info("chatRoomRequestDTOList : ${chatRoomRequestDTOList}")
             return chatRoomRequestDTOList
         } catch (e: Exception) {
-            log.error("채팅방 불러오기에 실패하였습니다")
+            log.error("채팅방 불러오기에 실패하였습니다 ${e.message}")
             throw ChatRoomException.FAILED_READ_ROOMS.get()
         }
     }

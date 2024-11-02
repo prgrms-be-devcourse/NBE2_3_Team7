@@ -37,6 +37,7 @@ class ChatRoomController(private val chatRoomService: ChatRoomService) {
     @Operation(summary = "채팅방 조회", description = "사용자와 관련된 채팅방 조회하는 API")
     fun myRooms(authentication: Authentication): ResponseEntity<List<ChatRoomRequestDTO>> {
         val currentMemberEmail = authentication.name
+        println("authentication: $authentication")
         return ResponseEntity.ok(chatRoomService.findRoomByEmail(currentMemberEmail))
     }
 

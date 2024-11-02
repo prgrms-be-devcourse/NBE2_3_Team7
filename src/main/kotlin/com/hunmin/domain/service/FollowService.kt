@@ -126,6 +126,7 @@ class FollowService(
             val member = memberRepository.findByEmail(email)
             val sort = Sort.by("followId").descending()
             val pageable = pageRequestDTO.getPageable(sort)
+            log.info("pageable{$pageable}")
             return followRepository.getFollowPage(member.memberId, pageable)
         } catch (e: RuntimeException) {
             log.error("페이징 실패 ${e.message}")
