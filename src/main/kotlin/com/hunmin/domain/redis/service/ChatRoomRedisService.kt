@@ -99,7 +99,7 @@ class ChatRoomRedisService(
                         userCount = chatRooms.userCount
                     )
                     // DB저장
-                    val chatRoomRepository1 = chatRoomRepository.save(newChatRoom)
+                    chatRoomRepository.save(newChatRoom)
                 }
                 // redis 저장소 비우기
                 chatRoomRedisRepository.deleteAll()

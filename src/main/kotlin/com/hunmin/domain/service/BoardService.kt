@@ -111,7 +111,7 @@ class BoardService(
             val followers= followRepository.getFollowList(senderId)
             // 알림 메세지 구현 -> return 방식은 emitter send로
             for (follower in followers) {
-                if (!follower.isBlock) {
+                if (!follower.isBlock && follower.notification) {
                     val notificationSendDTO = NotificationSendDTO(
                         message = sender.nickname + "님 : " + "새로운 게시글을 등록하였습니다",
                         notificationType = NotificationType.BOARD,
@@ -124,6 +124,7 @@ class BoardService(
                     val emitterId = follower.followerId.toString() + "_"
                     val emitter = sseEmitters.findSingleEmitter(emitterId)
 
+                    log.info("emitter $emitter")
                     if (emitter != null) {
                         try {
                             emitter.send(BoardResponseDTO(board))

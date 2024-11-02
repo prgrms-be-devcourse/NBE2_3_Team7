@@ -1,6 +1,5 @@
 package com.hunmin.domain.controller
 
-import com.hunmin.domain.dto.chat.ChatRoomDTO
 import com.hunmin.domain.dto.chat.ChatRoomRequestDTO
 import com.hunmin.domain.dto.page.PageRequestDTO
 import com.hunmin.domain.redis.service.ChatRoomRedisService
@@ -21,7 +20,7 @@ class ChatRoomController(
     private val chatRoomService: ChatRoomService,
     private val chatRoomRedisService: ChatRoomRedisService
 ) {
-    //채팅방 생성 레디스
+    //채팅방 생성
     @PostMapping("/{nickName}")
     @Operation(summary = "채팅방 생성", description = "채팅방을 이름으로 생성하는 API")
     fun createRoomByNickName(
