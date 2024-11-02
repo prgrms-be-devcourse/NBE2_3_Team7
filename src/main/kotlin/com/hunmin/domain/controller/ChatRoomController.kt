@@ -2,11 +2,13 @@ package com.hunmin.domain.controller
 
 import com.hunmin.domain.dto.chat.ChatRoomDTO
 import com.hunmin.domain.dto.chat.ChatRoomRequestDTO
+import com.hunmin.domain.dto.page.PageRequestDTO
 import com.hunmin.domain.redis.service.ChatRoomRedisService
 import com.hunmin.domain.service.ChatRoomService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.hibernate.query.sqm.tree.SqmNode.log
+import org.springframework.data.domain.Page
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.Authentication
 import org.springframework.validation.annotation.Validated
@@ -39,10 +41,16 @@ class ChatRoomController(
     //나랑 관련된 채팅방만 조회
     @GetMapping("/list")
     @Operation(summary = "채팅방 조회", description = "사용자와 관련된 채팅방 조회하는 API")
-    fun myRooms(authentication: Authentication): ResponseEntity<List<ChatRoomRequestDTO>> {
-        val currentMemberEmail = authentication.name
-        println("authentication: $authentication")
-        return ResponseEntity.ok(chatRoomService.findRoomByEmail(currentMemberEmail))
+    fun myRooms(
+        @Validated
+        authentication: Authentication,
+        @RequestParam("page", defaultValue = "1") page: Int,
+        @RequestParam("size", defaultValue = "10") size: Int
+    ): ResponseEntity<Page<ChatRoomRequestDTO>> {
+        val email = authentication.name
+        val pageRequestDTO = PageRequestDTO(page = page, size = size)
+//        return ResponseEntity.ok(chatRoomService.findRoomByEmail(currentMemberEmail))
+        return ResponseEntity.ok(chatRoomRedisService.findRoomByEmail(email, pageRequestDTO))
     }
 
     //채팅방 삭제

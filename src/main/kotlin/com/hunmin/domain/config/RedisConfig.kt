@@ -1,6 +1,7 @@
 package com.hunmin.domain.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.hunmin.domain.redis.entity.ChatRoomRedis
 import com.hunmin.domain.redis.sendMessage.RedisSubscriber
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -18,7 +19,6 @@ import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSeriali
 import org.springframework.data.redis.serializer.StringRedisSerializer
 
 @Configuration
-@EnableRedisRepositories
 class RedisConfig {
 
     @Bean
@@ -50,20 +50,19 @@ class RedisConfig {
         connectionFactory: RedisConnectionFactory,
         objectMapper: ObjectMapper
     ): RedisTemplate<String, Any> {
-        val template: RedisTemplate<String, Any> = RedisTemplate<String, Any>()
+        val template = RedisTemplate<String, Any>()
         template.setConnectionFactory(connectionFactory)
 
         // GenericJackson2JsonRedisSerializer 설정
-        val serializer = GenericJackson2JsonRedisSerializer(objectMapper)
+        val jackson2JsonRedisSerializer = GenericJackson2JsonRedisSerializer(objectMapper)
 
-        // Key Serializer 설정
-        val stringSerializer = StringRedisSerializer()
-        template.setKeySerializer(stringSerializer)
-        template.setHashKeySerializer(stringSerializer)
+        // Key Serializer 설정 - StringRedisSerializer
+        template.keySerializer = StringRedisSerializer()
+        template.hashKeySerializer = StringRedisSerializer()
 
         // Value Serializer 설정
-        template.setValueSerializer(serializer)
-        template.setHashValueSerializer(serializer)
+        template.valueSerializer = jackson2JsonRedisSerializer
+        template.hashValueSerializer = jackson2JsonRedisSerializer
 
         template.afterPropertiesSet()
         return template

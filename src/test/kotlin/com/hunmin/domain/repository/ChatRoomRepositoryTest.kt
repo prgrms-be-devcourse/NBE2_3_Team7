@@ -22,7 +22,10 @@ class ChatRoomRepositoryTest {
     @Test
     fun 채팅방추가() {
         //given
-        val chatRoom = ChatRoom(member=memberRepository.findById(1).get())
+        val chatRoom = ChatRoom(
+            member = memberRepository.findById(1).get(),
+            partner = memberRepository.findById(2).get()
+        )
         //when
         val savedChatRoom = chatRoomRepository.save(chatRoom)
         //then

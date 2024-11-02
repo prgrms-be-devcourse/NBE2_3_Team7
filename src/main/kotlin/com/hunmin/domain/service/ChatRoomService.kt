@@ -40,7 +40,6 @@ class ChatRoomService(
     //관련 채팅방 조회
     fun findRoomByEmail(email: String): List<ChatRoomRequestDTO> {
         try {
-
             val me = memberRepository.findByEmail(email)
             log.info("me : ${me}")
             val partnerNameAndChatRoom = roomStorage.values(me.nickname)
