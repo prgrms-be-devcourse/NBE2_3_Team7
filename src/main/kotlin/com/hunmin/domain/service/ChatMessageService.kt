@@ -11,7 +11,7 @@ import com.hunmin.domain.entity.NotificationType
 import com.hunmin.domain.exception.chat.ChatMessageException
 import com.hunmin.domain.exception.chat.ChatRoomException
 import com.hunmin.domain.handler.SseEmitters
-import com.hunmin.domain.pubsub.RedisSubscriber
+import com.hunmin.domain.redis.sendMessage.RedisSubscriber
 import com.hunmin.domain.repository.ChatMessageRepository
 import com.hunmin.domain.repository.ChatRoomRepository
 import com.hunmin.domain.repository.MemberRepository

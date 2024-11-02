@@ -1,10 +1,13 @@
 package com.hunmin.domain.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.hunmin.domain.pubsub.RedisSubscriber
+import com.hunmin.domain.redis.sendMessage.RedisSubscriber
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.redis.connection.RedisConnectionFactory
+import org.springframework.data.redis.connection.RedisPassword
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory
 import org.springframework.data.redis.core.HashOperations
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.data.redis.listener.ChannelTopic
@@ -17,6 +20,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer
 @Configuration
 @EnableRedisRepositories
 class RedisConfig {
+
     @Bean
     fun topicPattern(): ChannelTopic {
         return ChannelTopic("chatRoom")

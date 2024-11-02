@@ -7,8 +7,10 @@ import com.hunmin.domain.dto.notification.NotificationSendDTO
 import com.hunmin.domain.entity.ChatRoom
 import com.hunmin.domain.entity.Member
 import com.hunmin.domain.entity.NotificationType
+import com.hunmin.domain.redis.entity.ChatRoomRedis
 import com.hunmin.domain.exception.chat.ChatRoomException
 import com.hunmin.domain.handler.SseEmitters
+import com.hunmin.domain.redis.repository.ChatRoomRedisRepository
 import com.hunmin.domain.repository.ChatRoomRepository
 import com.hunmin.domain.repository.MemberRepository
 import org.hibernate.query.sqm.tree.SqmNode.log
@@ -25,7 +27,8 @@ class ChatRoomService(
     private val chatRoomRepository: ChatRoomRepository,
     private val memberRepository: MemberRepository,
     private val notificationService: NotificationService,
-    private val sseEmitters: SseEmitters
+    private val sseEmitters: SseEmitters,
+    private val chatRoomRedisRepository: ChatRoomRedisRepository
 ) {
     // 단일 채팅방 조회
     fun findRoomById(id: Long): ChatRoomDTO {
@@ -80,7 +83,6 @@ class ChatRoomService(
             throw ChatRoomException.FAILED_READ_ROOMS.get()
         }
     }
-
 
     // 채팅방 생성
     fun createChatRoomByNickName(partnerName: String, myEmail: String): ChatRoomRequestDTO {
