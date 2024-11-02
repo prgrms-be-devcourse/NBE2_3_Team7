@@ -13,6 +13,10 @@ data class ChatRoom(
     @JoinColumn(name = "member_id")
     var member: Member,
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "partner_id")
+    var partner: Member,
+
     @BatchSize(size = 50)
     @OneToMany(
         mappedBy = "chatRoom",

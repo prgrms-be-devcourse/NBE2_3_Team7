@@ -13,6 +13,7 @@ data class ChatRoomRedis (
     @Id
     var id: Long,
     val member: MemberDTO,
+    val partner: MemberDTO,
     var chatMessage: MutableList<ChatMessage>? =  mutableListOf(),
     var userCount: Long = 1,
     var createdAt : LocalDateTime = LocalDateTime.now(),

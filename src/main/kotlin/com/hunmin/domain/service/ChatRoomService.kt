@@ -99,7 +99,7 @@ class ChatRoomService(
             ) {
                 throw ChatRoomException.CHATROOM_ALREADY_EXIST.get()
             }
-            val chatRoom: ChatRoom = ChatRoom(member = me).apply {}
+            val chatRoom: ChatRoom = ChatRoom(member = me, partner = byNickname).apply {}
             val SavedchatRoom: ChatRoom = chatRoomRepository.save(chatRoom)
             val chatRoomRequestDTO: ChatRoomRequestDTO = ChatRoomRequestDTO(
                 chatRoomId = SavedchatRoom.chatRoomId, memberId = me.memberId, nickName = me.nickname,
