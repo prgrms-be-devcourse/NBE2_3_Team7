@@ -194,7 +194,7 @@ const CommentPage = ({ boardId }) => {
                                 }}
                             />
                         ) : (
-                            <FaUserCircle size={30} style={{ color: '#fff', marginRight: '10px' }} /> // 프로필 아이콘 표시
+                            <FaUserCircle size={30} style={{ color: 'skyblue', marginRight: '10px' }} /> // 프로필 아이콘 표시
                         )}
                         <ListItemText
                             primary={`${comment.nickname}: ${comment.content}`}
