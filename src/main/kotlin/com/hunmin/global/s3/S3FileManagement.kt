@@ -4,13 +4,14 @@ import com.hunmin.global.exception.ExceptionCode
 import com.hunmin.global.validate.FileValidate
 import com.hunmin.global.validate.FileValidate.Companion.createUniqueFileName
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.stereotype.Component
 import org.springframework.web.multipart.MultipartFile
 import software.amazon.awssdk.core.sync.RequestBody
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
 
-
+@Component
 class S3FileManagement(
     @Value("\${cloud.aws.s3.bucket}")
     private val bucket: String,
