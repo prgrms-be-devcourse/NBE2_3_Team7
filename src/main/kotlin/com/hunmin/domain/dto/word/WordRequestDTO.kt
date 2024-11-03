@@ -20,8 +20,8 @@ data class WordRequestDTO(
     @field:NotBlank(message = "언어는 필수 입력값입니다.")
     var lang: String,
 
-    var originalTitle: String,
-    var originalLang: String
+    var originalTitle: String? = null,
+    var originalLang: String? = null
 ) {
     fun toEntity(member: Member): Word {
         return Word(

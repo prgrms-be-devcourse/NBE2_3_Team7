@@ -32,7 +32,7 @@ const TestPage = () => {
     }, [selectedLanguage, selectedLevel]);
 
     const startTimer = () => {
-        setTimer(5); // Reset timer to 10 minutes
+        setTimer(600); // Reset timer to 10 minutes
         setIsTimeUp(false);
 
         if (timerId) {
