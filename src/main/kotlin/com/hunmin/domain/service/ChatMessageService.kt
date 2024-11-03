@@ -41,7 +41,7 @@ class ChatMessageService(
     // 채팅방에 메시지 발송
     fun sendChatMessage(chatMessageDTO: ChatMessageDTO) {
         try {
-
+            log.info("chatMessageDTO받음_메시지 $chatMessageDTO")
             val chatRoom: ChatRoom = chatRoomRepository.findById(chatMessageDTO.chatRoomId).get()
             val sender: Member = memberRepository.findById(chatMessageDTO.memberId).get()
 
@@ -50,22 +50,13 @@ class ChatMessageService(
                 type = chatMessageDTO.type!!
             }
             val savedChatMessage: ChatMessage = chatMessageRepository.save(chatMessage)
+            log.info("savedChatMessage받음_메시지 $savedChatMessage")
             redisSubscriber.sendMessage(ChatMessageDTO(savedChatMessage))
 
             // 알림
             val senderId = sender.memberId
-            var receiverId: Long? = null
+            var receiverId = chatRoom.partner.memberId
 
-            val messages: MutableList<ChatMessage> = chatRoom.chatMessage ?: mutableListOf()
-
-            messages.let {
-                for (message in it) {
-                    if (message.member.memberId != senderId) {
-                        receiverId = message.member.memberId
-                        break
-                    }
-                }
-            }
             if (receiverId == null) {
                 throw NoSuchElementException("수신자가 등록되지 않았습니다.")
             }
