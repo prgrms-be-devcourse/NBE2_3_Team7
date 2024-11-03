@@ -8,6 +8,7 @@ import com.hunmin.domain.dto.page.PageRequestDTO
 import com.hunmin.domain.entity.ChatMessage
 import com.hunmin.domain.entity.Member
 import com.hunmin.domain.entity.NotificationType
+import com.hunmin.domain.entity.QNotification.notification
 import com.hunmin.domain.exception.chat.ChatMessageException
 import com.hunmin.domain.exception.chat.ChatRoomException
 import com.hunmin.domain.handler.SseEmitters
@@ -17,12 +18,13 @@ import com.hunmin.domain.redis.repository.ChatRoomRedisRepository
 import com.hunmin.domain.redis.sendMessage.RedisSubscriber
 import com.hunmin.domain.repository.ChatMessageRepository
 import com.hunmin.domain.repository.ChatRoomRepository
+import com.hunmin.domain.repository.FollowRepository
 import com.hunmin.domain.repository.MemberRepository
 import com.hunmin.domain.service.NotificationService
 import mu.KotlinLogging
 import org.hibernate.query.sqm.tree.SqmNode.log
 import org.springframework.data.domain.Page
-import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Sort
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Service
@@ -41,7 +43,8 @@ class ChatMessageRedisService(
     private val notificationService: NotificationService,
     private val sseEmitters: SseEmitters,
     private val chatRoomRedisRepository: ChatRoomRedisRepository,
-    private val chatMessageRedisRepository: ChatMessageRedisRepository
+    private val chatMessageRedisRepository: ChatMessageRedisRepository,
+    private val followRepository: FollowRepository
 ) {
 
     companion object {
@@ -76,26 +79,28 @@ class ChatMessageRedisService(
                 if (receiverId == null) {
                     throw NoSuchElementException("수신자가 등록되지 않았습니다.")
                 }
+                val foundFollow = followRepository.findByMemberId(receiverId, senderId)
+                if (foundFollow.isPresent) {
+                    if (!foundFollow.get().isBlock && foundFollow.get().notification) {
+                        val notificationSendDTO: NotificationSendDTO = NotificationSendDTO(
+                            message = sender.nickname + "님 : " + chatMessageDTO.message,
+                            notificationType = NotificationType.CHAT,
+                            url = "/chat-room/" + chatMessageDTO.chatRoomId
+                        ).apply {
+                            this.memberId = receiverId
+                        }
+                        notificationService.send(notificationSendDTO)
 
-                if (receiverId != senderId) {
-                    val notificationSendDTO: NotificationSendDTO = NotificationSendDTO(
-                        message = sender.nickname + "님 : " + chatMessageDTO.message,
-                        notificationType = NotificationType.CHAT,
-                        url = "/chat-room/" + chatMessageDTO.chatRoomId
-                    ).apply {
-                        this.memberId = receiverId
-                    }
-                    notificationService.send(notificationSendDTO)
+                        val emitterId = receiverId.toString() + "_"
+                        val emitter = sseEmitters.findSingleEmitter(emitterId)
 
-                    val emitterId = receiverId.toString() + "_"
-                    val emitter = sseEmitters.findSingleEmitter(emitterId)
-
-                    if (emitter != null) {
-                        try {
-                            emitter.send(ChatMessageDTO(chatMessage))
-                        } catch (e: IOException) {
-                            log.error("Error sending comment to client via SSE: ${e.message}")
-                            sseEmitters.delete(emitterId)
+                        if (emitter != null) {
+                            try {
+                                emitter.send(ChatMessageDTO(chatMessage))
+                            } catch (e: IOException) {
+                                log.error("Error sending comment to client via SSE: ${e.message}")
+                                sseEmitters.delete(emitterId)
+                            }
                         }
                     }
                 }
@@ -132,26 +137,31 @@ class ChatMessageRedisService(
                 if (receiverId == null) {
                     throw NoSuchElementException("수신자가 등록되지 않았습니다.")
                 }
+                // 팔로우 차단이 아닌 경우에만 메세지 받기
+                val foundFollow = followRepository.findByMemberId(receiverId, senderId)
+                if (foundFollow.isPresent) {
+                    if (!foundFollow.get().isBlock && foundFollow.get().notification) {
+                        if (receiverId != senderId) {
+                            val notificationSendDTO: NotificationSendDTO = NotificationSendDTO(
+                                message = sender.nickname + "님 : " + chatMessageDTO.message,
+                                notificationType = NotificationType.CHAT,
+                                url = "/chat-room/" + chatMessageDTO.chatRoomId
+                            ).apply {
+                                this.memberId = receiverId
+                            }
+                            notificationService.send(notificationSendDTO)
 
-                if (receiverId != senderId) {
-                    val notificationSendDTO: NotificationSendDTO = NotificationSendDTO(
-                        message = sender.nickname + "님 : " + chatMessageDTO.message,
-                        notificationType = NotificationType.CHAT,
-                        url = "/chat-room/" + chatMessageDTO.chatRoomId
-                    ).apply {
-                        this.memberId = receiverId
-                    }
-                    notificationService.send(notificationSendDTO)
+                            val emitterId = receiverId.toString() + "_"
+                            val emitter = sseEmitters.findSingleEmitter(emitterId)
 
-                    val emitterId = receiverId.toString() + "_"
-                    val emitter = sseEmitters.findSingleEmitter(emitterId)
-
-                    if (emitter != null) {
-                        try {
-                            emitter.send(newChatMessageDTO)
-                        } catch (e: IOException) {
-                            log.error("Error sending comment to client via SSE: ${e.message}")
-                            sseEmitters.delete(emitterId)
+                            if (emitter != null) {
+                                try {
+                                    emitter.send(newChatMessageDTO)
+                                } catch (e: IOException) {
+                                    log.error("Error sending comment to client via SSE: ${e.message}")
+                                    sseEmitters.delete(emitterId)
+                                }
+                            }
                         }
                     }
                 }
@@ -161,31 +171,6 @@ class ChatMessageRedisService(
             log.error("채팅 메세지 전송에 실패하였습니다. $e.message")
             throw ChatRoomException.FAILED_REGISTER.get()
         }
-    }
-
-    // 모든 채팅 기록 조회
-    fun readAllMessages(chatRoomId: Long): List<ChatMessageDTO> {
-        try {
-
-            val chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow()
-
-            val chatLists = chatRoom.chatMessage?.map { chatMessage ->
-                ChatMessageDTO(chatMessage)
-            }?.toList() ?: emptyList()
-
-            return chatLists
-        } catch (e: RuntimeException) {
-            log.error("모든 채팅기록 불러오는데 실패했습니다. $e.message")
-            throw ChatMessageException.NOT_FOUND.get()
-        }
-    }
-
-    //채팅 조회
-    fun readChatMessage(chatMessageId: Long): ChatMessageDTO {
-        return ChatMessageDTO(
-            chatMessageRepository.findById(chatMessageId).orElse(null)
-                ?: throw ChatMessageException.NOT_FOUND.get()
-        )
     }
 
     //채팅 수정
@@ -208,11 +193,44 @@ class ChatMessageRedisService(
     //채팅목록 페이징
     fun getList(pageRequestDTO: PageRequestDTO, chatRoomId: Long): Page<ChatMessageListRequestDTO> { //목록
         try {
-            val sort = Sort.by("createdAt").descending()
-            val pageable: Pageable = pageRequestDTO.getPageable(sort)
-            val result = chatMessageRepository.chatMessageList(pageable, chatRoomId)
-            logger.info("=== 페이징 결과 {${result.toList()}}")
-            return result
+            // 모든 메세지를 담을 리스트 생성
+            var chatMessageListDTOs = mutableListOf<ChatMessageListRequestDTO>()
+
+            // DB 채팅 메세지 삽입
+            val foundChatMessages = chatMessageRepository.getChatMessageList(chatRoomId)
+            chatMessageListDTOs.addAll(foundChatMessages)
+
+            // 레디스 채팅 메세지 삽입
+            val foundRedisChatMessages: List<ChatMessageRedis> = chatMessageRedisRepository.findAll().toMutableList()
+            log.info("foundRedisChatRoom_확인 $foundRedisChatMessages")
+            if (foundRedisChatMessages.isNotEmpty()) {
+                for (redisMessage in foundRedisChatMessages) {
+                    if (redisMessage.chatRoom.id == chatRoomId) {
+                        val newChatMessageDTO = ChatMessageListRequestDTO(
+                            chatMessageId = redisMessage.id,
+                            memberId = redisMessage.member.memberId,
+                            message = redisMessage.message,
+                            createdAt = redisMessage.createdAt,
+                            type = redisMessage.type
+                        )
+                        log.info("newChatMessageDTO_확인 $newChatMessageDTO")
+                        chatMessageListDTOs.add(newChatMessageDTO)
+                        log.info("chatMessageListDTOs_확인 $chatMessageListDTOs")
+                    }
+                }
+            }
+            log.info("=== 모든 리스트 결과 {${chatMessageListDTOs}}")
+
+            // 페이지네이션 처리를 위해 전체 리스트 정렬
+            chatMessageListDTOs.sortBy { it.chatMessageId }
+
+            //pageRequestDTO 페이지네이션 진행
+            val pageable = pageRequestDTO.getPageable(Sort.by("chatMessageId").ascending())
+            val start = pageable.offset.toInt()
+            val end = (start + pageable.pageSize).coerceAtMost(chatMessageListDTOs.size)
+            val pagedChatMessageListDTOs = chatMessageListDTOs.subList(start, end)
+
+            return PageImpl(pagedChatMessageListDTOs, pageable, chatMessageListDTOs.size.toLong())
         } catch (e: Exception) {
             log.error("쳇서비스 페이징 실패 $e.message")
             throw ChatMessageException.NOT_FETCHED.get()

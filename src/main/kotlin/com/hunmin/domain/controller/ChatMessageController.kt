@@ -37,15 +37,6 @@ class ChatMessageController(
         chatMessageRedisService.sendChatMessage(message)
     }
 
-    //단일 채팅 조회
-    @GetMapping("/{chatMessageId}")
-    @ResponseBody
-    @Operation(summary = "채팅 검색", description = "검색하고 싶은 채팅을 조회하는 API")
-    fun readMessage(@Validated @PathVariable chatMessageId: Long): ResponseEntity<ChatMessageDTO> {
-        logger.info ("Long, ${chatMessageId}")
-        return ResponseEntity.ok(chatMessageService.readChatMessage(chatMessageId))
-    }
-
     //채팅 수정
     @PutMapping("/{message}")//프론트 화면에 수정 필요! put GetParam -> pathvariable
     @ResponseBody
@@ -81,12 +72,10 @@ class ChatMessageController(
         @RequestParam(value = "page", defaultValue = "1") page: Int,
         @RequestParam(value = "size", defaultValue = "10") size: Int
     ): ResponseEntity<Page<ChatMessageListRequestDTO>> {
-        logger.info("=== 페이징 결과 , ${page}, ${size}")
         val pageRequestDTO = PageRequestDTO(page = page,
             size = size)
-        val result = chatMessageService.getList(pageRequestDTO, chatRoomId)
-        logger.info("=== 페이징 결과 {${result.toList()}}, ${page}, ${size}")
+//        val result = chatMessageService.getList(pageRequestDTO, chatRoomId)
+        val result = chatMessageRedisService.getList(pageRequestDTO, chatRoomId)
         return ResponseEntity.ok(result)
     }
-
 }

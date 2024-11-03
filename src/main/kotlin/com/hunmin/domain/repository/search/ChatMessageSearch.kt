@@ -5,5 +5,6 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 
 interface ChatMessageSearch {
+    fun getChatMessageList(chatRoomId: Long): List<ChatMessageListRequestDTO>
     fun chatMessageList(pageable: Pageable, chatRoomId: Long): Page<ChatMessageListRequestDTO>
 }
