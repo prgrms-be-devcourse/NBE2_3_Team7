@@ -65,8 +65,6 @@ class WordService(
 
             val updatedWord = wordRepository.save(word)
 
-            log.info("~~~~~~~~~~~~~~")
-            log.info(updatedWord)
             WordResponseDTO(updatedWord)
         } catch (e: Exception) {
             throw WordException.WORD_NOT_UPDATED.toException()

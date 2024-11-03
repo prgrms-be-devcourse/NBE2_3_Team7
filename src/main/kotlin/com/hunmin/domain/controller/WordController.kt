@@ -44,10 +44,6 @@ class WordController (
         wordRequestDTO.originalTitle = title
         wordRequestDTO.originalLang = lang
 
-        log.info("***********")
-        log.info(title)
-        log.info(lang)
-
         val updatedWord = wordService.testUpdate(wordRequestDTO)
         return ResponseEntity.ok(updatedWord)
     }
