@@ -9,6 +9,7 @@ import com.hunmin.domain.exception.AdminException
 import com.hunmin.domain.exception.WordException
 import com.hunmin.domain.repository.MemberRepository
 import com.hunmin.domain.repository.WordRepository
+import org.hibernate.query.sqm.tree.SqmNode.log
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
@@ -64,6 +65,8 @@ class WordService(
 
             val updatedWord = wordRepository.save(word)
 
+            log.info("~~~~~~~~~~~~~~")
+            log.info(updatedWord)
             WordResponseDTO(updatedWord)
         } catch (e: Exception) {
             throw WordException.WORD_NOT_UPDATED.toException()

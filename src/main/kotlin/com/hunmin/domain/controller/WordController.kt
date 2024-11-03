@@ -7,6 +7,7 @@ import com.hunmin.domain.dto.word.WordResponseDTO
 import com.hunmin.domain.service.WordService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import org.hibernate.query.sqm.tree.SqmNode.log
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Sort
 import org.springframework.http.ResponseEntity
@@ -42,6 +43,10 @@ class WordController (
 
         wordRequestDTO.originalTitle = title
         wordRequestDTO.originalLang = lang
+
+        log.info("***********")
+        log.info(title)
+        log.info(lang)
 
         val updatedWord = wordService.testUpdate(wordRequestDTO)
         return ResponseEntity.ok(updatedWord)
