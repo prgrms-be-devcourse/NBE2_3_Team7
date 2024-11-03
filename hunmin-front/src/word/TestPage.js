@@ -61,6 +61,19 @@ const TestPage = () => {
 
             console.log("Fetched words:", response.data); // 응답 로그 찍기
 
+            // 단어 리스트가 있는지 확인
+            if (response.data.words) {
+                // 단어 리스트 확인 로그
+                console.log("Words received:", response.data.words); // 단어 리스트 로그 찍기
+            } else {
+                console.warn("No words found in the response."); // 단어 리스트가 없을 때 경고 로그
+            }
+
+            // 각 단어의 displayWord와 displayTranslation 로그
+            response.data.words.forEach((word, index) => {
+                console.log(`Word ${index + 1}: displayWord: ${word.displayWord}, displayTranslation: ${word.displayTranslation}`); // 단어 속성 로그 찍기
+            });
+
             setWords(response.data.words);
             setUserAnswers(new Array(response.data.words.length).fill(''));
             setShowResults(false);
@@ -89,7 +102,7 @@ const TestPage = () => {
                 correctCountTemp++;
             }
 
-            correctAnswers.push({ question: words[i].displayWord, userAnswer, correctAnswer });
+            correctAnswers.push({ question: words[i].displayTitle, userAnswer, correctAnswer });
         }
 
         try {
@@ -175,7 +188,7 @@ const TestPage = () => {
                     words.length > 0 ? (
                         words.map((word, index) => (
                             <Box key={index} sx={{ marginBottom: 4 }}>
-                                <Typography variant="body1" sx={{ fontSize: '1.2rem' }}>{index + 1}. {word.displayWord}</Typography>
+                                <Typography variant="body1" sx={{ fontSize: '1.2rem' }}>{index + 1}. {word.displayTitle}</Typography>
                                 <input
                                     type="text"
                                     value={userAnswers[index]}
@@ -202,7 +215,7 @@ const TestPage = () => {
                     </Button>
                 </Box>
                 <Typography variant="h6" align="center" sx={{ margin: '0 20px' }}>
-                    {isTimeUp ? '시간 종료' : `남은 시간: ${Math.floor(timer / 60)}:${timer % 60 < 10 ? `0${timer % 60}` : timer % 60}`}
+                    {isTimeUp ? '시간 종료! 제출해주세요!' : `남은 시간: ${Math.floor(timer / 60)}:${timer % 60 < 10 ? `0${timer % 60}` : timer % 60}`}
                 </Typography>
                 <Box>
                     {!hasSubmitted && !isTimeUp && (

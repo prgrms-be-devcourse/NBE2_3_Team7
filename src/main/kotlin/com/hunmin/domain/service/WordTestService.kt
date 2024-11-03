@@ -36,7 +36,6 @@ class WordTestService (
         return WordResponseDTO(word).apply {
             displayTitle = translation
             displayTranslation = title
-            definition = word.definition
         }
     }
 

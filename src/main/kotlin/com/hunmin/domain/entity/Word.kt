@@ -6,7 +6,11 @@ import jakarta.persistence.*
 data class Word (
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val wordId: Long = 0,
+    var wordId: Long = 0,
+
+    @ManyToOne
+    @JoinColumn(name = "member_id")
+    var member: Member? = null,
 
     @Column(nullable = false)
     var title: String,
