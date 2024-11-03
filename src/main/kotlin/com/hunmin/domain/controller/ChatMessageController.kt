@@ -4,6 +4,7 @@ import com.hunmin.domain.dto.chat.ChatMessageDTO
 import com.hunmin.domain.dto.chat.ChatMessageListRequestDTO
 import com.hunmin.domain.dto.member.MemberDTO
 import com.hunmin.domain.dto.page.PageRequestDTO
+import com.hunmin.domain.redis.service.ChatMessageRedisService
 import com.hunmin.domain.service.ChatMessageService
 import com.hunmin.domain.service.MemberService
 import io.swagger.v3.oas.annotations.Operation
@@ -22,7 +23,8 @@ import org.springframework.web.bind.annotation.*
 @Tag(name = "채팅", description = "채팅 CRUD")
 class ChatMessageController(
     private val chatMessageService: ChatMessageService,
-    private val memberService: MemberService
+    private val memberService: MemberService,
+    private val chatMessageRedisService: ChatMessageRedisService
 ) {
     companion object {
         private val logger = KotlinLogging.logger {}
@@ -31,7 +33,8 @@ class ChatMessageController(
     //클라이언트로 부터 오는 메세지 수신 -> Redis로 송신
     @MessageMapping("/api/chat/message")
     fun sendMessage(@Validated message: ChatMessageDTO) {
-        chatMessageService.sendChatMessage(message)
+//        chatMessageService.sendChatMessage(message)
+        chatMessageRedisService.sendChatMessage(message)
     }
 
     //단일 채팅 조회

@@ -17,7 +17,7 @@ data class ChatMessageDTO(
     @NotBlank(message = " 사용자 닉네임은 필수입니다.")
     val nickName: String,
     var message: String? = null,
-    var type: MessageType? = null,
+    var type: MessageType,
     val createdAt: LocalDateTime? = null
 ) {
     constructor(chatMessage: ChatMessage) : this(
@@ -29,4 +29,22 @@ data class ChatMessageDTO(
         chatMessage.type,
         chatMessage.createdAt
     )
+//
+//    constructor(
+//        chatMessageId: Long,
+//        chatRoomId: Long,
+//        memberId: Long,
+//        nickName: String,
+//        type: MessageType,
+//        message: String,
+//        createdAt: LocalDateTime
+//    ) : this(
+//        chatMessageId = chatMessageId,
+//        chatRoomId = chatRoomId,
+//        memberId = memberId,
+//        nickName = nickName,
+//        message = message,
+//        type = type,
+//        createdAt = createdAt
+//    )
 }

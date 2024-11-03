@@ -5,13 +5,17 @@ import com.hunmin.domain.dto.chat.ChatRoomRequestDTO
 import com.hunmin.domain.dto.member.MemberDTO
 import com.hunmin.domain.dto.notification.NotificationSendDTO
 import com.hunmin.domain.dto.page.PageRequestDTO
+import com.hunmin.domain.entity.ChatMessage
 import com.hunmin.domain.entity.ChatRoom
 import com.hunmin.domain.entity.Member
 import com.hunmin.domain.entity.NotificationType
 import com.hunmin.domain.exception.chat.ChatRoomException
 import com.hunmin.domain.handler.SseEmitters
+import com.hunmin.domain.redis.entity.ChatMessageRedis
 import com.hunmin.domain.redis.entity.ChatRoomRedis
 import com.hunmin.domain.redis.repository.ChatRoomRedisRepository
+import com.hunmin.domain.redis.repository.search.ChatRoomRedisSearchImpl
+import com.hunmin.domain.repository.ChatMessageRepository
 import com.hunmin.domain.repository.ChatRoomRepository
 import com.hunmin.domain.repository.MemberRepository
 import com.hunmin.domain.service.NotificationService
@@ -40,7 +44,8 @@ class ChatRoomRedisService(
     private val modelMapper: ModelMapper,
     private val chatRoomRedisRepository: ChatRoomRedisRepository,
     private val chatRoomRepository: ChatRoomRepository,
-) {
+    private val chatMessageRepository: ChatMessageRepository,
+) : ChatRoomRedisSearchImpl(chatRoomRedisRepository) {
     // 채팅방 생성
     fun createChatRoomByNickName(partnerName: String, myEmail: String): ChatRoomRequestDTO {
         try {
@@ -48,8 +53,12 @@ class ChatRoomRedisService(
             val partnerId = partner.memberId
             val me: Member = memberRepository.findByEmail(myEmail)
 
-            // 중복확인
+            // 중복이름으로 무언가 하려는 시도 차단
+            if (partnerName == me.nickname) throw ChatRoomException.FAILED_REGISTER.get()
+
+            // 중복확인 - 레디스
             val redisChatRooms = chatRoomRedisRepository.findAll()
+            log.info("redisChatRooms_생성 $redisChatRooms")
             for (chatRooms in redisChatRooms) {
                 if (chatRooms.member.nickname == me.nickname && chatRooms.partner.nickname == partner.nickname) {
                     throw ChatRoomException.CHATROOM_ALREADY_EXIST.get()
@@ -57,8 +66,18 @@ class ChatRoomRedisService(
                     throw ChatRoomException.CHATROOM_ALREADY_EXIST.get()
                 }
             }
+            //중복확인 - DB
+            val dbChatRooms = getDbChatRoomsByMember(me)
+            log.info("dbChatRooms_생성 $dbChatRooms")
+            for (dbChatRoom in dbChatRooms) {
+                if (dbChatRoom.nickName == me.nickname && dbChatRoom.partnerName == partnerName) {
+                    throw ChatRoomException.CHATROOM_ALREADY_EXIST.get()
+                } else if (dbChatRoom.nickName == partner.nickname && dbChatRoom.nickName == me.nickname) {
+                    throw ChatRoomException.CHATROOM_ALREADY_EXIST.get()
+                }
+            }
 
-            var memberDTO = MemberDTO(
+            val memberDTO = MemberDTO(
                 memberId = me.memberId, email = me.email,
                 nickname = me.nickname,
                 level = me.level,
@@ -67,7 +86,7 @@ class ChatRoomRedisService(
                 image = me.image
             )
 
-            var partnerDTO = MemberDTO(
+            val partnerDTO = MemberDTO(
                 memberId = partner.memberId, email = partner.email,
                 nickname = partner.nickname,
                 level = partner.level,
@@ -88,34 +107,46 @@ class ChatRoomRedisService(
             // 캐싱전략 설계 10개 이상이면 -> DB저장
             if ((increasedId % 10).toInt() == 0) {
                 for (chatRooms in allChatRooms) {
-                    // 새로운 ChatRoom 생성
+                    // ChatRoom DB에 저장
                     val newMember = modelMapper.map(chatRooms.member, Member::class.java)
                     val newPartner = modelMapper.map(chatRooms.partner, Member::class.java)
+
                     val newChatRoom = ChatRoom(
                         chatRoomId = chatRooms.id,
                         member = newMember,
                         partner = newPartner,
-                        chatMessage = chatRooms.chatMessage,
+                        chatMessage = mutableListOf(),
                         userCount = chatRooms.userCount
                     )
+                    //채팅 내역 DB에 저장
+                    val chatMessages: MutableList<ChatMessageRedis>? = chatRooms.chatMessage
+                    for (chatMessage in chatMessages!!) {
+                        var newChatMessage = ChatMessage(
+                            chatRoom = newChatRoom, message = chatMessage.message,
+                            member = if (chatMessage.member.memberId == newMember.memberId) newMember else newPartner,
+                            type = chatMessage.type
+                        )
+                        // DB저장
+                        chatMessageRepository.save(newChatMessage)
+                    }
+
                     // DB저장
                     chatRoomRepository.save(newChatRoom)
                 }
                 // redis 저장소 비우기
                 chatRoomRedisRepository.deleteAll()
+                chatMessageRepository.deleteAll()
             }
+            log.info("여기까진 ok 파트너: $partner, 나: $me")
             //알림
             val notificationSendDTO = NotificationSendDTO(
-                message = "[" + me.nickname + "]님이 ${partner}님을 채팅방에 초대하였습니다.",
+                memberId = partnerId,
+                message = "[" + me.nickname + "]님이 ${partner.nickname}님을 채팅방에 초대하였습니다.",
                 notificationType = NotificationType.CHAT,
                 url = "/chat-room/" + chatRoom.id
-
-            ).apply {
-                memberId = partnerId
-            }
-
+            )
+            log.info("notificationSendDTO $notificationSendDTO")
             notificationService.send(notificationSendDTO)
-
             val emitterId = partnerId.toString() + "_"
             val emitter = sseEmitters.findSingleEmitter(emitterId)
 
@@ -202,15 +233,16 @@ class ChatRoomRedisService(
         }
 
     }
-    fun getRedisChatRoomsByNickName(nickName:String):  List<ChatRoomRequestDTO> {
+
+    fun getRedisChatRoomsByNickName(nickName: String): List<ChatRoomRequestDTO> {
         // 새로운 List 생성 -> 관련채팅방 모두 넣기
         val chatRoomDTOs: MutableList<ChatRoomRequestDTO> = mutableListOf()
         log.info("chatRoomDTOs1 = $chatRoomDTOs")
 
-        val chatRoomMe = chatRoomRedisRepository.findByMemberNickname(nickName)
-        val ChatRoomPart = chatRoomRedisRepository.findByPartnerNickname(nickName)
+        val chatRoomMe = findByMemberNickname(nickName)
+        val ChatRoomPart = findByPartnerNickname(nickName)
 
-        log.info("chatRoomMe = $chatRoomMe, ChatRoomPart = $ChatRoomPart" )
+        log.info("chatRoomMe = $chatRoomMe, ChatRoomPart = $ChatRoomPart")
         // 내가 owner인 채팅룸 -> dto로 변환 후 삽입
         for (chatRooms in chatRoomMe) {
             val chatRoomRequest = objectMapper.convertValue(
@@ -247,7 +279,8 @@ class ChatRoomRedisService(
         }
         return chatRoomDTOs
     }
-    fun getDbChatRoomsByMember(member: Member): List<ChatRoomRequestDTO>{
+
+    fun getDbChatRoomsByMember(member: Member): List<ChatRoomRequestDTO> {
         val chatRoomDTOs: MutableList<ChatRoomRequestDTO> = mutableListOf()
         val chatRoomsMe = chatRoomRepository.findChatRoomByMember(member.memberId)
         log.info("chatRoomsMe3 = $chatRoomsMe")

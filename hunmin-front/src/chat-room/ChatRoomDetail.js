@@ -172,7 +172,7 @@ const ChatRoomDetail = () => {
             {/* 채팅방 헤더 */}
             <div className="chat-room-header">
                 <h1 className="chat-room-title">
-                    {currentUserName}과 {nickname}의 대화
+                    채팅 상대: {currentUserName}
                 </h1>
                 <button className="leave-button" onClick={() => navigate(-1)}>
                     채팅방 나가기

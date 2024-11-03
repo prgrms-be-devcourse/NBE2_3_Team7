@@ -41,7 +41,7 @@ class ChatMessageService(
     // 채팅방에 메시지 발송
     fun sendChatMessage(chatMessageDTO: ChatMessageDTO) {
         try {
-            log.info("chatMessageDTO받음_메시지 $chatMessageDTO")
+
             val chatRoom: ChatRoom = chatRoomRepository.findById(chatMessageDTO.chatRoomId).get()
             val sender: Member = memberRepository.findById(chatMessageDTO.memberId).get()
 
@@ -50,13 +50,22 @@ class ChatMessageService(
                 type = chatMessageDTO.type!!
             }
             val savedChatMessage: ChatMessage = chatMessageRepository.save(chatMessage)
-            log.info("savedChatMessage받음_메시지 $savedChatMessage")
             redisSubscriber.sendMessage(ChatMessageDTO(savedChatMessage))
 
             // 알림
             val senderId = sender.memberId
-            var receiverId = chatRoom.partner.memberId
+            var receiverId: Long? = null
 
+            val messages: MutableList<ChatMessage> = chatRoom.chatMessage ?: mutableListOf()
+
+            messages.let {
+                for (message in it) {
+                    if (message.member.memberId != senderId) {
+                        receiverId = message.member.memberId
+                        break
+                    }
+                }
+            }
             if (receiverId == null) {
                 throw NoSuchElementException("수신자가 등록되지 않았습니다.")
             }
@@ -92,13 +101,13 @@ class ChatMessageService(
     fun readAllMessages(chatRoomId: Long): List<ChatMessageDTO> {
         try {
 
-        val chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow()
+            val chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow()
 
-        val chatLists = chatRoom.chatMessage?.map { chatMessage ->
-            ChatMessageDTO(chatMessage)
-        }?.toList()?:emptyList()
+            val chatLists = chatRoom.chatMessage?.map { chatMessage ->
+                ChatMessageDTO(chatMessage)
+            }?.toList()?:emptyList()
 
-        return chatLists
+            return chatLists
         }catch (e:RuntimeException){
             log.error("모든 채팅기록 불러오는데 실패했습니다. $e.message")
             throw ChatMessageException.NOT_FOUND.get()

@@ -27,17 +27,24 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import ChatRoomInfo from './ChatRoomInfo';
 
 const ChatRoomCard = ({room, onEnter, onRightClick}) => {
+    const currentMemberId = localStorage.getItem('memberId'); // 현재 사용자 ID 가져오기
+
+    // 상대방 이름을 동적으로 설정
+    const displayName = room.memberId === Number(currentMemberId)
+        ? room.partnerName // 현재 사용자가 memberId와 동일하면 partnerName 표시
+        : room.nickName; // 아니라면 nickName 표시
+
     return (
         <Card
-            sx={{marginBottom: 2, cursor: 'pointer', width: '100%'}}
+            sx={{ marginBottom: 2, cursor: 'pointer', width: '100%' }}
             onClick={() => onEnter(room.chatRoomId)}
             onContextMenu={(e) => onRightClick(e, room.chatRoomId)}
         >
             <CardHeader
-                title={`채팅방 (${room.nickName || 'Unknown'}, ${room.partnerName || 'N/A'})`}
+                title={`채팅방 : ${displayName}`}
                 action={
                     <IconButton onClick={(e) => onRightClick(e, room.chatRoomId)}>
-                        <MoreVertIcon/>
+                        <MoreVertIcon />
                     </IconButton>
                 }
             />

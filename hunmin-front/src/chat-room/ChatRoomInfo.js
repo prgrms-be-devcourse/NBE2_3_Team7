@@ -2,16 +2,23 @@ import React, { useEffect, useState } from 'react';
 import api from '../axios';
 import { Box, Typography, CircularProgress } from '@mui/material';
 
-const ChatRoomInfo = ({ chatRoomId }) => {
+const ChatRoomInfo = ({ chatRoomId,  setPartnerName }) => {
     const [loading, setLoading] = useState(true);
     const [chatRoom, setChatRoom] = useState(null);
+    const currentMemberId = localStorage.getItem('memberId'); // 현재 사용자 ID 가져오기
 
     useEffect(() => {
         const fetchChatRoomDetails = async () => {
             setLoading(true);
             try {
-                const response = await api.get(`/chat-room/${chatRoomId}`);
+                const response = await api.get(`/chat-room/list`);
+                const roomData = response.data;
                 setChatRoom(response.data);
+                // 상대방 이름 설정
+                const displayName = roomData.memberId === Number(currentMemberId)
+                    ? roomData.partnerName
+                    : roomData.nickName;
+                setPartnerName(displayName);
             } catch (error) {
                 console.error('채팅방 정보를 불러오는 데 실패했습니다.', error);
             } finally {
@@ -36,19 +43,10 @@ const ChatRoomInfo = ({ chatRoomId }) => {
         return <Typography variant="body1">채팅방 정보를 불러올 수 없습니다.</Typography>;
     }
 
-    return (
-        <Box>
-            <Typography variant="h5" gutterBottom>
-                채팅방 정보
-            </Typography>
-            <Typography variant="body1">채팅방 ID: {chatRoom.chatRoomId}</Typography>
-            <Typography variant="body1">내 닉네임: {chatRoom.nickName}</Typography>
-            <Typography variant="body1">상대방 닉네임: {chatRoom.partnerName}</Typography>
-            <Typography variant="body1">
-                생성일: {chatRoom.createdAt ? new Date(chatRoom.createdAt).toLocaleString() : 'N/A'}
-            </Typography>
-        </Box>
-    );
+    const displayName = chatRoom.memberId === Number(currentMemberId)
+        ? chatRoom.partnerName // 현재 사용자가 memberId와 동일하면 partnerName 표시
+        : chatRoom.nickName; // 아니라면 nickName 표시
+
 };
 
 export default ChatRoomInfo;
