@@ -344,6 +344,8 @@ const WordEditPage = () => {
                 lang: newLang,
                 translation: newTranslation,
                 definition: newDefinition,
+                originalTitle: originalTitle,
+                originalLang: originalLang
             };
 
             console.log('수정 요청 데이터:', updatedWordDataPayload);
