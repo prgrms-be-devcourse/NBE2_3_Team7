@@ -24,6 +24,7 @@ import {
 } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import DeleteIcon from '@mui/icons-material/Delete';
+import ChatRoomInfo from './ChatRoomInfo';
 
 const ChatRoomCard = ({room, onEnter, onRightClick}) => {
     return (
@@ -50,6 +51,7 @@ const ChatRoomCard = ({room, onEnter, onRightClick}) => {
 };
 
 const ChatRoomList = () => {
+    const [selectedChatRoomId, setSelectedChatRoomId] = useState(null);
     const [chatRooms, setChatRooms] = useState([]);
     const [anchorEl, setAnchorEl] = useState(null);
     const [selectedChatRoom, setSelectedChatRoom] = useState(null);
@@ -60,14 +62,19 @@ const ChatRoomList = () => {
     const [partnerName, setPartnerName] = useState('');  // 파트너 이름 상태 추가
 
     useEffect(() => {
-        // 인증된 사용자인지 확인 후 요청
-        api.get('/chat-room/list')
-            .then(response => {
+        // 채팅방 목록 가져오기
+        api.get('/chat-room/list', {
+            params: {
+                page: 1,
+                size: 10,
+            },
+        })
+            .then((response) => {
                 console.log(response.data);
-                setChatRooms(response.data);
+                setChatRooms(response.data.content); // 페이지네이션된 데이터 처리
             })
-            .catch(error => {
-                console.error("Error fetching chat rooms:", error);
+            .catch((error) => {
+                console.error('Error fetching chat rooms:', error);
                 setSnackbar({
                     open: true,
                     message: '채팅방 목록을 불러오는데 실패했습니다.',
@@ -78,6 +85,7 @@ const ChatRoomList = () => {
 
     const enterRoom = (chatRoomId) => {
         window.location.href = `/chat-room/${chatRoomId}`;
+        setSelectedChatRoomId(chatRoomId);
     };
 
     const handleMenuOpen = (event, chatRoomId) => {
@@ -155,6 +163,7 @@ const ChatRoomList = () => {
         setNewNickName('');
     };
 
+    //채팅방 생성
     const handleCreateChatRoom = () => {
         if (newNickName.trim() === '') {
             setSnackbar({
@@ -164,7 +173,6 @@ const ChatRoomList = () => {
             });
             return;
         }
-
         api.post(`/chat-room/${newNickName}`)
             .then(response => {
                 setChatRooms([...chatRooms, response.data]);
@@ -188,27 +196,34 @@ const ChatRoomList = () => {
 
     return (
         <Box sx={{maxWidth: 700, margin: 'auto', padding: 2}}>
-            <Typography variant="h4" gutterBottom>
-                채팅방 목록
-            </Typography>
-            <Button variant="contained" color="primary" onClick={() => setOpenCreateDialog(true)}
-                    sx={{marginBottom: 2}}>
-                채팅방 생성
-            </Button>
-            <List sx={{width: '100%'}}>
-                {chatRooms.map(room => (
-                    <React.Fragment key={room.chatRoomId}>
-                        <ListItem>
-                            <ChatRoomCard
-                                room={room}
-                                onEnter={enterRoom}
-                                onRightClick={handleMenuOpen}
-                            />
-                        </ListItem>
-                        <Divider component="li"/>
-                    </React.Fragment>
-                ))}
-            </List>
+            {selectedChatRoomId ? (
+                // 선택된 채팅방이 있으면 ChatRoomInfo 컴포넌트 표시
+                <ChatRoomInfo chatRoomId={selectedChatRoomId}/>
+            ) : (
+                <>
+                    <Typography variant="h4" gutterBottom>
+                        채팅방 목록
+                    </Typography>
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={() => setOpenCreateDialog(true)}
+                        sx={{marginBottom: 2}}
+                    >
+                        채팅방 생성
+                    </Button>
+                    <List sx={{width: '100%'}}>
+                        {chatRooms.map((room) => (
+                            <React.Fragment key={room.chatRoomId}>
+                                <ListItem>
+                                    <ChatRoomCard room={room} onEnter={enterRoom} onRightClick={handleMenuOpen}/>
+                                </ListItem>
+                                <Divider component="li"/>
+                            </React.Fragment>
+                        ))}
+                    </List>
+                </>
+            )}
             <Menu
                 anchorEl={anchorEl}
                 open={Boolean(anchorEl)}

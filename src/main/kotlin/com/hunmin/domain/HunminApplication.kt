@@ -9,9 +9,12 @@ import org.springframework.data.redis.repository.configuration.EnableRedisReposi
 @SpringBootApplication
 @EnableJpaAuditing
 @EnableJpaRepositories(basePackages = ["com.hunmin.domain.repository"])
-@EnableRedisRepositories(basePackages = ["com.hunmin.domain.redis.repository"])
+@EnableRedisRepositories(
+    basePackages = ["com.hunmin.domain.redis.repository"],
+    redisTemplateRef = "redisTemplate"
+)
 class Nbe23Team7Application
 
 fun main(args: Array<String>) {
-	runApplication<Nbe23Team7Application>(*args)
+    runApplication<Nbe23Team7Application>(*args)
 }

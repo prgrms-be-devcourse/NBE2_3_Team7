@@ -1,12 +1,13 @@
 package com.hunmin.domain.redis.service
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.hunmin.domain.dto.chat.ChatRoomRequestDTO
 import com.hunmin.domain.dto.member.MemberDTO
 import com.hunmin.domain.dto.notification.NotificationSendDTO
+import com.hunmin.domain.dto.page.PageRequestDTO
 import com.hunmin.domain.entity.ChatRoom
 import com.hunmin.domain.entity.Member
 import com.hunmin.domain.entity.NotificationType
-import com.hunmin.domain.entity.QChatMessage.chatMessage
 import com.hunmin.domain.exception.chat.ChatRoomException
 import com.hunmin.domain.handler.SseEmitters
 import com.hunmin.domain.redis.entity.ChatRoomRedis
@@ -19,6 +20,9 @@ import io.lettuce.core.RedisCommandTimeoutException
 import org.hibernate.TransactionException
 import org.hibernate.query.sqm.tree.SqmNode.log
 import org.modelmapper.ModelMapper
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageImpl
+import org.springframework.data.domain.Sort
 import org.springframework.data.redis.RedisConnectionFailureException
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Service
@@ -28,13 +32,14 @@ import java.io.IOException
 @Service
 @Transactional
 class ChatRoomRedisService(
-    private val redisTemplate: RedisTemplate<String, String>,
+    private val objectMapper: ObjectMapper,
+    private val redisTemplate: RedisTemplate<String, Any>,
     private val memberRepository: MemberRepository,
     private val notificationService: NotificationService,
     private val sseEmitters: SseEmitters,
     private val modelMapper: ModelMapper,
     private val chatRoomRedisRepository: ChatRoomRedisRepository,
-    private val chatRoomRepository: ChatRoomRepository
+    private val chatRoomRepository: ChatRoomRepository,
 ) {
     // 채팅방 생성
     fun createChatRoomByNickName(partnerName: String, myEmail: String): ChatRoomRequestDTO {
@@ -44,8 +49,8 @@ class ChatRoomRedisService(
             val me: Member = memberRepository.findByEmail(myEmail)
 
             // 중복확인
-            val allChatRooms = chatRoomRedisRepository.findAll()
-            for (chatRooms in allChatRooms) {
+            val redisChatRooms = chatRoomRedisRepository.findAll()
+            for (chatRooms in redisChatRooms) {
                 if (chatRooms.member.nickname == me.nickname && chatRooms.partner.nickname == partner.nickname) {
                     throw ChatRoomException.CHATROOM_ALREADY_EXIST.get()
                 } else if (chatRooms.member.nickname == partner.nickname && chatRooms.partner.nickname == me.nickname) {
@@ -78,10 +83,10 @@ class ChatRoomRedisService(
             val chatRoom: ChatRoomRedis = ChatRoomRedis(id = increasedId, member = memberDTO, partner = partnerDTO)
 
             // redis에 저장
-            val save = chatRoomRedisRepository.save(chatRoom)
-
-            // 캐싱전략 설계 10개 10개 이상이면 -> DB저장
-            if ((increasedId % 11).toInt() == 0) {
+            chatRoomRedisRepository.save(chatRoom)
+            val allChatRooms = chatRoomRedisRepository.findAll()
+            // 캐싱전략 설계 10개 이상이면 -> DB저장
+            if ((increasedId % 10).toInt() == 0) {
                 for (chatRooms in allChatRooms) {
                     // 새로운 ChatRoom 생성
                     val newMember = modelMapper.map(chatRooms.member, Member::class.java)
@@ -94,7 +99,7 @@ class ChatRoomRedisService(
                         userCount = chatRooms.userCount
                     )
                     // DB저장
-                    val chatRoomRepository1 = chatRoomRepository.save(newChatRoom)
+                    chatRoomRepository.save(newChatRoom)
                 }
                 // redis 저장소 비우기
                 chatRoomRedisRepository.deleteAll()
@@ -142,23 +147,115 @@ class ChatRoomRedisService(
             throw Exception("채팅룸 만들기 실패 ${e.message}")
         }
     }
-//
-//    // 채팅방 삭제
-//    fun deleteChatRoom(chatRoomId: Long, partnerName: String, meEmail: String): Boolean {
-//        try {
-//            val me = memberRepository.findByEmail(meEmail)
-//            val chatRoom = chatRoomRepository.findById(chatRoomId)
-//                .orElseThrow(ChatRoomException.NOT_FOUND::get)
-//
-//            if (roomStorage.get(me.nickname, partnerName) != null) {
-//                roomStorage.delete(me.nickname, partnerName)
-//            } else if (roomStorage.get(partnerName, me.nickname) != null) {
-//                roomStorage.delete(partnerName, me.nickname)
-//            } else return false
-//            chatRoomRepository.delete(chatRoom)
-//            return true
-//        } catch (e: Exception) {
-//            throw NoSuchElementException("사용자가 존재하지 않습니다")
-//        }
-//    }
+
+    // 채팅방 삭제
+    fun deleteChatRoom(chatRoomId: Long): Boolean {
+        try {
+            val currentId = redisTemplate.opsForValue().get("chatRoomRedisId") ?: "0"
+            // 너무 큰 숫자가 들어온 경우
+            log.info("currntId ${currentId}")
+            if (chatRoomId < 0 || currentId.toString().toInt() < chatRoomId) return false
+            if (currentId.toString().first().toString().toInt() * 10 >= chatRoomId) {
+                chatRoomRepository.findById(chatRoomId).orElseThrow(ChatRoomException.NOT_FOUND::get)
+                chatRoomRepository.deleteById(chatRoomId)
+                return true
+            } else {
+                val foundChatRoom =
+                    chatRoomRedisRepository.findById(chatRoomId).orElseThrow(ChatRoomException.NOT_FOUND::get)
+                chatRoomRedisRepository.delete(foundChatRoom)
+                return true
+            }
+        } catch (e: Exception) {
+            log.info("채팅방 삭제에 실패하였습니다. ${e.message}")
+            throw ChatRoomException.NOT_FOUND.get()
+        }
+    }
+
+    //관련 채팅방 조회
+    fun findRoomByEmail(email: String, pageRequestDTO: PageRequestDTO): Page<ChatRoomRequestDTO> {
+        try {
+            val me = memberRepository.findByEmail(email)
+
+            val redisChatRooms = getRedisChatRoomsByNickName(me.nickname)
+            log.info("redisChatRooms = $redisChatRooms")
+            val dbChatRooms = getDbChatRoomsByMember(me)
+            log.info("dbChatRooms = $dbChatRooms")
+
+            // 새로운 List 생성 -> dbchatRoom , redisChatRoom list에 넣기
+            val chatRoomDTOs: MutableList<ChatRoomRequestDTO> = mutableListOf()
+            chatRoomDTOs.addAll(dbChatRooms)
+            chatRoomDTOs.addAll(redisChatRooms)
+
+            // 페이지네이션 처리를 위해 전체 리스트 정렬
+            chatRoomDTOs.sortBy { it.partnerName }
+
+            // PageRequestDTO로 받은 페이지 정보에 맞게 페이지네이션 수행
+            val pageable = pageRequestDTO.getPageable(Sort.by("partnerName").ascending())
+            val start = pageable.offset.toInt()
+            val end = (start + pageable.pageSize).coerceAtMost(chatRoomDTOs.size)
+            val pagedChatRoomDTOs = chatRoomDTOs.subList(start, end)
+
+            return PageImpl(pagedChatRoomDTOs, pageable, chatRoomDTOs.size.toLong())
+        } catch (e: Exception) {
+            log.error("채팅방 불러오기에 실패하였습니다 ${e.message}")
+            throw ChatRoomException.FAILED_READ_ROOMS.get()
+        }
+
+    }
+    fun getRedisChatRoomsByNickName(nickName:String):  List<ChatRoomRequestDTO> {
+        // 새로운 List 생성 -> 관련채팅방 모두 넣기
+        val chatRoomDTOs: MutableList<ChatRoomRequestDTO> = mutableListOf()
+        log.info("chatRoomDTOs1 = $chatRoomDTOs")
+
+        val chatRoomMe = chatRoomRedisRepository.findByMemberNickname(nickName)
+        val ChatRoomPart = chatRoomRedisRepository.findByPartnerNickname(nickName)
+
+        log.info("chatRoomMe = $chatRoomMe, ChatRoomPart = $ChatRoomPart" )
+        // 내가 owner인 채팅룸 -> dto로 변환 후 삽입
+        for (chatRooms in chatRoomMe) {
+            val chatRoomRequest = objectMapper.convertValue(
+                chatRooms,
+                ChatRoomRedis::class.java
+            )
+            log.info("chatRoomRequest1 = $chatRoomRequest")
+            val chatRoomRequestDTO = ChatRoomRequestDTO(
+                chatRoomId = chatRoomRequest.id,
+                memberId = chatRoomRequest.member.memberId,
+                nickName = chatRoomRequest.member.nickname,
+                partnerName = chatRoomRequest.partner.nickname,
+                createdAt = chatRoomRequest.createdAt
+            )
+            log.info("chatRoomRequestDTO2 = $chatRoomRequestDTO")
+            chatRoomDTOs.add(chatRoomRequestDTO)
+        }
+        // 내가 partner인 채팅룸 -> dto로 변환 후 삽입
+        for (chatRooms in ChatRoomPart) {
+            val chatRoomRequest = objectMapper.convertValue(
+                chatRooms,
+                ChatRoomRedis::class.java
+            )
+            log.info("chatRoomRequest2 = $chatRoomRequest")
+            val chatRoomRequestDTO = ChatRoomRequestDTO(
+                chatRoomId = chatRoomRequest.id,
+                memberId = chatRoomRequest.partner.memberId,
+                nickName = chatRoomRequest.partner.nickname,
+                partnerName = chatRoomRequest.member.nickname,
+                createdAt = chatRoomRequest.createdAt
+            )
+            log.info("chatRoomRequestDTO3 = $chatRoomRequestDTO")
+            chatRoomDTOs.add(chatRoomRequestDTO)
+        }
+        return chatRoomDTOs
+    }
+    fun getDbChatRoomsByMember(member: Member): List<ChatRoomRequestDTO>{
+        val chatRoomDTOs: MutableList<ChatRoomRequestDTO> = mutableListOf()
+        val chatRoomsMe = chatRoomRepository.findChatRoomByMember(member.memberId)
+        log.info("chatRoomsMe3 = $chatRoomsMe")
+        val chatRoomsPart = chatRoomRepository.findChatRoomByPartner(member.memberId)
+        log.info("chatRoomsPart3 = $chatRoomsPart")
+        chatRoomDTOs.addAll(chatRoomsMe)
+        chatRoomDTOs.addAll(chatRoomsPart)
+        return chatRoomDTOs
+    }
 }
+
