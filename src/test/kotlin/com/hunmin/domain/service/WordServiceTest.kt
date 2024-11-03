@@ -1,10 +1,12 @@
 package com.hunmin.domain.service
 
 import com.hunmin.domain.dto.word.WordRequestDTO
+import com.hunmin.domain.dto.word.WordResponseDTO
 import com.hunmin.domain.entity.Member
 import com.hunmin.domain.entity.MemberLevel
 import com.hunmin.domain.entity.MemberRole
 import com.hunmin.domain.entity.Word
+import com.hunmin.domain.exception.WordException
 import com.hunmin.domain.repository.MemberRepository
 import com.hunmin.domain.repository.WordRepository
 import org.junit.jupiter.api.Assertions.*
@@ -49,7 +51,8 @@ class WordServiceTest {
         )
 
         val wordRequestDTO = WordRequestDTO(
-            1L,
+            wordId = 1L,
+            memberId = 1L,
             title = "테스트 단어",
             translation = "Test Word",
             definition = "테스트 단어 정의",
@@ -57,6 +60,7 @@ class WordServiceTest {
         )
 
         val savedWord = Word(
+            wordId = 1L,
             title = "테스트 단어",
             translation = "Test Word",
             definition = "테스트 단어 정의",
@@ -66,7 +70,7 @@ class WordServiceTest {
         `when`(memberRepository.findById(1L)).thenReturn(Optional.of(member))
         `when`(wordRepository.save(any(Word::class.java))).thenReturn(savedWord)
 
-        val responseDTO = wordService.createWord(wordRequestDTO, 1L)
+        val responseDTO = wordService.createWord(wordRequestDTO)
 
         assertEquals("테스트 단어", responseDTO.title)
         verify(wordRepository, times(1)).save(any(Word::class.java))
@@ -87,10 +91,13 @@ class WordServiceTest {
 
         val wordRequestDTO = WordRequestDTO(
             wordId = 1L,
+            memberId = 1L,
             title = "수정된 단어",
             translation = "Updated Word",
             definition = "수정된 단어 정의",
-            lang = "ko"
+            lang = "ko",
+            originalTitle = "테스트 단어",
+            originalLang = "ko"
         )
 
         val existingWord = Word(
@@ -110,11 +117,11 @@ class WordServiceTest {
         )
 
         `when`(memberRepository.findById(1L)).thenReturn(Optional.of(member))
-        `when`(wordRepository.findByTitleAndLang(wordRequestDTO.title, wordRequestDTO.lang))
+        `when`(wordRepository.findByTitleAndLang(wordRequestDTO.originalTitle!!, wordRequestDTO.originalLang!!))
             .thenReturn(Optional.of(existingWord))
         `when`(wordRepository.save(any(Word::class.java))).thenReturn(updatedWord)
 
-        val responseDTO = wordService.updateWord(wordRequestDTO, 1L)
+        val responseDTO = wordService.updateWord(wordRequestDTO)
 
         assertEquals("수정된 단어", responseDTO.title)
         assertEquals("Updated Word", responseDTO.translation)
@@ -159,6 +166,16 @@ class WordServiceTest {
     fun getWord() {
         val title = "테스트 단어"
         val lang = "ko"
+        val member = Member(
+            memberId = 1L,
+            nickname = "tester",
+            email = "test@test.com",
+            country = "Korea",
+            level = MemberLevel.BEGINNER,
+            password = "123",
+            memberRole = MemberRole.USER
+        )
+
         val word = Word(
             wordId = 1L,
             title = title,
@@ -167,9 +184,10 @@ class WordServiceTest {
             lang = lang
         )
 
+        `when`(memberRepository.findById(1L)).thenReturn(Optional.of(member))
         `when`(wordRepository.findByTitleAndLang(title, lang)).thenReturn(Optional.of(word))
 
-        val responseDTO = wordService.getWord(title, lang)
+        val responseDTO = wordService.getWord(title, lang, 1L)
 
         assertEquals(word.title, responseDTO.title)
         assertEquals(word.translation, responseDTO.translation)
@@ -181,14 +199,25 @@ class WordServiceTest {
     fun getAllWords() {
         val lang = "ko"
         val pageable: Pageable = PageRequest.of(0, 10)
+        val member = Member(
+            memberId = 1L,
+            nickname = "tester",
+            email = "test@test.com",
+            country = "Korea",
+            level = MemberLevel.BEGINNER,
+            password = "123",
+            memberRole = MemberRole.USER
+        )
+
         val words = listOf(
             Word(wordId = 1L, title = "단어1", translation = "Word1", definition = "정의1", lang = "ko"),
             Word(wordId = 2L, title = "단어2", translation = "Word2", definition = "정의2", lang = "ko")
         )
         val wordsPage = PageImpl(words)
-        `when`(wordRepository.findByLang("ko", pageable)).thenReturn(wordsPage)
+        `when`(memberRepository.findById(1L)).thenReturn(Optional.of(member))
+        `when`(wordRepository.findByLang(lang, pageable)).thenReturn(wordsPage)
 
-        val responsePage = wordService.getAllWords(lang, pageable)
+        val responsePage = wordService.getAllWords(lang, pageable, 1L)
 
         assertEquals(2, responsePage.size)
         assertEquals("단어1", responsePage.content[0].title)

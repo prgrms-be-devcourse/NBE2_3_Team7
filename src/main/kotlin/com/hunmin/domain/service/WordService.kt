@@ -38,7 +38,7 @@ class WordService(
     }
 
     // 단어 등록
-    fun testCreate(wordRequestDTO: WordRequestDTO): WordResponseDTO {
+    fun createWord(wordRequestDTO: WordRequestDTO): WordResponseDTO {
         val member = checkAdmin(wordRequestDTO.memberId ?: throw AdminException.MEMBER_NOT_FOUND.get())
 
         return try {
@@ -51,10 +51,13 @@ class WordService(
     }
 
     // 단어 수정
-    fun testUpdate(wordRequestDTO: WordRequestDTO): WordResponseDTO {
+    fun updateWord(wordRequestDTO: WordRequestDTO): WordResponseDTO {
         checkAdmin(wordRequestDTO.memberId ?: throw AdminException.MEMBER_NOT_FOUND.get())
 
-        val word = wordRepository.findByTitleAndLang(wordRequestDTO.originalTitle, wordRequestDTO.originalLang)
+        val originalTitle = wordRequestDTO.originalTitle ?: throw WordException.WORD_NOT_UPDATED.toException()
+        val originalLang = wordRequestDTO.originalLang ?: throw WordException.WORD_NOT_UPDATED.toException()
+
+        val word = wordRepository.findByTitleAndLang(originalTitle, originalLang)
             .orElseThrow { WordException.WORD_NOT_FOUND.toException() }
 
         return try {
@@ -65,6 +68,8 @@ class WordService(
 
             val updatedWord = wordRepository.save(word)
 
+            log.info("~~~~~~~~~~~~~~")
+            log.info(updatedWord)
             WordResponseDTO(updatedWord)
         } catch (e: Exception) {
             throw WordException.WORD_NOT_UPDATED.toException()
@@ -72,7 +77,7 @@ class WordService(
     }
 
     // 단어 삭제
-    fun testDelete(title: String, lang: String, memberId: Long) {
+    fun deleteWord(title: String, lang: String, memberId: Long) {
         checkAdmin(memberId)
 
         val word = wordRepository.findByTitleAndLang(title, lang)
