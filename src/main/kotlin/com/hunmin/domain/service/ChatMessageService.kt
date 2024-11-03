@@ -11,6 +11,7 @@ import com.hunmin.domain.entity.NotificationType
 import com.hunmin.domain.exception.chat.ChatMessageException
 import com.hunmin.domain.exception.chat.ChatRoomException
 import com.hunmin.domain.handler.SseEmitters
+import com.hunmin.domain.redis.repository.ChatMessageRedisRepository
 import com.hunmin.domain.redis.sendMessage.RedisSubscriber
 import com.hunmin.domain.repository.ChatMessageRepository
 import com.hunmin.domain.repository.ChatRoomRepository
@@ -32,7 +33,9 @@ class ChatMessageService(
     private val chatRoomRepository: ChatRoomRepository,
     private val redisSubscriber: RedisSubscriber,
     private val notificationService: NotificationService,
-    private val sseEmitters: SseEmitters){
+    private val sseEmitters: SseEmitters,
+    chatMessageRedisRepository: ChatMessageRedisRepository
+){
 
     companion object {
         private val logger = KotlinLogging.logger {}

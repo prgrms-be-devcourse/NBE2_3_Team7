@@ -203,6 +203,7 @@ class ChatMessageRedisService(
                 memberId = updatedChatMessage.member.memberId,
                 nickName = updatedChatMessage.member.nickname,
                 message = updatedChatMessage.message,
+                createdAt = updatedChatMessage.createdAt,
                 type = updatedChatMessage.type
             )
         }
@@ -210,10 +211,21 @@ class ChatMessageRedisService(
 
     //채팅 삭제
     fun deleteChatMessage(chatMessageId: Long): Boolean {
-        val chatMessage: ChatMessage = chatMessageRepository.findById(chatMessageId)
-            .orElse(null) ?: throw ChatMessageException.NOT_FOUND.get()
-        chatMessageRepository.deleteById(chatMessageId)
-        return true
+        try {
+            val redisChatMessage = chatMessageRedisRepository.findById(chatMessageId)
+            if (redisChatMessage.isEmpty) {
+                val chatMessage = chatMessageRepository.findById(chatMessageId)
+                if (chatMessage.isEmpty) return false
+                chatMessageRepository.deleteById(chatMessageId)
+                return true
+            } else {
+                chatMessageRedisRepository.deleteById(chatMessageId)
+                return true
+            }
+        }catch (e:Exception){
+            log.error("채팅 삭제에 실패하였습니다. ${e.message}")
+            throw e
+        }
     }
 
     //채팅목록 페이징

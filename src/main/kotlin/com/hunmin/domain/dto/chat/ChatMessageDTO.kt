@@ -29,22 +29,4 @@ data class ChatMessageDTO(
         chatMessage.type,
         chatMessage.createdAt
     )
-//
-//    constructor(
-//        chatMessageId: Long,
-//        chatRoomId: Long,
-//        memberId: Long,
-//        nickName: String,
-//        type: MessageType,
-//        message: String,
-//        createdAt: LocalDateTime
-//    ) : this(
-//        chatMessageId = chatMessageId,
-//        chatRoomId = chatRoomId,
-//        memberId = memberId,
-//        nickName = nickName,
-//        message = message,
-//        type = type,
-//        createdAt = createdAt
-//    )
 }

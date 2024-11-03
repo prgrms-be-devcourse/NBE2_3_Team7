@@ -51,7 +51,8 @@ class ChatMessageController(
     @ResponseBody
     @Operation(summary = "채팅 삭제", description = "삭제하고 싶은 채팅을 삭제하는 API")
     fun deleteMessage(@Validated @PathVariable chatMessageId: Long): ResponseEntity<Boolean> {
-        return ResponseEntity.ok(chatMessageService.deleteChatMessage(chatMessageId))
+//        return ResponseEntity.ok(chatMessageService.deleteChatMessage(chatMessageId))
+        return ResponseEntity.ok(chatMessageRedisService.deleteChatMessage(chatMessageId))
     }
 
     //사용자 정보 호출
