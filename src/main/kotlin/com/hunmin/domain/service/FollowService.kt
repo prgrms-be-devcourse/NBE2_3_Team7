@@ -92,12 +92,12 @@ class FollowService(
                 throw FollowException.DUPLICATED_FOLLOW.get()
             }
 
-            val follow = Follow(follower = owner, followee = followee)
+            val follow = Follow(follower = owner, followee = followee, status = FollowStatus.ACCEPTED)
             followRepository.save(follow)
-            val follower = followRepository.findByMemberId(memberId, owner.memberId)
+            val follower = followRepository.findByMemberId(followee.memberId, owner.memberId)
                 .orElseThrow { throw FollowException.NOT_FOUND.get() }
-            follower.status = FollowStatus.ACCEPTED
-            followRepository.save(follower)
+            val updatedFollower = follower.copy(status = FollowStatus.ACCEPTED)
+            followRepository.save(updatedFollower)
 
             return FollowRequestDTO(follower)
         } catch (e: RuntimeException) {
