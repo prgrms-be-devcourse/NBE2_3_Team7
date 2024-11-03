@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param
 
 interface WordScoreRepository : JpaRepository<WordScore, Long> {
     // 전체 랭킹
-    @Query("SELECT ws FROM WordScore ws ORDER BY ws.testScore DESC, ws.testLevel DESC, ws.createdAt ASC")
+    @Query("SELECT ws FROM WordScore ws ORDER BY ws.testRankScore DESC, ws.testLevel DESC, ws.createdAt ASC")
     fun getTopRankers(): List<WordScore>
 
     // 개인 시험 기록 조회

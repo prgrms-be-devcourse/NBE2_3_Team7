@@ -3,6 +3,7 @@ package com.hunmin.domain.controller
 import com.hunmin.domain.dto.word.WordResponseDTO
 import com.hunmin.domain.dto.word.WordScoreRequestDTO
 import com.hunmin.domain.dto.word.WordScoreResponseDTO
+import com.hunmin.domain.service.WordService
 import com.hunmin.domain.service.WordTestService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -14,7 +15,8 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/api/words/test")
 @Tag(name = "단어 시험", description = "단어 시험 관련 API")
 class WordScoreController(
-    private val wordTestService: WordTestService
+    private val wordTestService: WordTestService,
+    private val wordService: WordService
 ) {
     @GetMapping("/testLanguageSelect")
     @Operation(summary = "단어 시험 언어 선택", description = "단어 시험 언어를 선택할 때 사용하는 API")

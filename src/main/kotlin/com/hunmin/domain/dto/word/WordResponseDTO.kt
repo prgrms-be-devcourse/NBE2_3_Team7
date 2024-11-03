@@ -25,5 +25,4 @@ data class WordResponseDTO(
         createdAt = word.createdAt,
         updatedAt = word.updatedAt
     )
-
 }
