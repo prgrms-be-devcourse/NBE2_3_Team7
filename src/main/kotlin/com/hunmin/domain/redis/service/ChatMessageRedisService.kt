@@ -5,9 +5,8 @@ import com.hunmin.domain.dto.chat.ChatMessageListRequestDTO
 import com.hunmin.domain.dto.member.MemberDTO
 import com.hunmin.domain.dto.notification.NotificationSendDTO
 import com.hunmin.domain.dto.page.PageRequestDTO
-import com.hunmin.domain.entity.ChatMessage
-import com.hunmin.domain.entity.Member
-import com.hunmin.domain.entity.NotificationType
+import com.hunmin.domain.entity.*
+import com.hunmin.domain.entity.QChatRoom.chatRoom
 import com.hunmin.domain.exception.chat.ChatMessageException
 import com.hunmin.domain.exception.chat.ChatRoomException
 import com.hunmin.domain.handler.SseEmitters
@@ -36,7 +35,6 @@ import kotlin.jvm.optionals.getOrNull
 @Service
 @Transactional
 class ChatMessageRedisService(
-    private val modelMapper: ModelMapper,
     private val redisTemplate: RedisTemplate<String, Any>,
     private val memberRepository: MemberRepository,
     private val chatMessageRepository: ChatMessageRepository,
@@ -47,7 +45,6 @@ class ChatMessageRedisService(
     private val chatRoomRedisRepository: ChatRoomRedisRepository,
     private val chatMessageRedisRepository: ChatMessageRedisRepository,
     private val followRepository: FollowRepository,
-    private val chatRoomRedisService: ChatRoomRedisService
 ) {
 
     companion object {
@@ -83,27 +80,62 @@ class ChatMessageRedisService(
                     throw NoSuchElementException("수신자가 등록되지 않았습니다.")
                 }
                 // 팔로우 차단이 아닌 경우에만 메세지 받기
-                val foundFollow = followRepository.findByMemberId(receiverId, senderId)
-                if (foundFollow.isPresent) {
-                    if (!foundFollow.get().isBlock && foundFollow.get().notification) {
-                        val notificationSendDTO: NotificationSendDTO = NotificationSendDTO(
-                            message = sender.nickname + "님 : " + chatMessageDTO.message,
-                            notificationType = NotificationType.CHAT,
-                            url = "/chat-room/" + chatMessageDTO.chatRoomId
-                        ).apply {
-                            this.memberId = receiverId
+                if (sender.memberId == chatRoom.member.memberId) {
+                    val foundFollow =
+                        followRepository.findByMemberId(chatRoom.member.memberId, chatRoom.partner.memberId)
+                    if (foundFollow.isPresent) {
+                        val follow = foundFollow.get()
+                        if (!follow.isBlock && follow.notification) {
+                            val notificationSendDTO: NotificationSendDTO = NotificationSendDTO(
+                                memberId = sender.memberId,
+                                message = sender.nickname + "님 : " + chatMessageDTO.message,
+                                notificationType = NotificationType.CHAT,
+                                url = "/chat-room/" + chatMessageDTO.chatRoomId
+                            ).apply {
+                                this.memberId = receiverId
+                            }
+                            notificationService.send(notificationSendDTO)
+
+                            val emitterId = receiverId.toString() + "_"
+                            val emitter = sseEmitters.findSingleEmitter(emitterId)
+
+                            if (emitter != null) {
+                                try {
+                                    emitter.send(ChatMessageDTO(savedChatMessage))
+                                } catch (e: IOException) {
+                                    log.error("Error sending comment to client via SSE: ${e.message}")
+                                    sseEmitters.delete(emitterId)
+                                }
+                            }
                         }
-                        notificationService.send(notificationSendDTO)
+                    }
+                } else {
+                    val newReceiverId = chatRoom.member.memberId
+                    val foundFollow =
+                        followRepository.findByMemberId(chatRoom.partner.memberId, chatRoom.member.memberId)
+                    if (foundFollow.isPresent) {
+                        val follow = foundFollow.get()
+                        if (!follow.isBlock && follow.notification) {
+                            val notificationSendDTO: NotificationSendDTO = NotificationSendDTO(
+                                memberId = sender.memberId,
+                                message = sender.nickname + "님 : " + chatMessageDTO.message,
+                                notificationType = NotificationType.CHAT,
+                                url = "/chat-room/" + chatMessageDTO.chatRoomId
+                            ).apply {
+                                this.memberId = newReceiverId
+                            }
+                            notificationService.send(notificationSendDTO)
 
-                        val emitterId = receiverId.toString() + "_"
-                        val emitter = sseEmitters.findSingleEmitter(emitterId)
+                            val emitterId = newReceiverId.toString() + "_"
+                            val emitter = sseEmitters.findSingleEmitter(emitterId)
 
-                        if (emitter != null) {
-                            try {
-                                emitter.send(ChatMessageDTO(chatMessage))
-                            } catch (e: IOException) {
-                                log.error("Error sending comment to client via SSE: ${e.message}")
-                                sseEmitters.delete(emitterId)
+                            if (emitter != null) {
+                                try {
+                                    emitter.send(ChatMessageDTO(savedChatMessage))
+                                } catch (e: IOException) {
+                                    log.error("Error sending comment to client via SSE: ${e.message}")
+                                    sseEmitters.delete(emitterId)
+                                }
                             }
                         }
                     }
@@ -132,21 +164,44 @@ class ChatMessageRedisService(
                     createdAt = chatMessage.createdAt,
                     chatMessageId = chatMessage.id
                 )
+                val partner = Member(
+                    level = redisChatRoom.partner.level,
+                    memberId = redisChatRoom.partner.memberId,
+                    image = redisChatRoom.partner.image,
+                    country = redisChatRoom.partner.country,
+                    password = redisChatRoom.partner.password,
+                    email = redisChatRoom.partner.email,
+                    nickname = redisChatRoom.partner.nickname,
+                )
                 redisSubscriber.sendMessage(newChatMessageDTO)
+                val dbChatRoom = ChatRoom(
+                    chatMessage = mutableListOf(),
+                    chatRoomId = chatMessageDTO.chatRoomId, partner = partner,
+                    userCount = redisChatRoom.userCount, member = sender
+                )
+                val dbChatMessage = ChatMessage(
+                    chatMessageId = savedChatMessage.id,
+                    message = savedChatMessage.message,
+                    chatRoom = dbChatRoom,
+                    type = savedChatMessage.type,
+                    member = sender
+                )
 
                 // 알림 (팔로우 상태만 받기)
-                val senderId = sender.memberId
                 val receiverId = redisChatRoom.partner.memberId
 
                 if (receiverId == null) {
                     throw NoSuchElementException("수신자가 등록되지 않았습니다.")
                 }
                 // 팔로우 차단이 아닌 경우에만 메세지 받기
-                val foundFollow = followRepository.findByMemberId(receiverId, senderId)
-                if (foundFollow.isPresent) {
-                    if (!foundFollow.get().isBlock && foundFollow.get().notification) {
-                        if (receiverId != senderId) {
+                if (sender.memberId == redisChatRoom.member.memberId) {
+                    val foundFollow =
+                        followRepository.findByMemberId(redisChatRoom.member.memberId, redisChatRoom.partner.memberId)
+                    if (foundFollow.isPresent) {
+                        val follow = foundFollow.get()
+                        if (!follow.isBlock && follow.notification) {
                             val notificationSendDTO: NotificationSendDTO = NotificationSendDTO(
+                                memberId = sender.memberId,
                                 message = sender.nickname + "님 : " + chatMessageDTO.message,
                                 notificationType = NotificationType.CHAT,
                                 url = "/chat-room/" + chatMessageDTO.chatRoomId
@@ -160,7 +215,37 @@ class ChatMessageRedisService(
 
                             if (emitter != null) {
                                 try {
-                                    emitter.send(newChatMessageDTO)
+                                    emitter.send(ChatMessageDTO(dbChatMessage))
+                                } catch (e: IOException) {
+                                    log.error("Error sending comment to client via SSE: ${e.message}")
+                                    sseEmitters.delete(emitterId)
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    val newReceiverId = redisChatRoom.member.memberId
+                    val foundFollow =
+                        followRepository.findByMemberId(redisChatRoom.partner.memberId, redisChatRoom.member.memberId)
+                    if (foundFollow.isPresent) {
+                        val follow = foundFollow.get()
+                        if (!follow.isBlock && follow.notification) {
+                            val notificationSendDTO: NotificationSendDTO = NotificationSendDTO(
+                                memberId = sender.memberId,
+                                message = sender.nickname + "님 : " + chatMessageDTO.message,
+                                notificationType = NotificationType.CHAT,
+                                url = "/chat-room/" + chatMessageDTO.chatRoomId
+                            ).apply {
+                                this.memberId = newReceiverId
+                            }
+                            notificationService.send(notificationSendDTO)
+
+                            val emitterId = newReceiverId.toString() + "_"
+                            val emitter = sseEmitters.findSingleEmitter(emitterId)
+
+                            if (emitter != null) {
+                                try {
+                                    emitter.send(ChatMessageDTO(dbChatMessage))
                                 } catch (e: IOException) {
                                     log.error("Error sending comment to client via SSE: ${e.message}")
                                     sseEmitters.delete(emitterId)
@@ -222,7 +307,7 @@ class ChatMessageRedisService(
                 chatMessageRedisRepository.deleteById(chatMessageId)
                 return true
             }
-        }catch (e:Exception){
+        } catch (e: Exception) {
             log.error("채팅 삭제에 실패하였습니다. ${e.message}")
             throw e
         }

@@ -17,6 +17,7 @@ import com.hunmin.domain.redis.repository.ChatRoomRedisRepository
 import com.hunmin.domain.redis.repository.search.ChatRoomRedisSearchImpl
 import com.hunmin.domain.repository.ChatMessageRepository
 import com.hunmin.domain.repository.ChatRoomRepository
+import com.hunmin.domain.repository.FollowRepository
 import com.hunmin.domain.repository.MemberRepository
 import com.hunmin.domain.service.NotificationService
 import org.hibernate.query.sqm.tree.SqmNode.log
@@ -42,6 +43,7 @@ class ChatRoomRedisService(
     private val chatRoomRepository: ChatRoomRepository,
     private val chatMessageRedisRepository: ChatMessageRedisRepository,
     private val chatMessageRepository: ChatMessageRepository,
+    private val followRepository: FollowRepository,
 ) : ChatRoomRedisSearchImpl(chatRoomRedisRepository) {
     // 채팅방 생성
     fun createChatRoomByNickName(partnerName: String, myEmail: String): ChatRoomRequestDTO {
@@ -147,25 +149,30 @@ class ChatRoomRedisService(
                 chatRoomRedisRepository.deleteAll()
                 chatMessageRedisRepository.deleteAll()
             }
-
             //알림
-            val notificationSendDTO = NotificationSendDTO(
-                memberId = partnerId,
-                message = "[" + me.nickname + "]님이 ${partner.nickname}님을 채팅방에 초대하였습니다.",
-                notificationType = NotificationType.CHAT,
-                url = "/chat-room/" + chatRoom.id
-            )
-            log.info("notificationSendDTO $notificationSendDTO")
-            notificationService.send(notificationSendDTO)
-            val emitterId = partnerId.toString() + "_"
-            val emitter = sseEmitters.findSingleEmitter(emitterId)
+            val foundFollow = followRepository.findByMemberId(me.memberId, partnerId)
+            if (foundFollow.isPresent) {
+                val follow = foundFollow.get()
+                if (!follow.isBlock && follow.notification) {
+                    val notificationSendDTO = NotificationSendDTO(
+                        memberId = partnerId,
+                        message = "[" + me.nickname + "]님이 ${partner.nickname}님을 채팅방에 초대하였습니다.",
+                        notificationType = NotificationType.CHAT,
+                        url = "/chat-room/" + chatRoom.id
+                    )
+                    log.info("notificationSendDTO $notificationSendDTO")
+                    notificationService.send(notificationSendDTO)
+                    val emitterId = partnerId.toString() + "_"
+                    val emitter = sseEmitters.findSingleEmitter(emitterId)
 
-            if (emitter != null) {
-                try {
-                    emitter.send(chatRoom)
-                } catch (e: IOException) {
-                    log.error("Error sending chat room notification to client via SSE: {}", e)
-                    sseEmitters.delete(emitterId)
+                    if (emitter != null) {
+                        try {
+                            emitter.send(chatRoom)
+                        } catch (e: IOException) {
+                            log.error("Error sending chat room notification to client via SSE: {}", e)
+                            sseEmitters.delete(emitterId)
+                        }
+                    }
                 }
             }
             return ChatRoomRequestDTO(
@@ -185,15 +192,15 @@ class ChatRoomRedisService(
             log.info("chatRoomId삭제 $chatRoomId")
             val redisChatRoom = chatRoomRedisRepository.findById(chatRoomId)
             log.info("redisChatRoomㄴㄴ $redisChatRoom")
-            if (redisChatRoom.isEmpty){
+            if (redisChatRoom.isEmpty) {
                 val foundChatRoom = chatRoomRepository.findById(chatRoomId)
                 log.info("foundChatRoomㄴㄴ $foundChatRoom")
-                if (foundChatRoom.isEmpty){
+                if (foundChatRoom.isEmpty) {
                     return false
                 }
                 chatRoomRepository.deleteById(chatRoomId)
                 return true
-            }else {
+            } else {
                 chatRoomRedisRepository.deleteById(chatRoomId)
                 return true
             }
