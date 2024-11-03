@@ -7,10 +7,10 @@ import java.util.*
 class FileValidate {
     companion object {
         // 허용 확장자 설정
-        private val IMAGE_EXTENTIONS = listOf("jpg", "jpeg", "png", "gif", "webp")
+        private val IMAGE_EXTENSIONS = listOf("jpg", "jpeg", "png", "gif", "webp")
 
-        // 최대 파일 크기 설정: 3mb
-        private val MAX_FILE_SIZE = 3_145_728L
+        // 최대 파일 크기 설정: 3mb, 메모리 효율/가독성 등을 고려 const로 설정
+        private const val MAX_FILE_SIZE = 3_145_728L
 
         // 파일 검증
         fun validateImageFile(file: MultipartFile) {
@@ -38,7 +38,7 @@ class FileValidate {
             }
 
             // IMAGE_EXTENTIONS에서 지정한 확장자인지 확인
-            if (!IMAGE_EXTENTIONS.contains(extension)) {
+            if (!IMAGE_EXTENSIONS.contains(extension)) {
                 throw IllegalArgumentException(ExceptionCode.NOT_SUPPORT_FILE_EXTENSION.message)
             }
             
