@@ -1,0 +1,11 @@
+cloud:
+  aws:
+    s3:
+      bucket: "project-hunmin"
+    region:
+      static: "ap-northeast-2"
+    stack:
+      auto: false
+    credentials:
+      access-key: "AKIAQ3EGTLUBY5FUFXH7"
+      secret-key: "GTxPCkFnbduQh9S/GuHbXyn/ePt7BzPme9TJZQhcs"
