@@ -29,20 +29,20 @@ jobs:
           java-version: 17 # 자바 설치
           distribution: 'adopt'
 
-      - name: Set up Node.js for React
-        uses: actions/setup-node@v3
-        with:
-          node-version: '20' # Node.js 설치
+#      - name: Set up Node.js for React
+#        uses: actions/setup-node@v3
+#        with:
+#          node-version: '20' # Node.js 설치
 
-      - name: Install React dependencies
-        run: npm install
-        working-directory: ./hunmin-front # React 애플리케이션 디렉토리 설정
-        shell: bash
+#      - name: Install React dependencies
+#        run: npm install
+#        working-directory: ./hunmin-front # React 애플리케이션 디렉토리 설정
+#        shell: bash
 
-      - name: Build React app
-        run: npm run build
-        working-directory: ./hunmin-front # React 빌드 실행
-        shell: bash
+#      - name: Build React app
+#        run: npm run build
+#        working-directory: ./hunmin-front # React 빌드 실행
+#        shell: bash
 
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
