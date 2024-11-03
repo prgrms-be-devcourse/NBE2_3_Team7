@@ -141,19 +141,30 @@ const BoardListPage = () => {
     // 로그아웃 처리 함수
     const handleLogout = async () => {
         try {
-            // 현재 쿠키 상태 로그
             console.log('Current cookies:', document.cookie);
 
-            // 로그아웃 요청
-            const response = await api.post('/members/logout', {}, { withCredentials: true });
-            console.log('Logout response:', response); // 응답 확인
+            const response = await api.post('/members/logout', {}, {
+                withCredentials: true
+            });
+            console.log('Logout response:', response);
 
-            // 로컬 스토리지 초기화
+            // 성공적인 응답이든 토큰 관련 에러든 모두 로그아웃 처리를 해야 함
+            if (response.status === 200) {
+                alert(response.data.message || '로그아웃되었습니다.');
+            } else {
+                alert(response.data.message || '로그아웃 처리되었습니다.');
+            }
+
+            // 어떤 경우든 로컬 스토리지를 비우고 로그인 페이지로 이동
             localStorage.clear();
-            // 로그인 페이지로 이동
             navigate('/login');
+
         } catch (error) {
-            console.error('Logout failed:', error); // 오류 출력
+            console.error('Logout failed:', error);
+            // 에러가 발생해도 로그아웃 처리를 진행
+            alert(error.response?.data?.message || '로그아웃 처리되었습니다.');
+            localStorage.clear();
+            navigate('/login');
         }
     }
 
