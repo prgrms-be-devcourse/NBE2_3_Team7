@@ -74,47 +74,32 @@ const UpdateMemberForm = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        const updatedData = {};
+        try {
+            const formData = new FormData();
 
-        const storedNickname = localStorage.getItem('nickname');
-        const storedLevel = localStorage.getItem('level');
+            // memberInfo를 JSON 문자열로 변환하여 추가
+            const memberInfo = {
+                nickname: nickname,
+                level: level
+            };
+            formData.append('memberInfo', new Blob([JSON.stringify(memberInfo)], {
+                type: 'application/json'
+            }));
 
-        if (nickname && nickname !== storedNickname) {
-            updatedData.nickname = nickname;
-        }
-
-        if (level && level !== storedLevel) {
-            updatedData.level = level;
-        }
-
-        let imageUrl = null;
-
-        if (image) {
-            const imageData = new FormData();
-            imageData.append('image', image);
-            const imageResponse = await axios.post('http://localhost:8080/api/members/uploads', imageData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
-            });
-            imageUrl = imageResponse.data;
-            updatedData.image = imageUrl;
-            console.log(imageUrl);
-        }
-
-        if (Object.keys(updatedData).length > 0) {
-            try {
-                await api.put(`/members/${memberId}`, {
-                    ...updatedData,
-                });
-                alert('회원정보가 수정되었습니다. 다시 로그인 해주세요.'); // 메시지 추가
-                navigate('/login'); // 로그인 페이지로 리다이렉트
-            } catch (error) {
-                console.error(error);
-                setError('회원정보 수정에 실패했습니다.');
+            // 이미지 파일 추가
+            if (image) {
+                formData.append('profileImage', image);
             }
-        } else {
-            alert('변경된 정보가 없습니다.');
+
+            // Content-Type 헤더를 직접 설정하지 않음
+            // FormData는 자동으로 boundary를 설정함
+            await api.put(`/members/${memberId}`, formData);
+
+            alert('회원정보가 수정되었습니다.');
+            navigate('/login');
+        } catch (error) {
+            console.error(error);
+            setError('회원정보 수정에 실패했습니다.');
         }
     };
 
