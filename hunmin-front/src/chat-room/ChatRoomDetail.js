@@ -204,6 +204,8 @@ const ChatRoomDetail = () => {
                                 {editingMessageId === msg.chatMessageId ? (
                                     <ChatEditComponent
                                         chatMessageId={msg.chatMessageId}
+                                        chatRoomId={chatRoomId}
+                                        memberId={currentUserId}
                                         originalMessage={msg.message}
                                         onUpdateSuccess={handleUpdateMessage}
                                         onCancel={() => setEditingMessageId(null)}

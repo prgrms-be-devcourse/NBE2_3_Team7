@@ -8,7 +8,6 @@ import com.hunmin.domain.dto.page.PageRequestDTO
 import com.hunmin.domain.entity.ChatMessage
 import com.hunmin.domain.entity.Member
 import com.hunmin.domain.entity.NotificationType
-import com.hunmin.domain.entity.QNotification.notification
 import com.hunmin.domain.exception.chat.ChatMessageException
 import com.hunmin.domain.exception.chat.ChatRoomException
 import com.hunmin.domain.handler.SseEmitters
@@ -23,6 +22,7 @@ import com.hunmin.domain.repository.MemberRepository
 import com.hunmin.domain.service.NotificationService
 import mu.KotlinLogging
 import org.hibernate.query.sqm.tree.SqmNode.log
+import org.modelmapper.ModelMapper
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Sort
@@ -30,11 +30,13 @@ import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.io.IOException
+import java.time.LocalDateTime
 import kotlin.jvm.optionals.getOrNull
 
 @Service
 @Transactional
 class ChatMessageRedisService(
+    private val modelMapper: ModelMapper,
     private val redisTemplate: RedisTemplate<String, Any>,
     private val memberRepository: MemberRepository,
     private val chatMessageRepository: ChatMessageRepository,
@@ -44,7 +46,8 @@ class ChatMessageRedisService(
     private val sseEmitters: SseEmitters,
     private val chatRoomRedisRepository: ChatRoomRedisRepository,
     private val chatMessageRedisRepository: ChatMessageRedisRepository,
-    private val followRepository: FollowRepository
+    private val followRepository: FollowRepository,
+    private val chatRoomRedisService: ChatRoomRedisService
 ) {
 
     companion object {
@@ -176,11 +179,33 @@ class ChatMessageRedisService(
 
     //채팅 수정
     fun updateChatMessage(chatMessageDTO: ChatMessageDTO): ChatMessageDTO {
-        val foundChatMessage: ChatMessage = chatMessageRepository.findById(chatMessageDTO.chatMessageId).orElse(null)
-            ?: throw ChatMessageException.NOT_FOUND.get()
+        val chatMessageRedis = chatMessageRedisRepository.findById(chatMessageDTO.chatMessageId)
 
-        foundChatMessage.message = chatMessageDTO.message
-        return ChatMessageDTO(chatMessageRepository.save(foundChatMessage))
+        log.info("chatMessageDTO는? $chatMessageDTO")
+        log.info("chatMessageRedis는? $chatMessageRedis")
+        if (chatMessageRedis.isEmpty) {
+            val foundChatMessage =
+                chatMessageRepository.findById(chatMessageDTO.chatMessageId).orElse(null)
+                    ?: throw ChatMessageException.NOT_FOUND.get()
+            log.info("foundChatMessage는? $foundChatMessage")
+            foundChatMessage.message = chatMessageDTO.message
+            return ChatMessageDTO(chatMessageRepository.save(foundChatMessage))
+        } else {
+            val updatedChatMessage = chatMessageRedis.get().copy(
+                message = chatMessageDTO.message,
+                updatedAt = LocalDateTime.now()
+            )
+            log.info("updatedChatMessage는? $updatedChatMessage")
+            chatMessageRedisRepository.save(updatedChatMessage)
+            return ChatMessageDTO(
+                chatMessageId = updatedChatMessage.id,
+                chatRoomId = updatedChatMessage.chatRoom.id,
+                memberId = updatedChatMessage.member.memberId,
+                nickName = updatedChatMessage.member.nickname,
+                message = updatedChatMessage.message,
+                type = updatedChatMessage.type
+            )
+        }
     }
 
     //채팅 삭제

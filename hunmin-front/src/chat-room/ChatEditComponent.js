@@ -1,14 +1,32 @@
 import React, { useState } from 'react';
 import api from '../axios';
 
-const ChatEditComponent = ({ chatMessageId, originalMessage, onUpdateSuccess, onCancel }) => {
+const ChatEditComponent = ({
+                               chatMessageId,
+                               chatRoomId,
+                               memberId,
+                               originalMessage,
+                               onUpdateSuccess,
+                               onCancel,
+                           }) => {
     const [editedMessage, setEditedMessage] = useState(originalMessage);
 
     const handleUpdate = async () => {
         try {
-            const response = await api.put('/chat', {
+            const token = localStorage.getItem('token');
+
+            const requestBody = {
                 chatMessageId: chatMessageId,
+                chatRoomId: chatRoomId,
+                memberId: memberId,
                 message: editedMessage,
+                type: 'CHAT',
+            };
+
+            const response = await api.put('/chat', requestBody, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
             });
             onUpdateSuccess(response.data);
         } catch (error) {
@@ -18,11 +36,11 @@ const ChatEditComponent = ({ chatMessageId, originalMessage, onUpdateSuccess, on
 
     return (
         <div className="chat-edit-container">
-      <textarea
-          value={editedMessage}
-          onChange={(e) => setEditedMessage(e.target.value)}
-          className="chat-edit-textarea"
-      />
+            <textarea
+                value={editedMessage}
+                onChange={(e) => setEditedMessage(e.target.value)}
+                className="chat-edit-textarea"
+            />
             <div className="chat-edit-buttons">
                 <button onClick={handleUpdate} className="chat-edit-save-button">
                     저장

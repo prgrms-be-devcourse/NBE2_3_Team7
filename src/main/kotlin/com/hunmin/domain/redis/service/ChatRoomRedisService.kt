@@ -11,23 +11,19 @@ import com.hunmin.domain.entity.Member
 import com.hunmin.domain.entity.NotificationType
 import com.hunmin.domain.exception.chat.ChatRoomException
 import com.hunmin.domain.handler.SseEmitters
-import com.hunmin.domain.redis.entity.ChatMessageRedis
 import com.hunmin.domain.redis.entity.ChatRoomRedis
+import com.hunmin.domain.redis.repository.ChatMessageRedisRepository
 import com.hunmin.domain.redis.repository.ChatRoomRedisRepository
 import com.hunmin.domain.redis.repository.search.ChatRoomRedisSearchImpl
 import com.hunmin.domain.repository.ChatMessageRepository
 import com.hunmin.domain.repository.ChatRoomRepository
 import com.hunmin.domain.repository.MemberRepository
 import com.hunmin.domain.service.NotificationService
-import io.jsonwebtoken.io.DeserializationException
-import io.lettuce.core.RedisCommandTimeoutException
-import org.hibernate.TransactionException
 import org.hibernate.query.sqm.tree.SqmNode.log
 import org.modelmapper.ModelMapper
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Sort
-import org.springframework.data.redis.RedisConnectionFailureException
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -44,6 +40,7 @@ class ChatRoomRedisService(
     private val modelMapper: ModelMapper,
     private val chatRoomRedisRepository: ChatRoomRedisRepository,
     private val chatRoomRepository: ChatRoomRepository,
+    private val chatMessageRedisRepository: ChatMessageRedisRepository,
     private val chatMessageRepository: ChatMessageRepository,
 ) : ChatRoomRedisSearchImpl(chatRoomRedisRepository) {
     // 채팅방 생성
@@ -104,6 +101,8 @@ class ChatRoomRedisService(
             // redis에 저장
             chatRoomRedisRepository.save(chatRoom)
             val allChatRooms = chatRoomRedisRepository.findAll()
+            //채팅 준비
+            val chatMessagesList: MutableList<ChatMessage> = mutableListOf()
             // 캐싱전략 설계 10개 이상이면 -> DB저장
             if ((increasedId % 10).toInt() == 0) {
                 for (chatRooms in allChatRooms) {
@@ -118,26 +117,37 @@ class ChatRoomRedisService(
                         chatMessage = mutableListOf(),
                         userCount = chatRooms.userCount
                     )
-                    //채팅 내역 DB에 저장
-                    val chatMessages: MutableList<ChatMessageRedis>? = chatRooms.chatMessage
-                    for (chatMessage in chatMessages!!) {
-                        var newChatMessage = ChatMessage(
-                            chatRoom = newChatRoom, message = chatMessage.message,
-                            member = if (chatMessage.member.memberId == newMember.memberId) newMember else newPartner,
-                            type = chatMessage.type
-                        )
-                        // DB저장
-                        chatMessageRepository.save(newChatMessage)
-                    }
 
+                    //채팅도 함께 DB저장
+                    val chatMessages = chatMessageRedisRepository.findAll()
+                    log.info("chatMessages는? $chatMessages")
+
+                    for (redisChatMessage in chatMessages) {
+                        if (redisChatMessage.chatRoom.id == chatRooms.id) {
+                            val newChatMessage = ChatMessage(
+                                chatRoom = newChatRoom, message = redisChatMessage.message,
+                                member = newMember,
+                                type = redisChatMessage.type
+                            )
+                            log.info("newChatMessage는? $newChatMessage")
+                            // DB저장
+                            val savedDbChatMessage = chatMessageRepository.save(newChatMessage)
+                            chatMessagesList.add(savedDbChatMessage)
+                            log.info("save는? $savedDbChatMessage")
+                        }
+                    }
+                    val realChatRoom = newChatRoom.copy(
+                        chatMessage = chatMessagesList
+                    )
+                    chatMessagesList.clear()
                     // DB저장
-                    chatRoomRepository.save(newChatRoom)
+                    chatRoomRepository.save(realChatRoom)
                 }
                 // redis 저장소 비우기
                 chatRoomRedisRepository.deleteAll()
-                chatMessageRepository.deleteAll()
+                chatMessageRedisRepository.deleteAll()
             }
-            log.info("여기까진 ok 파트너: $partner, 나: $me")
+
             //알림
             val notificationSendDTO = NotificationSendDTO(
                 memberId = partnerId,
@@ -164,16 +174,6 @@ class ChatRoomRedisService(
                 partnerName = partnerName,
                 createdAt = chatRoom.createdAt
             )
-        } catch (e: RedisConnectionFailureException) {
-            throw RedisConnectionFailureException("레디스 연결문제 ${e.message}")
-        } catch (e: RedisCommandTimeoutException) {
-            throw RedisCommandTimeoutException("레디스 서버 과부하 ${e.message}")
-        } catch (e: DeserializationException) {
-            throw DeserializationException("역직렬화 문제 ${e.message}")
-        } catch (e: OutOfMemoryError) {
-            throw OutOfMemoryError("기본 명령실패 ${e.message}")
-        } catch (e: TransactionException) {
-            throw TransactionException("트랜젝션 사용으로 인한 문제 ${e.message}")
         } catch (e: Exception) {
             throw Exception("채팅룸 만들기 실패 ${e.message}")
         }
@@ -182,18 +182,19 @@ class ChatRoomRedisService(
     // 채팅방 삭제
     fun deleteChatRoom(chatRoomId: Long): Boolean {
         try {
-            val currentId = redisTemplate.opsForValue().get("chatRoomRedisId") ?: "0"
-            // 너무 큰 숫자가 들어온 경우
-            log.info("currntId ${currentId}")
-            if (chatRoomId < 0 || currentId.toString().toInt() < chatRoomId) return false
-            if (currentId.toString().first().toString().toInt() * 10 >= chatRoomId) {
-                chatRoomRepository.findById(chatRoomId).orElseThrow(ChatRoomException.NOT_FOUND::get)
+            log.info("chatRoomId삭제 $chatRoomId")
+            val redisChatRoom = chatRoomRedisRepository.findById(chatRoomId)
+            log.info("redisChatRoomㄴㄴ $redisChatRoom")
+            if (redisChatRoom.isEmpty){
+                val foundChatRoom = chatRoomRepository.findById(chatRoomId)
+                log.info("foundChatRoomㄴㄴ $foundChatRoom")
+                if (foundChatRoom.isEmpty){
+                    return false
+                }
                 chatRoomRepository.deleteById(chatRoomId)
                 return true
-            } else {
-                val foundChatRoom =
-                    chatRoomRedisRepository.findById(chatRoomId).orElseThrow(ChatRoomException.NOT_FOUND::get)
-                chatRoomRedisRepository.delete(foundChatRoom)
+            }else {
+                chatRoomRedisRepository.deleteById(chatRoomId)
                 return true
             }
         } catch (e: Exception) {

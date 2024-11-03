@@ -38,11 +38,12 @@ class ChatMessageController(
     }
 
     //채팅 수정
-    @PutMapping("/{message}")//프론트 화면에 수정 필요! put GetParam -> pathvariable
+    @PutMapping//프론트 화면에 수정 필요! put GetParam -> pathvariable
     @ResponseBody
     @Operation(summary = "채팅 수정", description = "채팅 내역을 수정하는 API")
-    fun updateMessage(@Validated @PathVariable message: ChatMessageDTO): ResponseEntity<ChatMessageDTO> {
-        return ResponseEntity.ok(chatMessageService.updateChatMessage(message))
+    fun updateMessage(@Validated @RequestBody message: ChatMessageDTO): ResponseEntity<ChatMessageDTO> {
+//        return ResponseEntity.ok(chatMessageService.updateChatMessage(message))
+        return ResponseEntity.ok(chatMessageRedisService.updateChatMessage(message))
     }
 
     //채팅삭제
