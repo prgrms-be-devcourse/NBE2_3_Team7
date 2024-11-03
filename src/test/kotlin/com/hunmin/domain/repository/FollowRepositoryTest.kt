@@ -4,6 +4,7 @@ import com.hunmin.domain.dto.page.PageRequestDTO
 import com.hunmin.domain.entity.Follow
 import com.hunmin.domain.entity.FollowStatus
 import com.hunmin.domain.entity.MemberLevel
+import com.hunmin.domain.service.FollowService
 import jakarta.transaction.Transactional
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
@@ -18,6 +19,9 @@ import kotlin.test.assertTrue
 @Transactional
 @TestPropertySource(locations = ["classpath:application-test.properties"])
 class FollowRepositoryTest {
+    @Autowired
+    private lateinit var followService: FollowService
+
     @Autowired
     lateinit var memberRepository: MemberRepository
     @Autowired
@@ -96,14 +100,14 @@ class FollowRepositoryTest {
 
         // 서로 팔로우 하기
         Follow(follower = foundMemberB, followee =foundMemberA, isBlock = false, status = FollowStatus.ACCEPTED, notification = true )
-        val foundFollowA = followRepository.findById(1).get()
-        foundFollowA.status = FollowStatus.ACCEPTED
-        followRepository.save(foundFollowA)
-
+        followService.register(memberId = 3, myEmail = "test1@test.com")
+        followService.register(memberId = 1, myEmail = "test3@test.com")
+        followService.register(memberId = 4, myEmail = "test1@test.com")
+        followService.register(memberId = 1, myEmail = "test4@test.com")
         //when
-        var foundFollow = followRepository.getFollowPage(foundMemberA.memberId, pageable)
+        var foundFollow = followRepository.getFollowPage(1, pageable)
         //then
-        assertEquals(foundFollow.totalElements, 1)
+        assertEquals(foundFollow.totalElements, 2)
         assertEquals(foundFollow.totalPages, 1)
     }
 }

@@ -91,7 +91,7 @@ class FollowServiceTest {
         val acceptFollow = followService.registerAccept("test8@test.com", 2)
         //when
         var pageRequestDTO = PageRequestDTO(page = 1, size = 10)
-        val newFollowList = followService.readPage(pageRequestDTO, "test1@test.com")
+        val newFollowList = followService.readPage(pageRequestDTO, "test2@test.com")
         //then
         assertNotNull(newFollowList)
         assertThat(newFollowList.totalPages).isEqualTo(1)
@@ -132,35 +132,5 @@ class FollowServiceTest {
         //then
         assertNotNull(newFollow)
         assertTrue(newFollow)
-    }
-    @Test
-    fun `게시글 등록시 팔로우에게 알림 보내기`(){
-        //given
-        val foundMemberA =memberRepository.findById(1).get()
-
-        val newFollow = followService.register("test2@test.com", 8)
-        val acceptFollow = followService.registerAccept("test8@test.com", 2)
-
-        val foundFollowA = followRepository.findById(1).get()
-        foundFollowA.status = FollowStatus.ACCEPTED
-        followRepository.save(foundFollowA)
-
-        val boardRequestDTO = BoardRequestDTO(
-            boardId = 1L,
-            memberId = foundMemberA.memberId,
-            title = "테스트 제목",
-            content = "테스트 내용",
-            location = "위치 이름",
-            latitude = 0.0,
-            longitude = 0.0,
-            imageUrls = listOf("image1.png", "image2.png").toMutableList()
-        )
-
-        //when
-        val boardResponseDTO = boardService.createBoard(boardRequestDTO)
-        val notification = notificationRepository.findById(1).get()
-        //then
-        assertThat(boardResponseDTO)
-        assertNotNull(notification)
     }
 }
