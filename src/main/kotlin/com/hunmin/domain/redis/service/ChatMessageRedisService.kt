@@ -72,13 +72,14 @@ class ChatMessageRedisService(
                 log.info("savedChatMessage받음_메시지 $savedChatMessage")
                 redisSubscriber.sendMessage(ChatMessageDTO(savedChatMessage))
 
-                // 알림
+                // 알림 (팔로우 상태만 받기)
                 val senderId = sender.memberId
                 val receiverId = chatRoom.partner.memberId
 
                 if (receiverId == null) {
                     throw NoSuchElementException("수신자가 등록되지 않았습니다.")
                 }
+                // 팔로우 차단이 아닌 경우에만 메세지 받기
                 val foundFollow = followRepository.findByMemberId(receiverId, senderId)
                 if (foundFollow.isPresent) {
                     if (!foundFollow.get().isBlock && foundFollow.get().notification) {
@@ -130,7 +131,7 @@ class ChatMessageRedisService(
                 )
                 redisSubscriber.sendMessage(newChatMessageDTO)
 
-                // 알림
+                // 알림 (팔로우 상태만 받기)
                 val senderId = sender.memberId
                 val receiverId = redisChatRoom.partner.memberId
 
