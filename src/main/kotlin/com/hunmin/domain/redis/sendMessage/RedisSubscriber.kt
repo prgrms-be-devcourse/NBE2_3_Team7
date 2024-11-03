@@ -20,6 +20,7 @@ class RedisSubscriber(
     //메세지를 구독자들에게 송신
     fun sendMessage(publishMessage: ChatMessageDTO) {
         try {
+            log.info("publishing message: $publishMessage")
             messagingTemplate.convertAndSend("/sub/chat/room/${publishMessage.chatRoomId}", publishMessage)
         } catch (e: Exception) {
             log.error("Exception {}", e)
@@ -33,6 +34,7 @@ class RedisSubscriber(
 
             val chatMessage = objectMapper.readValue(publishMessage, ChatMessageDTO::class.java)
 
+            log.info("publishMessage message: $publishMessage")
             messagingTemplate.convertAndSend("/sub/chat/room/${chatMessage.chatRoomId}", chatMessage)
         } catch (e: Exception) {
             log.error(e.message)
