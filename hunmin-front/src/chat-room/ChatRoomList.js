@@ -163,6 +163,7 @@ const ChatRoomList = () => {
         setNewNickName('');
     };
 
+    //채팅방 생성
     const handleCreateChatRoom = () => {
         if (newNickName.trim() === '') {
             setSnackbar({
@@ -172,7 +173,6 @@ const ChatRoomList = () => {
             });
             return;
         }
-
         api.post(`/chat-room/${newNickName}`)
             .then(response => {
                 setChatRooms([...chatRooms, response.data]);
@@ -195,33 +195,33 @@ const ChatRoomList = () => {
     };
 
     return (
-        <Box sx={{ maxWidth: 700, margin: 'auto', padding: 2 }}>
+        <Box sx={{maxWidth: 700, margin: 'auto', padding: 2}}>
             {selectedChatRoomId ? (
                 // 선택된 채팅방이 있으면 ChatRoomInfo 컴포넌트 표시
-                <ChatRoomInfo chatRoomId={selectedChatRoomId} />
+                <ChatRoomInfo chatRoomId={selectedChatRoomId}/>
             ) : (
                 <>
-                <Typography variant="h4" gutterBottom>
-                    채팅방 목록
-                </Typography>
-                <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={() => setOpenCreateDialog(true)}
-                    sx={{ marginBottom: 2 }}
-                >
-                    채팅방 생성
-                </Button>
-                <List sx={{ width: '100%' }}>
-                    {chatRooms.map((room) => (
-                        <React.Fragment key={room.chatRoomId}>
-                            <ListItem>
-                                <ChatRoomCard room={room} onEnter={enterRoom} onRightClick={handleMenuOpen} />
-                            </ListItem>
-                            <Divider component="li" />
-                        </React.Fragment>
-                    ))}
-                </List>
+                    <Typography variant="h4" gutterBottom>
+                        채팅방 목록
+                    </Typography>
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={() => setOpenCreateDialog(true)}
+                        sx={{marginBottom: 2}}
+                    >
+                        채팅방 생성
+                    </Button>
+                    <List sx={{width: '100%'}}>
+                        {chatRooms.map((room) => (
+                            <React.Fragment key={room.chatRoomId}>
+                                <ListItem>
+                                    <ChatRoomCard room={room} onEnter={enterRoom} onRightClick={handleMenuOpen}/>
+                                </ListItem>
+                                <Divider component="li"/>
+                            </React.Fragment>
+                        ))}
+                    </List>
                 </>
             )}
             <Menu

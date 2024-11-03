@@ -8,4 +8,5 @@ import org.springframework.stereotype.Repository
 @Repository
 interface ChatRoomRedisRepository: CrudRepository<ChatRoomRedis, Long> {
     fun findByMemberNickname(nickname: String): List<ChatRoomRedis>
+    fun findByPartnerNickname(nickname: String): List<ChatRoomRedis>
 }

@@ -176,31 +176,15 @@ class ChatRoomRedisService(
         try {
             val me = memberRepository.findByEmail(email)
 
-            val redisChatRooms = getChatRoomsByNickName(me.nickname)
+            val redisChatRooms = getRedisChatRoomsByNickName(me.nickname)
             log.info("redisChatRooms = $redisChatRooms")
-            val dbChatRooms: List<ChatRoomRequestDTO> = chatRoomRepository.findChatRoomByMember(me.memberId)
+            val dbChatRooms = getDbChatRoomsByMember(me)
+            log.info("dbChatRooms = $dbChatRooms")
 
-            // 새로운 List 생성 -> dbchatRoom list에 넣기
+            // 새로운 List 생성 -> dbchatRoom , redisChatRoom list에 넣기
             val chatRoomDTOs: MutableList<ChatRoomRequestDTO> = mutableListOf()
             chatRoomDTOs.addAll(dbChatRooms)
-
-            // redisChatRoom -> dto로 변환 후 삽입
-            for (chatRooms in redisChatRooms) {
-                val chatRoomRequest = objectMapper.convertValue(
-                    chatRooms,
-                    ChatRoomRedis::class.java
-                )
-                log.info("chatRoomRequest = $chatRoomRequest")
-                val chatRoomRequestDTO = ChatRoomRequestDTO(
-                    chatRoomId = chatRoomRequest.id,
-                    memberId = chatRoomRequest.member.memberId,
-                    nickName = chatRoomRequest.member.nickname,
-                    partnerName = chatRoomRequest.partner.nickname,
-                    createdAt = chatRoomRequest.createdAt
-                )
-                log.info("chatRoomRequestDTO = $chatRoomRequestDTO")
-                chatRoomDTOs.add(chatRoomRequestDTO)
-            }
+            chatRoomDTOs.addAll(redisChatRooms)
 
             // 페이지네이션 처리를 위해 전체 리스트 정렬
             chatRoomDTOs.sortBy { it.partnerName }
@@ -218,8 +202,60 @@ class ChatRoomRedisService(
         }
 
     }
-    fun getChatRoomsByNickName(nickName:String):  List<ChatRoomRedis> {
-        return chatRoomRedisRepository.findByMemberNickname(nickName)
+    fun getRedisChatRoomsByNickName(nickName:String):  List<ChatRoomRequestDTO> {
+        // 새로운 List 생성 -> 관련채팅방 모두 넣기
+        val chatRoomDTOs: MutableList<ChatRoomRequestDTO> = mutableListOf()
+        log.info("chatRoomDTOs1 = $chatRoomDTOs")
+
+        val chatRoomMe = chatRoomRedisRepository.findByMemberNickname(nickName)
+        val ChatRoomPart = chatRoomRedisRepository.findByPartnerNickname(nickName)
+
+        log.info("chatRoomMe = $chatRoomMe, ChatRoomPart = $ChatRoomPart" )
+        // 내가 owner인 채팅룸 -> dto로 변환 후 삽입
+        for (chatRooms in chatRoomMe) {
+            val chatRoomRequest = objectMapper.convertValue(
+                chatRooms,
+                ChatRoomRedis::class.java
+            )
+            log.info("chatRoomRequest1 = $chatRoomRequest")
+            val chatRoomRequestDTO = ChatRoomRequestDTO(
+                chatRoomId = chatRoomRequest.id,
+                memberId = chatRoomRequest.member.memberId,
+                nickName = chatRoomRequest.member.nickname,
+                partnerName = chatRoomRequest.partner.nickname,
+                createdAt = chatRoomRequest.createdAt
+            )
+            log.info("chatRoomRequestDTO2 = $chatRoomRequestDTO")
+            chatRoomDTOs.add(chatRoomRequestDTO)
+        }
+        // 내가 partner인 채팅룸 -> dto로 변환 후 삽입
+        for (chatRooms in ChatRoomPart) {
+            val chatRoomRequest = objectMapper.convertValue(
+                chatRooms,
+                ChatRoomRedis::class.java
+            )
+            log.info("chatRoomRequest2 = $chatRoomRequest")
+            val chatRoomRequestDTO = ChatRoomRequestDTO(
+                chatRoomId = chatRoomRequest.id,
+                memberId = chatRoomRequest.partner.memberId,
+                nickName = chatRoomRequest.partner.nickname,
+                partnerName = chatRoomRequest.member.nickname,
+                createdAt = chatRoomRequest.createdAt
+            )
+            log.info("chatRoomRequestDTO3 = $chatRoomRequestDTO")
+            chatRoomDTOs.add(chatRoomRequestDTO)
+        }
+        return chatRoomDTOs
+    }
+    fun getDbChatRoomsByMember(member: Member): List<ChatRoomRequestDTO>{
+        val chatRoomDTOs: MutableList<ChatRoomRequestDTO> = mutableListOf()
+        val chatRoomsMe = chatRoomRepository.findChatRoomByMember(member.memberId)
+        log.info("chatRoomsMe3 = $chatRoomsMe")
+        val chatRoomsPart = chatRoomRepository.findChatRoomByPartner(member.memberId)
+        log.info("chatRoomsPart3 = $chatRoomsPart")
+        chatRoomDTOs.addAll(chatRoomsMe)
+        chatRoomDTOs.addAll(chatRoomsPart)
+        return chatRoomDTOs
     }
 }
 

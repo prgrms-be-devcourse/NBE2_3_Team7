@@ -18,8 +18,7 @@ data class ChatMessageDTO(
     val nickName: String,
     var message: String? = null,
     var type: MessageType? = null,
-    @NotNull(message = " 채팅 사용날짜는 필수 입니다.")
-    val createdAt: LocalDateTime
+    val createdAt: LocalDateTime? = null
 ) {
     constructor(chatMessage: ChatMessage) : this(
         chatMessage.chatMessageId,
