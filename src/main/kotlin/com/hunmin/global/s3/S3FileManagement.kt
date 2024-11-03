@@ -18,10 +18,6 @@ class S3FileManagement(
     private val region: String,
     private val s3Client: S3Client, // AmazonS3는 v1, S3Client는 v2 최신 버전 사용을 권장
 ) {
-    companion object {
-        const val TYPE_IMAGE = "image"
-    }
-
     fun uploadImage(multipartFile: MultipartFile): String {
 
         // 파일 검증
