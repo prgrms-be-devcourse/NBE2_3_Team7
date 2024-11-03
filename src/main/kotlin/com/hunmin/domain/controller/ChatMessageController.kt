@@ -24,7 +24,9 @@ class ChatMessageController(
     private val chatMessageService: ChatMessageService,
     private val memberService: MemberService
 ) {
-    private val logger = KotlinLogging.logger {}
+    companion object {
+        private val logger = KotlinLogging.logger {}
+    }
 
     //클라이언트로 부터 오는 메세지 수신 -> Redis로 송신
     @MessageMapping("/api/chat/message")
@@ -37,7 +39,7 @@ class ChatMessageController(
     @ResponseBody
     @Operation(summary = "채팅 검색", description = "검색하고 싶은 채팅을 조회하는 API")
     fun readMessage(@Validated @PathVariable chatMessageId: Long): ResponseEntity<ChatMessageDTO> {
-        logger.info { "Long {}" + chatMessageId }
+        logger.info ("Long, ${chatMessageId}")
         return ResponseEntity.ok(chatMessageService.readChatMessage(chatMessageId))
     }
 
@@ -76,11 +78,12 @@ class ChatMessageController(
         @RequestParam(value = "page", defaultValue = "1") page: Int,
         @RequestParam(value = "size", defaultValue = "10") size: Int
     ): ResponseEntity<Page<ChatMessageListRequestDTO>> {
+        logger.info("=== 페이징 결과 , ${page}, ${size}")
         val pageRequestDTO = PageRequestDTO(page = page,
             size = size)
-        return ResponseEntity.ok(
-            chatMessageService.getList(pageRequestDTO, chatRoomId)
-        )
+        val result = chatMessageService.getList(pageRequestDTO, chatRoomId)
+        logger.info("=== 페이징 결과 {${result.toList()}}, ${page}, ${size}")
+        return ResponseEntity.ok(result)
     }
 
 }

@@ -1,6 +1,7 @@
 package com.hunmin.domain.entity
 
 import jakarta.persistence.*
+import java.io.Serializable
 
 @Entity
 data class ChatMessage(

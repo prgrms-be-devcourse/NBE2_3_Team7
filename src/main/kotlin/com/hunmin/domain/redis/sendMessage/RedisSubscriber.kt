@@ -1,4 +1,4 @@
-package com.hunmin.domain.pubsub
+package com.hunmin.domain.redis.sendMessage
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.hunmin.domain.dto.chat.ChatMessageDTO

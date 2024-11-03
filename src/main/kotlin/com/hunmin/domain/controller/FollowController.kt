@@ -40,7 +40,7 @@ class FollowController (
         authentication: Authentication
     ): ResponseEntity<FollowRequestDTO> {
         val myEmail = authentication.name
-        return ResponseEntity.ok(followService?.registerAccept(myEmail, memberId))
+        return ResponseEntity.ok(followService.registerAccept(myEmail, memberId))
     }
 
     // 팔로이 삭제
@@ -52,7 +52,7 @@ class FollowController (
         authentication: Authentication
     ): ResponseEntity<Boolean> {
         val myEmail = authentication.name
-        return ResponseEntity.ok(followService?.remove(myEmail, memberId))
+        return ResponseEntity.ok(followService.remove(myEmail, memberId))
     }
 
     // 팔로우 리스트 조회

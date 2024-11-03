@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import api from '../axios';
 import {
     Container,
@@ -15,7 +15,7 @@ import {
     Grid,
     CircularProgress,
 } from '@mui/material';
-import { makeStyles } from '@mui/styles';
+import {makeStyles} from '@mui/styles';
 
 const useStyles = makeStyles({
     container: {
@@ -45,41 +45,46 @@ function FollowForm() {
 
     const fetchFollowList = useCallback(async (pageNumber) => {
         try {
-            const response = await api.get('/follow/list', {
-                params: {
-                    page: pageNumber,
-                    size: 10,
-                },
-                headers: {
-                    Authorization: `${localStorage.getItem('token')}`,
-                },
-            });
+                const response = await api.get('/follow/list', {
+                    params: {
+                        page: pageNumber,
+                        size: 10,
+                    },
+                    headers: {
+                        Authorization: `${localStorage.getItem('token')}`,
+                    },
+                });
+                console.log('API response data확인!:', response.data);
 
-            const followContent = response.data.content.map((follow) => ({
-                followId: follow.followId,
-                followerId: follow.followerId,
-                followeeId: follow.followeeId,
-                followerNickname: follow.followerName,
-                followerEmail: follow.followerEmail,
-                followerProfileImageUrl:
-                    follow.followerImage || 'https://via.placeholder.com/150?text=Default+Profile',
-                followeeNickname: follow.followeeName,
-                followeeEmail: follow.followeeEmail,
-                followeeProfileImageUrl:
-                    follow.followeeImage || 'https://via.placeholder.com/150?text=Default+Profile',
-                isNotificationEnabled: follow.notification,
-                isBlocked: follow.isBlock,
-                status: follow.status,
-            }));
-            setFollowList(followContent);
-            setTotalPages(response.data.totalPages);
-            setError(null);
-            console.log('followContent {}',followContent)
+            if (response.data && Array.isArray(response.data.content)) {
+                const followContent = response.data.content.map((follow) => ({
+                    followId: follow.followId,
+                    followerId: follow.followerId,
+                    followeeId: follow.followeeId,
+                    followerNickname: follow.followerName,
+                    followerEmail: follow.followerEmail,
+                    followerProfileImageUrl:
+                        follow.followerImage || 'https://via.placeholder.com/150?text=Default+Profile',
+                    followeeNickname: follow.followeeName,
+                    followeeEmail: follow.followeeEmail,
+                    followeeProfileImageUrl:
+                        follow.followeeImage || 'https://via.placeholder.com/150?text=Default+Profile',
+                    isNotificationEnabled: follow.notification,
+                    isBlocked: follow.isBlock,
+                    status: follow.status,
+                }));
+                setFollowList(followContent);
+                setTotalPages(response.data.totalPages);
+                setError(null);
+                console.log('followContent {}', followContent)
+            }
         } catch (error) {
-            console.error('팔로우 목록을 불러오는 중 오류 발생:', error);
+            console.error(`팔로우 목록을 불러오는 중 오류 발생: ${error.message}`, error.message);
             setError('팔로우 목록을 불러오는 중 오류가 발생했습니다.');
         }
+
     }, []);
+
 
     useEffect(() => {
         fetchFollowList(page);
@@ -105,7 +110,7 @@ function FollowForm() {
             setFollowList((prevList) =>
                 prevList.map((follow) =>
                     follow.followerId === followerId
-                        ? { ...follow, isNotificationEnabled: !isNotificationEnabled }
+                        ? {...follow, isNotificationEnabled: !isNotificationEnabled}
                         : follow
                 )
             );
@@ -164,7 +169,7 @@ function FollowForm() {
             );
             setFollowList((prevList) =>
                 prevList.map((follow) =>
-                    follow.followerId === followerId ? { ...follow, status: 'ACCEPTED' } : follow
+                    follow.followerId === followerId ? {...follow, status: 'ACCEPTED'} : follow
                 )
             );
             setError(null); // 에러 초기화
@@ -232,7 +237,7 @@ function FollowForm() {
                                             disabled={loadingId === follow.followId}
                                             endIcon={
                                                 loadingId === follow.followId ? (
-                                                    <CircularProgress size={20} color="inherit" />
+                                                    <CircularProgress size={20} color="inherit"/>
                                                 ) : null
                                             }
                                         >
@@ -243,13 +248,13 @@ function FollowForm() {
                                             <Button
                                                 variant="contained"
                                                 color={follow.isNotificationEnabled ? 'primary' : 'default'}
-                                            onClick={() =>
+                                                onClick={() =>
                                                     toggleNotification(follow.followerId, follow.isNotificationEnabled)
                                                 }
                                                 disabled={loadingId === follow.followId || follow.isBlocked}
                                                 endIcon={
                                                     loadingId === follow.followId ? (
-                                                        <CircularProgress size={20} color="inherit" />
+                                                        <CircularProgress size={20} color="inherit"/>
                                                     ) : null
                                                 }
                                             >
@@ -263,7 +268,7 @@ function FollowForm() {
                                                 disabled={loadingId === follow.followId}
                                                 endIcon={
                                                     loadingId === follow.followId ? (
-                                                        <CircularProgress size={20} color="inherit" />
+                                                        <CircularProgress size={20} color="inherit"/>
                                                     ) : null
                                                 }
                                             >

@@ -5,6 +5,7 @@ import com.hunmin.domain.entity.Board
 import com.hunmin.domain.entity.QBoard
 import com.hunmin.domain.entity.QComment
 import com.querydsl.jpa.JPQLQuery
+import org.hibernate.query.sqm.tree.SqmNode.log
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
@@ -18,7 +19,7 @@ class BoardSearchImpl : QuerydslRepositorySupport(Board::class.java), BoardSearc
 
         val query: JPQLQuery<Board> = from(board)
             .leftJoin(board.member).fetchJoin()
-            .leftJoin(board.comments, comment).fetchJoin()
+            .leftJoin(board.comments, comment)
             .where(board.title.contains(title))
             .distinct()
 
@@ -31,6 +32,8 @@ class BoardSearchImpl : QuerydslRepositorySupport(Board::class.java), BoardSearc
         val boardDtoList: List<BoardResponseDTO> = boardList.stream()
             .map({ board: Board -> BoardResponseDTO(board) })
             .collect(Collectors.toList())
+
+        log.info("results 게시판 검색 페이징 ${boardDtoList}")
 
         return PageImpl(boardDtoList, pageable, total)
     }

@@ -7,8 +7,10 @@ import com.hunmin.domain.dto.notification.NotificationSendDTO
 import com.hunmin.domain.entity.ChatRoom
 import com.hunmin.domain.entity.Member
 import com.hunmin.domain.entity.NotificationType
+import com.hunmin.domain.redis.entity.ChatRoomRedis
 import com.hunmin.domain.exception.chat.ChatRoomException
 import com.hunmin.domain.handler.SseEmitters
+import com.hunmin.domain.redis.repository.ChatRoomRedisRepository
 import com.hunmin.domain.repository.ChatRoomRepository
 import com.hunmin.domain.repository.MemberRepository
 import org.hibernate.query.sqm.tree.SqmNode.log
@@ -25,7 +27,8 @@ class ChatRoomService(
     private val chatRoomRepository: ChatRoomRepository,
     private val memberRepository: MemberRepository,
     private val notificationService: NotificationService,
-    private val sseEmitters: SseEmitters
+    private val sseEmitters: SseEmitters,
+    private val chatRoomRedisRepository: ChatRoomRedisRepository
 ) {
     // 단일 채팅방 조회
     fun findRoomById(id: Long): ChatRoomDTO {
@@ -35,44 +38,51 @@ class ChatRoomService(
     }
 
     //관련 채팅방 조회
-    fun findRoomByEmail(email: String): MutableList<ChatRoomRequestDTO> {
+    fun findRoomByEmail(email: String): List<ChatRoomRequestDTO> {
         try {
 
-            val me: Member = memberRepository.findByEmail(email)
-
-            val partnerNameAndChatRoom: MutableList<Any> = roomStorage.values(me.nickname)
+            val me = memberRepository.findByEmail(email)
+            log.info("me : ${me}")
+            val partnerNameAndChatRoom = roomStorage.values(me.nickname)
 
             val chatRoomIds: MutableSet<Long> = HashSet()
+            log.info("chatRoomIds : ${chatRoomIds}")
             val chatRoomRequestDTOList: MutableList<ChatRoomRequestDTO> = ArrayList()
+            log.info("chatRoomRequestDTOList : ${chatRoomRequestDTOList}")
 
             for (chatRoomRequestDTO in partnerNameAndChatRoom) {
+                log.info("chatRoomRequestDTO : ${chatRoomRequestDTO}")
                 val chatRoomRequest: ChatRoomRequestDTO? =
                     objectMapper.convertValue(chatRoomRequestDTO, ChatRoomRequestDTO::class.java)
                 chatRoomRequest?.let {
+                    log.info("it : ${it}")
                     chatRoomIds.add(it.chatRoomId)
                     chatRoomRequestDTOList.add(it)
                 }
             }
 
             val allMembers: List<Member> = memberRepository.findAll()
+            log.info("allMembers : ${allMembers}")
             for (member in allMembers) {
                 val rawChatRoom = roomStorage.get(member.nickname, me.nickname)
                 val chatRoomRequestDTO =
                     objectMapper.convertValue(rawChatRoom, ChatRoomRequestDTO::class.java)
+                log.info("chatRoomRequestDTO : ${chatRoomRequestDTO}")
                 chatRoomRequestDTO?.let {
                     if (!chatRoomIds.contains(it.chatRoomId)) {
+                        log.info("it : ${it}")
                         chatRoomIds.add(it.chatRoomId)
                         chatRoomRequestDTOList.add(it)
                     }
                 }
             }
+            log.info("chatRoomRequestDTOList : ${chatRoomRequestDTOList}")
             return chatRoomRequestDTOList
         } catch (e: Exception) {
-            log.error("채팅방 불러오기에 실패하였습니다")
+            log.error("채팅방 불러오기에 실패하였습니다 ${e.message}")
             throw ChatRoomException.FAILED_READ_ROOMS.get()
         }
     }
-
 
     // 채팅방 생성
     fun createChatRoomByNickName(partnerName: String, myEmail: String): ChatRoomRequestDTO {
@@ -89,7 +99,7 @@ class ChatRoomService(
             ) {
                 throw ChatRoomException.CHATROOM_ALREADY_EXIST.get()
             }
-            val chatRoom: ChatRoom = ChatRoom(member = me).apply {}
+            val chatRoom: ChatRoom = ChatRoom(member = me, partner = byNickname).apply {}
             val SavedchatRoom: ChatRoom = chatRoomRepository.save(chatRoom)
             val chatRoomRequestDTO: ChatRoomRequestDTO = ChatRoomRequestDTO(
                 chatRoomId = SavedchatRoom.chatRoomId, memberId = me.memberId, nickName = me.nickname,

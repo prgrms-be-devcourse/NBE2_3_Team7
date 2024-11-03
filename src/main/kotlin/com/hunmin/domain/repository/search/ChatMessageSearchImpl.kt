@@ -16,7 +16,8 @@ class ChatMessageSearchImpl : QuerydslRepositorySupport(ChatMessage::class.java)
         val chatMessage = QChatMessage.chatMessage
         val chatRoom = QChatRoom.chatRoom
 
-        val query = from(chatMessage).leftJoin(chatMessage.chatRoom, chatRoom)
+        val query = from(chatMessage)
+            .leftJoin(chatMessage.chatRoom, chatRoom)
             .where(chatRoom.chatRoomId.eq(chatRoomId))
 
         val dtoQuery = query.select(
