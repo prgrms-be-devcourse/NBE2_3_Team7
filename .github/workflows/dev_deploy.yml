@@ -25,6 +25,12 @@ jobs:
         with:
           fetch-depth: 0  # 전체 히스토리를 가져옴
 
+      - name: Set up JDK 17 for Kotlin
+        uses: actions/setup-java@v3
+        with:
+          java-version: 17 # 자바 설치
+          distribution: 'adopt'
+
           # Gradle Wrapper 권한 설정
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
@@ -33,11 +39,6 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew clean build -x test
 
-      - name: Set up JDK 17 for Kotlin
-        uses: actions/setup-java@v3
-        with:
-          java-version: 17 # 자바 설치
-          distribution: 'adopt'
 
 #      - name: Set up Node.js for React
 #        uses: actions/setup-node@v3
