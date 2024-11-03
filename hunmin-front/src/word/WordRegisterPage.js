@@ -45,12 +45,16 @@ const WordRegisterPage = () => {
                 memberId: memberId, // memberId를 Number 타입으로 변환하여 추가
             };
 
+            console.log("Sending data:", wordRequestDTO);
+
             // 단어 등록 API 호출
             const response = await api.post('/words', wordRequestDTO);
+            console.log(response.data); // 응답 데이터 확인
             setRegisteredWord(response.data); // 등록된 단어 상태 업데이트
             // 성공 시 홈으로 리다이렉트
-            // navigate('/word-management'); // 필요 시 주석 해제
+            navigate('/word-management'); // 필요 시 주석 해제
         } catch (error) {
+            console.error("Error during registration:", error); // 오류에 대한 로그 추가
             setErrorMessage('등록 중 오류가 발생했습니다. 다시 시도해 주세요.');
         }
     };
