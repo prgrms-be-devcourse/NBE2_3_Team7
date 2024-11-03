@@ -1,6 +1,9 @@
 name: hunmin kotlin dev CI/CD
 
 on:
+  push:
+    branches:
+      - 'feature/#119-feat-깃허브-액션-설정'  # 특정 브랜치에서 push 발생시 실행 테스트 후 삭제해야함.
   pull_request:
     types: [closed] # PR이 닫힐때 실행
   workflow_dispatch: # 수동 실행도 가능하도록
@@ -8,7 +11,13 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest # OS환경
-    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'develop' # develop 브랜치
+    if: |
+      (github.event_name == 'push' && github.ref == 'refs/heads/feature/#119-feat-깃허브-액션-설정') || 
+      (github.event_name == 'pull_request' && 
+       github.event.pull_request.merged == true && 
+       github.event.pull_request.base.ref == 'develop')
+
+    #if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'develop' # develop 브랜치
 
     steps:
       - name: Checkout
