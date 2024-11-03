@@ -226,7 +226,7 @@ class ChatMessageRedisService(
             chatMessageListDTOs.sortBy { it.chatMessageId }
 
             //pageRequestDTO 페이지네이션 진행
-            val pageable = pageRequestDTO.getPageable(Sort.by("chatMessageId").ascending())
+            val pageable = pageRequestDTO.getPageable(Sort.by("chatMessageId").descending())
             val start = pageable.offset.toInt()
             val end = (start + pageable.pageSize).coerceAtMost(chatMessageListDTOs.size)
             val pagedChatMessageListDTOs = chatMessageListDTOs.subList(start, end)

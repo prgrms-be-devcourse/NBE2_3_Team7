@@ -1,7 +1,7 @@
 // src/chat-room/ChatRoomDetail.jsx
 
-import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, {useEffect, useLayoutEffect, useRef, useState} from 'react';
+import {useNavigate, useParams} from 'react-router-dom';
 import ChatComponent from './ChatComponent';
 import ChatRoomInfo from './ChatRoomInfo';
 import ChatEditComponent from './ChatEditComponent';
@@ -9,15 +9,16 @@ import ChatDeleteComponent from './ChatDeleteComponent';
 import api from '../axios';
 import './ChatRoomDetail.css';
 import moment from 'moment';
-import { v4 as uuidv4 } from 'uuid';
+import {v4 as uuidv4} from 'uuid';
 
 const ChatRoomDetail = () => {
     const { chatRoomId } = useParams();
     const navigate = useNavigate();
-
+    const [size] = useState(10);  // 사이즈 고정
     // 상태 변수 선언
     const [messages, setMessages] = useState([]);
     const [page, setPage] = useState(1);
+    const [partnerName, setPartnerName] = useState('');  // 상
     const [hasMore, setHasMore] = useState(true);
     const [isFetching, setIsFetching] = useState(false);
     const [nickname, setNickname] = useState('');
@@ -72,7 +73,7 @@ const ChatRoomDetail = () => {
             if (uniqueNewMessages.length === 0) {
                 setHasMore(false);
             } else {
-                setMessages((prevMessages) => [...uniqueNewMessages.reverse(), ...prevMessages]);
+                setMessages((prevMessages) => [...uniqueNewMessages, ...prevMessages]);
                 setPage(pageNumber + 1);
                 setHasMore(!lastPage);
             }
@@ -172,7 +173,7 @@ const ChatRoomDetail = () => {
             {/* 채팅방 헤더 */}
             <div className="chat-room-header">
                 <h1 className="chat-room-title">
-                    채팅 상대: {currentUserName}
+                    채팅 상대: {partnerName}님
                 </h1>
                 <button className="leave-button" onClick={() => navigate(-1)}>
                     채팅방 나가기
@@ -180,8 +181,12 @@ const ChatRoomDetail = () => {
             </div>
 
             {/* 채팅방 정보 */}
-            <ChatRoomInfo chatRoomId={chatRoomId} setNickname={setNickname} />
-
+            <ChatRoomInfo
+                chatRoomId={chatRoomId}
+                setPartnerName={setPartnerName}
+                page={page}
+                size={size}
+            />
             {/* 채팅 메시지 목록 */}
             <div className="chat-messages-container" onScroll={handleScroll} ref={messagesContainerRef}>
                 <ul className="chat-messages-list">
@@ -192,7 +197,7 @@ const ChatRoomDetail = () => {
                         >
                             <div className="message-content">
                                 <strong className="sender-name">
-                                    {msg.memberId === currentUserId ? '나' : msg.nickName || '상대방'}
+                                    {msg.memberId === currentUserId ? '나' : partnerName}
                                 </strong>
 
                                 {/* 메시지 수정 또는 일반 메시지 표시 */}
@@ -252,6 +257,7 @@ const ChatRoomDetail = () => {
                 memberId={currentUserId}
                 onMessageSend={() => setShouldScrollToBottom(true)}
             />
+
         </div>
     );
 
