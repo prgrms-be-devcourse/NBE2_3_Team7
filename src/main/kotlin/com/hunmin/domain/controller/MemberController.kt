@@ -1,6 +1,7 @@
 package com.hunmin.domain.controller
 
 import com.hunmin.domain.dto.member.MemberDTO
+import com.hunmin.domain.dto.member.MemberUpdateDTO
 import com.hunmin.domain.dto.member.PasswordFindRequestDto
 import com.hunmin.domain.dto.member.PasswordUpdateRequestDto
 import com.hunmin.domain.entity.MemberRole
@@ -28,9 +29,9 @@ import java.util.*
 class MemberController(
     private val memberService: MemberService,
     private val jwtUtil: JWTUtil,
-    private val refreshRepository: RefreshRepository
+    private val refreshRepository: RefreshRepository,
 
-) {
+    ) {
     companion object {
         private val logger = KotlinLogging.logger {}
     }
@@ -40,6 +41,7 @@ class MemberController(
     fun uploadImage(@RequestParam("image") image: MultipartFile): ResponseEntity<String> {
         return try {
             val imageUrl = memberService.uploadImage(image)
+            logger.info("=== 이미지 업로드 성공: $imageUrl ===")
             ResponseEntity.ok(imageUrl)
         } catch (e: Exception) {
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("이미지 업로드 실패")
@@ -48,11 +50,20 @@ class MemberController(
 
     @PostMapping("/register")
     @Operation(summary = "회원 가입", description = "회원 가입할 때 사용하는 API")
-    fun registerProcess(@RequestBody memberDTO: MemberDTO): ResponseEntity<String> {
+    fun registerProcess(
+        @RequestPart("memberInfo") memberDTO: MemberDTO,
+        @RequestPart("profileImage", required = false) profileImage: MultipartFile?
+    ): ResponseEntity<String> {
         return try {
             logger.info("=== 회원가입 시작: ${memberDTO.email} ===")
+            profileImage?.let {
+                val imageUrl = memberService.uploadImage(it)
+                memberDTO.image = imageUrl
+                logger.info("=== 프로필 이미지 업로드 완료: $imageUrl ===")
+            }
             memberService.registerProcess(memberDTO)
             logger.info("=== 회원가입 성공 ===")
+
             ResponseEntity.status(HttpStatus.CREATED).body("회원 가입 완료")
         } catch (e: Exception) {
             logger.error("=== 회원가입 실패 (유효성 검사): ${e.message} ===")
@@ -61,16 +72,30 @@ class MemberController(
     }
 
     @PutMapping("/{memberId}")
-    @Operation(summary = "회원 정보 수정", description = "등록된 회원의 정보를 수정할 때 사용하는 API")
+    @Operation(summary = "회원정보 수정", description = "등록된 회원의 정보를 수정할 때 사용하는 API")
     fun updateMember(
         @PathVariable memberId: Long,
-        @RequestBody memberDTO: MemberDTO
-    ): ResponseEntity<String> {
+        @RequestPart("memberInfo") updateDTO: MemberUpdateDTO,
+        @RequestPart("profileImage", required = false) newProfileImage: MultipartFile?,
+    ): ResponseEntity<Any> {
         return try {
-            memberService.updateMember(memberId, memberDTO)
-            ResponseEntity.ok("회원 정보가 수정되었습니다")
+            // 이미지가 들어가면 먼저 업로드
+            newProfileImage?.let {
+                val imageUrl = memberService.uploadImage(it)
+                updateDTO.image = imageUrl
+                logger.info("=== 새 프로필 이미지 업로드 완료: $imageUrl ===")
+
+            }
+            val updatedMember = memberService.updateMember(memberId, updateDTO)
+            logger.info("=== 회원정보 수정 성공 ===")
+            logger.info("=== 수정된 회원 정보 - 이미지 URL: ${updateDTO.image} ===")
+
+            // 수정된 회원 정보를 응답으로 반환
+            ResponseEntity.ok(updatedMember)
+
         } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("회원 정보 수정 실패")
+            logger.error("=== 회원 정보 수정 실패: ${e.message} ===")
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("회원정보 수정 실패: ${e.message}")
         }
     }
 
