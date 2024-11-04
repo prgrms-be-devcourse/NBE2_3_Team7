@@ -12,6 +12,7 @@ import com.hunmin.domain.handler.SseEmitters
 import com.hunmin.domain.repository.BoardRepository
 import com.hunmin.domain.repository.FollowRepository
 import com.hunmin.domain.repository.MemberRepository
+import com.hunmin.global.s3.S3FileManagement
 import org.hibernate.query.sqm.tree.SqmNode.log
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
@@ -35,7 +36,8 @@ class BoardService(
     private val followRepository: FollowRepository,
     private val notificationService: NotificationService,
     private val sseEmitters: SseEmitters,
-    private val redisTemplate: RedisTemplate<String, Any>
+    private val redisTemplate: RedisTemplate<String, Any>,
+    private val s3FileManagement: S3FileManagement
 
 ) {
 
@@ -44,44 +46,17 @@ class BoardService(
         return redisTemplate.opsForHash<Any, BoardResponseDTO>().get("board", boardId) as? BoardResponseDTO
     }
 
-    // 게시글 이미지 첨부
+    // 기존 uploadImage 메서드를 완전히 교체
     @Throws(IOException::class)
     fun uploadImage(file: MultipartFile): String {
-        val uploadDir = Paths.get("uploads").toAbsolutePath().normalize().toString()
-        val directory = File(uploadDir)
-
-        if (!directory.exists()) {
-            val created = directory.mkdirs()
-            if (!created) {
-                throw IOException("Failed to create directory")
-            }
-        }
-
-        val fileName = "${UUID.randomUUID()}.${getFileExtension(file.originalFilename)}"
-        val filePath = Paths.get(uploadDir, fileName)
-        file.inputStream.use { input ->
-            Files.copy(input, filePath)
-        }
-
-        return "/uploads/$fileName"
+        return s3FileManagement.uploadImage(file)
     }
 
-    // 파일 확장자 추출
-    private fun getFileExtension(fileName: String?): String {
-        require(!fileName.isNullOrEmpty() && fileName.contains(".")) {
-            "Invalid file name: $fileName"
-        }
-        return fileName.substring(fileName.lastIndexOf('.') + 1)
-    }
-
-    // 게시글 이미지 삭제
+    // deleteImage 메서드도 수정
     @Throws(IOException::class)
     fun deleteImage(imageUrl: String) {
-        val uploadDir = Paths.get("uploads").toAbsolutePath().normalize().toString()
         val fileName = imageUrl.substring(imageUrl.lastIndexOf("/") + 1)
-        val filePath = Paths.get(uploadDir, fileName)
-
-        Files.deleteIfExists(filePath)
+        s3FileManagement.delete(fileName)
     }
 
     //게시글 등록
