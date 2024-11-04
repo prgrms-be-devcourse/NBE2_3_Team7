@@ -4,8 +4,12 @@ cloud:
       bucket: "project-hunmin"
     region:
       static: "ap-northeast-2"
-    stack:
-      auto: false
     credentials:
-      access-key: "AKIAQ3EGTLUBY5FUFXH7"
-      secret-key: "GTxPCkFnbduQh9S/GuHbXyn/ePt7BzPme9TJZQhcs"
+      access-key: ${AWS_ACCESS_KEY}
+      secret-key: ${AWS_SECRET_KEY}
+
+logging:
+  level:
+    com.amazonaws: DEBUG
+    software.amazon.awssdk: DEBUG
+    com.hunmin: DEBUG
