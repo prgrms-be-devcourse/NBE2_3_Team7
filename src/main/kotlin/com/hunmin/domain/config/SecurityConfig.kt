@@ -77,6 +77,7 @@ class SecurityConfig(
                     .requestMatchers("/v3/api-docs/**").permitAll()
                     .requestMatchers("/swagger-ui.html").permitAll()
                     .requestMatchers("/api/notices/list/**").permitAll()
+                    .requestMatchers("/health").permitAll()
                     .anyRequest().permitAll()
             }
             .sessionManagement { session ->
