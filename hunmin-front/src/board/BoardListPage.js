@@ -59,6 +59,13 @@ const BoardListPage = () => {
             const response = await api.get('/board', {
                 params: { page, size },
             });
+
+            console.log('=== 게시글 데이터:', response.data.content);
+            // 첫 번째 게시글의 프로필 이미지 URL 확인
+            if (response.data.content.length > 0) {
+                console.log('=== 첫 번째 게시글 프로필 이미지:', response.data.content[0].profileImage);
+            }
+
             setBoards(response.data.content);
             setTotalPages(response.data.totalPages);
             console.log(response.data)
