@@ -51,7 +51,7 @@ class MemberService(
         val filePath = Paths.get(uploadDir, fileName)
         Files.copy(file.inputStream, filePath)
 
-        return "/uploads/$fileName"
+        return "https://project-hunmin.s3.ap-northeast-2.amazonaws.com/$fileName"
     }
 
     // 파일 확장자 추출
