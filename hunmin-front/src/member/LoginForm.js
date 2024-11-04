@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import Header from '../header/Header';
+const apiUrl = process.env.REACT_APP_API_URL;
 
 const LoginForm = ({ setToken }) => {
     const [email, setEmail] = useState('');
@@ -14,7 +15,7 @@ const LoginForm = ({ setToken }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post('http://localhost:8080/api/members/login', { email, password }, {
+            const response = await axios.post(`${apiUrl}/api/members/login`, { email, password }, {
                 headers: {
                     'Content-Type': 'application/json',
                 },
