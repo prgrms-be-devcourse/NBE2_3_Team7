@@ -1,6 +1,7 @@
 package com.hunmin.domain.dto.board
 
 import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer
@@ -10,26 +11,26 @@ import com.hunmin.domain.entity.Board
 import java.time.LocalDateTime
 
 data class BoardResponseDTO @JsonCreator constructor(
-    val boardId: Long,
-    val memberId: Long? = null,
-    val title: String,
-    val nickname: String,
-    val profileImage: String? = null,
-    val content: String,
-    val location: String?,
-    val latitude: Double?,
-    val longitude: Double?,
-    val imageUrls: List<String> = emptyList(),
+    @JsonProperty("boardId") val boardId: Long,
+    @JsonProperty("memberId") val memberId: Long? = null,
+    @JsonProperty("title") val title: String,
+    @JsonProperty("nickname") val nickname: String,
+    @JsonProperty("profileImage") val profileImage: String? = null,
+    @JsonProperty("content") val content: String,
+    @JsonProperty("location") val location: String?,
+    @JsonProperty("latitude") val latitude: Double?,
+    @JsonProperty("longitude") val longitude: Double?,
+    @JsonProperty("imageUrls") val imageUrls: List<String> = emptyList(),
 
     @JsonSerialize(using = LocalDateTimeSerializer::class)
     @JsonDeserialize(using = LocalDateTimeDeserializer::class)
-    val createdAt: LocalDateTime?,
+    @JsonProperty("createdAt") val createdAt: LocalDateTime?,
 
     @JsonSerialize(using = LocalDateTimeSerializer::class)
     @JsonDeserialize(using = LocalDateTimeDeserializer::class)
-    val updatedAt: LocalDateTime?,
+    @JsonProperty("updatedAt") val updatedAt: LocalDateTime?,
 
-    val comments: List<CommentResponseDTO> = emptyList()
+    @JsonProperty("comments") val comments: List<CommentResponseDTO> = emptyList()
 ) {
     constructor(board: Board) : this(
         boardId = board.boardId,

@@ -260,7 +260,7 @@ const BoardDetailPage = () => {
                                     }}
                                 />
                             ) : (
-                                <FaUserCircle size={30} style={{color: '#fff'}}/> // 프로필 아이콘 표시
+                                <FaUserCircle size={30} style={{color: 'skyblue'}}/> // 프로필 아이콘 표시
                             )} <span
                             onClick={handlePopoverOpen}
                             style={{cursor: 'pointer', color: '#007bff', textDecoration: 'underline'}}
@@ -316,7 +316,7 @@ const BoardDetailPage = () => {
                         <Grid item xs={12}>
                             <div style={{display: 'flex', justifyContent: 'flex-end', gap: '8px'}}>
                             {/* 수정 및 삭제 버튼 표시 조건 추가 */}
-                                {memberId === originalMemberId && (
+                                {memberId == originalMemberId && (
                                     <>
                                         <Button variant="contained" color="primary" onClick={() => setIsEditMode(true)}>수정</Button>
                                         <Button variant="outlined" color="secondary" onClick={handleDelete}>삭제</Button>
