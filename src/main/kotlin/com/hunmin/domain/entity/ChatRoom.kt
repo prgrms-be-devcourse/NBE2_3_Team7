@@ -24,7 +24,7 @@ data class ChatRoom(
         orphanRemoval = true,
         fetch = FetchType.EAGER
     )
-    var chatMessage: MutableList<ChatMessage>? = null,
+    var chatMessage: MutableList<ChatMessage>? = mutableListOf(),
 
     var userCount: Long = 1
 

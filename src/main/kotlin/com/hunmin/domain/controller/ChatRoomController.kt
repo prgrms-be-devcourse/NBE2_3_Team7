@@ -1,5 +1,6 @@
 package com.hunmin.domain.controller
 
+import com.hunmin.domain.dto.chat.ChatRoomDTO
 import com.hunmin.domain.dto.chat.ChatRoomRequestDTO
 import com.hunmin.domain.dto.page.PageRequestDTO
 import com.hunmin.domain.redis.service.ChatRoomRedisService
@@ -61,6 +62,12 @@ class ChatRoomController(
     ): ResponseEntity<Boolean> {
 //        return ResponseEntity.ok(chatRoomService.deleteChatRoom(chatRoomId, partnerName, authentication.name))
         return ResponseEntity.ok(chatRoomRedisService.deleteChatRoom(chatRoomId))
+    }
 
+    //단일 채팅방 정보 조회
+    @GetMapping("/{chatRoomId}")
+    @Operation(summary = "단일 채팅방 정보 조회", description = "검색하고 싶은 채팅방을 조회하는 API")
+    fun roomInfo(@PathVariable chatRoomId: Long): ResponseEntity<ChatRoomDTO> {
+        return ResponseEntity.ok(chatRoomService.findRoomById(chatRoomId))
     }
 }

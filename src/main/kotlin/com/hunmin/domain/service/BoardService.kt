@@ -6,6 +6,7 @@ import com.hunmin.domain.dto.board.BoardResponseDTO
 import com.hunmin.domain.dto.notification.NotificationSendDTO
 import com.hunmin.domain.dto.page.PageRequestDTO
 import com.hunmin.domain.entity.Board
+import com.hunmin.domain.entity.Follow
 import com.hunmin.domain.entity.NotificationType
 import com.hunmin.domain.exception.BoardException
 import com.hunmin.domain.exception.MemberException
@@ -113,22 +114,26 @@ class BoardService(
 
             // 알림
             val sender = member
-            val senderId = member.memberId
 
-            val followers= followRepository.getFollowList(senderId)
-            // 알림 메세지 구현 -> return 방식은 emitter send로
-            for (follower in followers) {
-                if (!follower.isBlock && follower.notification) {
+            val allFollow = followRepository.findAll()
+            val followList = mutableListOf<Follow>()
+            for (follow in allFollow) {
+                if (follow.follower == sender){
+                    followList.add(follow)
+                }
+            }
+            for (follow in followList) {
+                if (!follow.isBlock && follow.notification) {
                     val notificationSendDTO = NotificationSendDTO(
-                        message = sender.nickname + "님 : " + "새로운 게시글을 등록하였습니다",
+                        message = follow.follower!!.nickname + "님 : " + "새로운 게시글을 등록하였습니다",
                         notificationType = NotificationType.BOARD,
                         url = "/board/" + board.boardId
                     ).apply {
-                        this.memberId = follower.followerId
+                        this.memberId = follow.followee!!.memberId
                     }
                     notificationService.send(notificationSendDTO)
                     // emitter
-                    val emitterId = follower.followerId.toString() + "_"
+                    val emitterId = follow.followee!!.memberId.toString() + "_"
                     val emitter = sseEmitters.findSingleEmitter(emitterId)
 
                     log.info("emitter $emitter")

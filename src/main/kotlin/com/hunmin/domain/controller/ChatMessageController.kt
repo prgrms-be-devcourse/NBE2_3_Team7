@@ -4,6 +4,7 @@ import com.hunmin.domain.dto.chat.ChatMessageDTO
 import com.hunmin.domain.dto.chat.ChatMessageListRequestDTO
 import com.hunmin.domain.dto.member.MemberDTO
 import com.hunmin.domain.dto.page.PageRequestDTO
+import com.hunmin.domain.redis.service.ChatMessageRedisService
 import com.hunmin.domain.service.ChatMessageService
 import com.hunmin.domain.service.MemberService
 import io.swagger.v3.oas.annotations.Operation
@@ -22,7 +23,8 @@ import org.springframework.web.bind.annotation.*
 @Tag(name = "채팅", description = "채팅 CRUD")
 class ChatMessageController(
     private val chatMessageService: ChatMessageService,
-    private val memberService: MemberService
+    private val memberService: MemberService,
+    private val chatMessageRedisService: ChatMessageRedisService
 ) {
     companion object {
         private val logger = KotlinLogging.logger {}
@@ -31,24 +33,17 @@ class ChatMessageController(
     //클라이언트로 부터 오는 메세지 수신 -> Redis로 송신
     @MessageMapping("/api/chat/message")
     fun sendMessage(@Validated message: ChatMessageDTO) {
-        chatMessageService.sendChatMessage(message)
-    }
-
-    //단일 채팅 조회
-    @GetMapping("/{chatMessageId}")
-    @ResponseBody
-    @Operation(summary = "채팅 검색", description = "검색하고 싶은 채팅을 조회하는 API")
-    fun readMessage(@Validated @PathVariable chatMessageId: Long): ResponseEntity<ChatMessageDTO> {
-        logger.info ("Long, ${chatMessageId}")
-        return ResponseEntity.ok(chatMessageService.readChatMessage(chatMessageId))
+//        chatMessageService.sendChatMessage(message)
+        chatMessageRedisService.sendChatMessage(message)
     }
 
     //채팅 수정
-    @PutMapping("/{message}")//프론트 화면에 수정 필요! put GetParam -> pathvariable
+    @PutMapping//프론트 화면에 수정 필요! put GetParam -> pathvariable
     @ResponseBody
     @Operation(summary = "채팅 수정", description = "채팅 내역을 수정하는 API")
-    fun updateMessage(@Validated @PathVariable message: ChatMessageDTO): ResponseEntity<ChatMessageDTO> {
-        return ResponseEntity.ok(chatMessageService.updateChatMessage(message))
+    fun updateMessage(@Validated @RequestBody message: ChatMessageDTO): ResponseEntity<ChatMessageDTO> {
+//        return ResponseEntity.ok(chatMessageService.updateChatMessage(message))
+        return ResponseEntity.ok(chatMessageRedisService.updateChatMessage(message))
     }
 
     //채팅삭제
@@ -56,7 +51,8 @@ class ChatMessageController(
     @ResponseBody
     @Operation(summary = "채팅 삭제", description = "삭제하고 싶은 채팅을 삭제하는 API")
     fun deleteMessage(@Validated @PathVariable chatMessageId: Long): ResponseEntity<Boolean> {
-        return ResponseEntity.ok(chatMessageService.deleteChatMessage(chatMessageId))
+//        return ResponseEntity.ok(chatMessageService.deleteChatMessage(chatMessageId))
+        return ResponseEntity.ok(chatMessageRedisService.deleteChatMessage(chatMessageId))
     }
 
     //사용자 정보 호출
@@ -78,12 +74,10 @@ class ChatMessageController(
         @RequestParam(value = "page", defaultValue = "1") page: Int,
         @RequestParam(value = "size", defaultValue = "10") size: Int
     ): ResponseEntity<Page<ChatMessageListRequestDTO>> {
-        logger.info("=== 페이징 결과 , ${page}, ${size}")
         val pageRequestDTO = PageRequestDTO(page = page,
             size = size)
-        val result = chatMessageService.getList(pageRequestDTO, chatRoomId)
-        logger.info("=== 페이징 결과 {${result.toList()}}, ${page}, ${size}")
+//        val result = chatMessageService.getList(pageRequestDTO, chatRoomId)
+        val result = chatMessageRedisService.getList(pageRequestDTO, chatRoomId)
         return ResponseEntity.ok(result)
     }
-
 }
