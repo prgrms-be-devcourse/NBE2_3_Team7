@@ -22,7 +22,8 @@ const LoginForm = ({ setToken }) => {
                 withCredentials: true
             });
 
-            console.log(response.data);
+            console.log('=== 로그인 응답 전체 데이터:', response.data); // 전체 응답 데이터 확인
+
             const token = response.data.token;
             const memberId = response.data.memberId;
             const memberEmail = response.data.email;
@@ -32,6 +33,21 @@ const LoginForm = ({ setToken }) => {
             const level = response.data.level;
             const country = response.data.country;
             const refreshToken = response.data.refreshToken;
+
+            console.log('=== 순수 이미지 URL:', image);
+            console.log('=== URL에 포함된 localhost 여부:', image.includes('localhost'));
+
+            // localStorage 저장 전 데이터 확인
+            console.log('=== localStorage 저장 전 데이터:', {
+                token,
+                memberId,
+                email: memberEmail,
+                role,
+                nickname,
+                image,
+                level,
+                country
+            });
 
             // localStorage에 데이터 저장
             localStorage.setItem('token', token);
@@ -43,20 +59,23 @@ const LoginForm = ({ setToken }) => {
             localStorage.setItem('level', level);
             localStorage.setItem('country', country);
 
+            // localStorage 저장 후 확인
+            console.log('=== localStorage 저장 후 이미지 URL:', localStorage.getItem('image'));
+
             // 쿠키 설정
             Cookies.set('refresh', refreshToken, {
                 expires: 1,
                 path: '/'
             });
 
-            setToken(token); // 상태 업데이트
+            setToken(token);
 
-            // Header 컴포넌트를 재렌더링하여 알림 구독 시작
-            <Header />; // Header를 여기서 호출하여 구독을 시작
+            <Header />;
 
             navigate('/');
         } catch (error) {
-            console.error('Login failed:', error);
+            console.error('=== 로그인 실패 상세:', error.response); // 에러 상세 정보
+            console.error('=== 로그인 실패 데이터:', error.response?.data); // 에러 응답 데이터
             setError('로그인 실패. 이메일과 비밀번호를 확인하세요.');
         }
     };

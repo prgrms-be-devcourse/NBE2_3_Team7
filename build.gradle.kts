@@ -83,6 +83,12 @@ dependencies {
 
     // Javassist 라이브러리 추가
     implementation("org.javassist:javassist:3.15.0-GA")
+
+    // aws s3
+    implementation("io.awspring.cloud:spring-cloud-aws-starter:3.1.0")
+    implementation("io.awspring.cloud:spring-cloud-aws-starter-s3:3.1.0")
+    implementation("software.amazon.awssdk:s3:2.24.0")
+
 }
 
 kotlin {

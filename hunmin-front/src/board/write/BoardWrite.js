@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
+import axios from 'axios';
 
 class BoardWrite extends Component {
     constructor(props) {
@@ -22,25 +23,56 @@ class BoardWrite extends Component {
         const input = document.createElement('input');
         input.setAttribute('type', 'file');
         input.setAttribute('accept', 'image/*');
+        input.setAttribute('multiple', 'true');  // 여러 파일 선택 가능하도록 추가
         input.click();
 
         input.onchange = async () => {
-            const file = input.files[0];
+            const files = input.files;
 
-            // 파일 URL을 생성하여 에디터에 이미지 삽입
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const imgSrc = e.target.result;
+            // === 수정 성공 시 삭제 ===
+            // const file = input.files[0];
+            // // 파일 URL을 생성하여 에디터에 이미지 삽입
+            // const reader = new FileReader();
+            // reader.onload = (e) => {
+            //     const imgSrc = e.target.result;
+            //     const editor = this.quillRef.getEditor();
+            //     const range = editor.getSelection(true);
+            //
+            //     editor.insertEmbed(range.index, 'image', imgSrc); // 클라이언트에 임시 이미지 삽입
+            //     editor.setSelection(range.index + 1);
+            //
+            //     // 이미지 파일을 상태에 저장하여 나중에 서버로 업로드할 수 있게 함
+            //     this.props.setImageUrls((prev) => [...prev, imgSrc]); // setImageFiles 대신 setImageUrls 사용
+            // };
+            // reader.readAsDataURL(file); // 파일을 읽어서 Base64 URL로 변환
+
+            try {
+                const formData = new FormData();
+                Array.from(files).forEach(file => {
+                    formData.append('files', file); // 여러 파일 추가
+                });
+
+                const response = await axios.post('http://localhost:8080/api/board/uploadImage', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                });
+
+                // 반환된 모든 이미지 URL을 에디터에 삽입
+                const imageUrls = response.data;
                 const editor = this.quillRef.getEditor();
                 const range = editor.getSelection(true);
 
-                editor.insertEmbed(range.index, 'image', imgSrc); // 클라이언트에 임시 이미지 삽입
-                editor.setSelection(range.index + 1);
+                imageUrls.forEach((imageUrl, index) => {
+                    editor.insertEmbed(range.index + index, 'image', imageUrl);
+                    editor.setSelection(range.index + index + 1);
+                });
 
-                // 이미지 파일을 상태에 저장하여 나중에 서버로 업로드할 수 있게 함
-                this.props.setImageUrls((prev) => [...prev, imgSrc]); // setImageFiles 대신 setImageUrls 사용
-            };
-            reader.readAsDataURL(file); // 파일을 읽어서 Base64 URL로 변환
+                // 이미지 URL들을 상태에 추가
+                this.props.setImageUrls(prev => [...prev, ...imageUrls]);
+            } catch (error) {
+                console.error('이미지 업로드 실패:', error);
+            }
         };
     };
 

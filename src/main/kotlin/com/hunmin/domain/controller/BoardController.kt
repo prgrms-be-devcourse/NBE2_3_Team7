@@ -7,6 +7,7 @@ import com.hunmin.domain.exception.BoardException
 import com.hunmin.domain.repository.BoardRepository
 import com.hunmin.domain.repository.MemberRepository
 import com.hunmin.domain.service.BoardService
+import com.hunmin.global.s3.S3FileManagement
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
@@ -25,7 +26,8 @@ import java.io.IOException
 class BoardController(
     private val boardService: BoardService,
     private val memberRepository: MemberRepository,
-    private val boardRepository: BoardRepository
+    private val boardRepository: BoardRepository,
+    private val s3FileManagement: S3FileManagement // s3 주입
 ) {
 
     // 게시글 이미지 첨부
@@ -36,11 +38,12 @@ class BoardController(
 
         return try {
             files.forEach { file ->
-                val imageUrl = boardService.uploadImage(file)
+                // boardService.uploadImage() 대신 s3FileManagement 직접 사용
+                val imageUrl = s3FileManagement.uploadImage(file)
                 imageUrls.add(imageUrl)
             }
             ResponseEntity.ok(imageUrls)
-        } catch (e: IOException) {
+        } catch (e: Exception) { // IOException 대신 일반 Exception으로 변경
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(listOf("Image upload failed"))
         }
     }

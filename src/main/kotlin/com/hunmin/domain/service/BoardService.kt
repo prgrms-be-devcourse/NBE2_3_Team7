@@ -6,6 +6,7 @@ import com.hunmin.domain.dto.board.BoardResponseDTO
 import com.hunmin.domain.dto.notification.NotificationSendDTO
 import com.hunmin.domain.dto.page.PageRequestDTO
 import com.hunmin.domain.entity.Board
+import com.hunmin.domain.entity.Follow
 import com.hunmin.domain.entity.NotificationType
 import com.hunmin.domain.exception.BoardException
 import com.hunmin.domain.exception.MemberException
@@ -13,6 +14,7 @@ import com.hunmin.domain.handler.SseEmitters
 import com.hunmin.domain.repository.BoardRepository
 import com.hunmin.domain.repository.FollowRepository
 import com.hunmin.domain.repository.MemberRepository
+import com.hunmin.global.s3.S3FileManagement
 import org.hibernate.query.sqm.tree.SqmNode.log
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
@@ -37,7 +39,8 @@ class BoardService(
     private val followRepository: FollowRepository,
     private val notificationService: NotificationService,
     private val sseEmitters: SseEmitters,
-    private val redisTemplate: RedisTemplate<String, Any>
+    private val redisTemplate: RedisTemplate<String, Any>,
+    private val s3FileManagement: S3FileManagement
 
 ) {
 
@@ -51,44 +54,17 @@ class BoardService(
         }
     }
 
-    // 게시글 이미지 첨부
+    // 기존 uploadImage 메서드를 완전히 교체
     @Throws(IOException::class)
     fun uploadImage(file: MultipartFile): String {
-        val uploadDir = Paths.get("uploads").toAbsolutePath().normalize().toString()
-        val directory = File(uploadDir)
-
-        if (!directory.exists()) {
-            val created = directory.mkdirs()
-            if (!created) {
-                throw IOException("Failed to create directory")
-            }
-        }
-
-        val fileName = "${UUID.randomUUID()}.${getFileExtension(file.originalFilename)}"
-        val filePath = Paths.get(uploadDir, fileName)
-        file.inputStream.use { input ->
-            Files.copy(input, filePath)
-        }
-
-        return "/uploads/$fileName"
+        return s3FileManagement.uploadImage(file)
     }
 
-    // 파일 확장자 추출
-    private fun getFileExtension(fileName: String?): String {
-        require(!fileName.isNullOrEmpty() && fileName.contains(".")) {
-            "Invalid file name: $fileName"
-        }
-        return fileName.substring(fileName.lastIndexOf('.') + 1)
-    }
-
-    // 게시글 이미지 삭제
+    // deleteImage 메서드도 수정
     @Throws(IOException::class)
     fun deleteImage(imageUrl: String) {
-        val uploadDir = Paths.get("uploads").toAbsolutePath().normalize().toString()
         val fileName = imageUrl.substring(imageUrl.lastIndexOf("/") + 1)
-        val filePath = Paths.get(uploadDir, fileName)
-
-        Files.deleteIfExists(filePath)
+        s3FileManagement.delete(fileName)
     }
 
     //게시글 등록
@@ -113,22 +89,26 @@ class BoardService(
 
             // 알림
             val sender = member
-            val senderId = member.memberId
 
-            val followers= followRepository.getFollowList(senderId)
-            // 알림 메세지 구현 -> return 방식은 emitter send로
-            for (follower in followers) {
-                if (!follower.isBlock && follower.notification) {
+            val allFollow = followRepository.findAll()
+            val followList = mutableListOf<Follow>()
+            for (follow in allFollow) {
+                if (follow.follower == sender){
+                    followList.add(follow)
+                }
+            }
+            for (follow in followList) {
+                if (!follow.isBlock && follow.notification) {
                     val notificationSendDTO = NotificationSendDTO(
-                        message = sender.nickname + "님 : " + "새로운 게시글을 등록하였습니다",
+                        message = follow.follower!!.nickname + "님 : " + "새로운 게시글을 등록하였습니다",
                         notificationType = NotificationType.BOARD,
                         url = "/board/" + board.boardId
                     ).apply {
-                        this.memberId = follower.followerId
+                        this.memberId = follow.followee!!.memberId
                     }
                     notificationService.send(notificationSendDTO)
                     // emitter
-                    val emitterId = follower.followerId.toString() + "_"
+                    val emitterId = follow.followee!!.memberId.toString() + "_"
                     val emitter = sseEmitters.findSingleEmitter(emitterId)
 
                     log.info("emitter $emitter")
