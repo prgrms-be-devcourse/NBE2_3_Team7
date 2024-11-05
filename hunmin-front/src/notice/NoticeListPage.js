@@ -8,6 +8,7 @@ const NoticeListPage = () => {
     const [notices, setNotices] = useState([]);
     const [page, setPage] = useState(1); // 초기 페이지 번호
     const [totalPages, setTotalPages] = useState(0); // 총 페이지 수
+    const memberRole = localStorage.getItem('role');
 
     useEffect(() => {
         fetchNotices(page);
@@ -59,6 +60,12 @@ const NoticeListPage = () => {
         return pageNumbers;
     };
 
+    const handleCreateClick = (e) => {
+        if (memberRole === 'USER') {
+            alert("관리자만 작성 가능합니다.");
+        }
+    };
+
 
     return (
         <div className="container">
@@ -83,8 +90,11 @@ const NoticeListPage = () => {
                 {renderPageNumbers()} {/* 페이지 번호 표시 */}
                 <button onClick={handleNextPage} disabled={page === totalPages}>다음 페이지</button>
             </div>
-            <Link to="/create-notice" className="create-link">공지사항 생성</Link>
-
+            {memberRole === 'ADMIN' ? (
+                <Link to="/create" onClick={handleCreateClick} className="create-link">공지사항 생성</Link>
+            ) : (
+                <Link onClick={handleCreateClick} className="create-link">공지사항 생성</Link>
+            )}
         </div>
     )
         ;

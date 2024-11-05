@@ -196,7 +196,9 @@ const TestLanguageSelectPage = () => {
                                     </TableCell>
                                     <TableCell align="center" sx={{ fontSize: '1rem' }}>{wordScore.testLang}</TableCell>
                                     <TableCell align="center" sx={{ fontSize: '1rem' }}>{wordScore.testLevel}</TableCell>
-                                    <TableCell align="center" sx={{ fontSize: '1rem' }}>{wordScore.testRankScore}</TableCell>
+                                    <TableCell align="center" sx={{ fontSize: '1rem' }}>
+                                        {wordScore.testRankScore.toFixed(1)}
+                                    </TableCell>
                                 </TableRow>
                             ))
                         ) : (

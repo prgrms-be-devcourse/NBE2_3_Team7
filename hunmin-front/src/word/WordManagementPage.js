@@ -4,6 +4,14 @@ import {Link, useNavigate} from 'react-router-dom';
 
 const WordManagementPage = () => {
     const navigate = useNavigate();
+    const memberRole = localStorage.getItem('role');
+
+    const handleCreateClick = (e) => {
+        if (memberRole === 'USER') {
+            alert("관리자만 관리 가능합니다.");
+        }
+    };
+
     return (
         <Container maxWidth="md">
             <Box sx={{ textAlign: 'right', marginBottom: 2 }}>
@@ -71,14 +79,18 @@ const WordManagementPage = () => {
 
                 <List>
                     <ListItem>
-                        <Link to="/word-register">
-                            <ListItemText primary="단어 등록" />
-                        </Link>
+                        {memberRole === 'ADMIN' ? (
+                            <Link to="/word-register" onClick={handleCreateClick}>단어 등록</Link>
+                        ) : (
+                            <Link onClick={handleCreateClick}>단어 등록</Link>
+                        )}
                     </ListItem>
                     <ListItem>
-                        <Link to="/word-edit">
-                            <ListItemText primary="단어 수정, 삭제" />
-                        </Link>
+                        {memberRole === 'ADMIN' ? (
+                            <Link to="/word-edit" onClick={handleCreateClick}>단어 수정, 삭제</Link>
+                        ) : (
+                            <Link onClick={handleCreateClick}>단어 수정, 삭제</Link>
+                        )}
                     </ListItem>
                 </List>
             </Box>
