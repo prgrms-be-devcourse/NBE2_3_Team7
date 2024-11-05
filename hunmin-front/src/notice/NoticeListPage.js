@@ -91,7 +91,7 @@ const NoticeListPage = () => {
                 <button onClick={handleNextPage} disabled={page === totalPages}>다음 페이지</button>
             </div>
             {memberRole === 'ADMIN' ? (
-                <Link to="/create" onClick={handleCreateClick} className="create-link">공지사항 생성</Link>
+                <Link to="/create-notice" onClick={handleCreateClick} className="create-link">공지사항 생성</Link>
             ) : (
                 <Link onClick={handleCreateClick} className="create-link">공지사항 생성</Link>
             )}
