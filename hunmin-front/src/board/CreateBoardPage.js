@@ -5,6 +5,7 @@ import KakaoMapSearch from '../board/map/KakaoMapSearch';
 import BoardWrite from '../board/write/BoardWrite';
 import { TextField, Button, Typography, Container, Box, Paper } from '@mui/material';
 import api from '../axios';
+const apiUrl = process.env.REACT_APP_API_URL;
 
 const CreateBoardPage = () => {
     const [title, setTitle] = useState('');
@@ -24,7 +25,7 @@ const CreateBoardPage = () => {
         formData.append('files', file);
 
         try {
-            const response = await axios.post('http://localhost:8080/api/board/uploadImage', formData, {
+            const response = await axios.post(`${apiUrl}/api/board/uploadImage`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { TextField, Button, Container, Typography, Box, MenuItem, Select, FormControl, InputLabel } from '@mui/material';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+const apiUrl = process.env.REACT_APP_API_URL;
 
 const countries = [
     "대한민국", "미국", "영국", "일본", "중국",
@@ -49,7 +50,7 @@ const RegistrationForm = () => {
             if (image) {
                 const imageData = new FormData();
                 imageData.append('image', image);
-                const imageResponse = await axios.post('http://localhost:8080/api/members/uploads', imageData, {
+                const imageResponse = await axios.post(`${apiUrl}/api/members/uploads`, imageData, {
                     headers: {
                         'Content-Type': 'multipart/form-data'
                     }
@@ -58,7 +59,7 @@ const RegistrationForm = () => {
             }
 
             // 회원가입 데이터 전송
-            await axios.post('http://localhost:8080/api/members/register', {
+            await axios.post(`${apiUrl}/api/members/register`, {
                 email,
                 password,
                 nickname,

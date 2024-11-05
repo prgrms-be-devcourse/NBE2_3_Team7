@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  # develop브랜치에서 일어난 push/pull request에 작동한다.
+  pull_request:
+    branches: [ "develop" ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# This workflow contains a single job called "build"
+jobs:
+  build:
+    # machine which runner would use
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+
+      - name: JDK 17 설치
+        uses: actions/setup-java@v4.0.0
+        with:
+          java-version: '17'
+          distribution: 'zulu'
+
+      - name: application.yml 생성
+        shell: bash
+        run: |
+          cd src/main/resources
+          touch ./application.yml
+
+          echo "spring.application.name: hunmin" >> ./application.yml
+          echo "spring.datasource.url: jdbc:mysql://hunmin.cnqikamy0f23.ap-northeast-2.rds.amazonaws.com:3306/hunmin" >> ./application.yml
+          echo "spring.datasource.username: admin" >> ./application.yml
+          echo "spring.datasource.password: ${{ secrets.RDS_ADMIN_PASSWORD }}" >> ./application.yml
+          echo "spring.jpa.show-sql: true" >> ./application.yml
+          echo "spring.jpa.hibernate.ddl-auto: update" >> ./application.yml
+          echo "spring.jwt.secret: vmfhaltmskdlstkfkdgodyroqkfwkdbalroqkfwkdbalabcdefg1234567890" >> ./application.yml
+          echo "spring.data.redis.host: localhost" >> ./application.yml
+          echo "spring.data.redis.port: 6379" >> ./application.yml
+          echo "spring.data.redis.database: 0" >> ./application.yml
+          echo "spring.profiles.include: key" >> ./application.yml
+          echo "spring.cache.type: redis" >> ./application.yml
+          echo "spring.jpa.properties.hibernate.dialect: org.hibernate.dialect.MySQL8Dialect" >> ./application.yml
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      # Gradle build (Test 제외)
+      - name: Build with Gradle
+        run: ./gradlew clean build -x test
+
+      - name: archive repository
+        run: tar cvfz ./user.tar.gz ./*
+
+        # github secret 이용하여 AWS설정
+      - name: AWS configure credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.USER_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.USER_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-2
+
+        # 압축파일 이름, 버켓 이름 설정에 주의
+      - name: upload to S3
+        run: aws s3 cp --region ap-northeast-2 ./user.tar.gz s3://hunmin-codedeploy/service/
+
+        # codeDeploy 실행, 다양한 이름 설정에 주의
+      - name: deploy with AWS codeDeploy
+        run: aws deploy create-deployment
+          --application-name codoedeploy-hunmin
+          --deployment-config-name CodeDeployDefault.OneAtATime
+          --deployment-group-name deploy-group
+          --s3-location bucket=hunmin-codedeploy,bundleType=tgz,key=service/user.tar.gz
