@@ -260,7 +260,7 @@ const BoardDetailPage = () => {
                                     }}
                                 />
                             ) : (
-                                <FaUserCircle size={30} style={{color: '#fff'}}/> // 프로필 아이콘 표시
+                                <FaUserCircle size={30} style={{color: 'skyblue'}}/> // 프로필 아이콘 표시
                             )} <span
                             onClick={handlePopoverOpen}
                             style={{cursor: 'pointer', color: '#007bff', textDecoration: 'underline'}}

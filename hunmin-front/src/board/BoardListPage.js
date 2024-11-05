@@ -223,7 +223,7 @@ const BoardListPage = () => {
                                     }}
                                 />
                             ) : (
-                                <FaUserCircle size={30} style={{ color: '#fff' }} /> // 프로필 아이콘 표시
+                                <FaUserCircle size={30} style={{ color: 'skyblue' }} /> // 프로필 아이콘 표시
                             )}
                         </Link>
                         <Typography variant="h6" style={{ marginLeft: '20px' }}>
@@ -334,7 +334,7 @@ const BoardListPage = () => {
                                                             }}
                                                         />
                                                     ) : (
-                                                        <FaUserCircle size={30} style={{ color: '#fff' }} />
+                                                        <FaUserCircle size={30} style={{ color: 'skyblue' }} />
                                                     )} {board.nickname}
                                                 </Link>
                                             }

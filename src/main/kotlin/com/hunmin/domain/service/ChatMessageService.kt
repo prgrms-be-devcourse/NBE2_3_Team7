@@ -11,6 +11,7 @@ import com.hunmin.domain.entity.NotificationType
 import com.hunmin.domain.exception.chat.ChatMessageException
 import com.hunmin.domain.exception.chat.ChatRoomException
 import com.hunmin.domain.handler.SseEmitters
+import com.hunmin.domain.redis.repository.ChatMessageRedisRepository
 import com.hunmin.domain.redis.sendMessage.RedisSubscriber
 import com.hunmin.domain.repository.ChatMessageRepository
 import com.hunmin.domain.repository.ChatRoomRepository
@@ -32,7 +33,9 @@ class ChatMessageService(
     private val chatRoomRepository: ChatRoomRepository,
     private val redisSubscriber: RedisSubscriber,
     private val notificationService: NotificationService,
-    private val sseEmitters: SseEmitters){
+    private val sseEmitters: SseEmitters,
+    chatMessageRedisRepository: ChatMessageRedisRepository
+){
 
     companion object {
         private val logger = KotlinLogging.logger {}
@@ -101,13 +104,13 @@ class ChatMessageService(
     fun readAllMessages(chatRoomId: Long): List<ChatMessageDTO> {
         try {
 
-        val chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow()
+            val chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow()
 
-        val chatLists = chatRoom.chatMessage?.map { chatMessage ->
-            ChatMessageDTO(chatMessage)
-        }?.toList()?:emptyList()
+            val chatLists = chatRoom.chatMessage?.map { chatMessage ->
+                ChatMessageDTO(chatMessage)
+            }?.toList()?:emptyList()
 
-        return chatLists
+            return chatLists
         }catch (e:RuntimeException){
             log.error("모든 채팅기록 불러오는데 실패했습니다. $e.message")
             throw ChatMessageException.NOT_FOUND.get()
