@@ -7,6 +7,7 @@ import com.hunmin.domain.entity.Follow
 import com.hunmin.domain.entity.FollowStatus
 import com.hunmin.domain.entity.Member
 import com.hunmin.domain.entity.NotificationType
+import com.hunmin.domain.entity.QBoard.board
 import com.hunmin.domain.exception.follow.FollowException
 import com.hunmin.domain.handler.SseEmitters
 import com.hunmin.domain.repository.FollowRepository
