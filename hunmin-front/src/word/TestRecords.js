@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Button, Typography, Paper } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../axios';
+const apiUrl = process.env.REACT_APP_API_URL;
 
 const TestRecords = () => {
     const [testRecords, setTestRecords] = useState([]);
@@ -14,7 +15,7 @@ const TestRecords = () => {
     useEffect(() => {
         const fetchTestScores = async () => {
             try {
-                const response = await axios.get(`/api/words/test/records?memberId=${memberId}`);
+                const response = await api.get(`${apiUrl}/api/words/test/records?memberId=${memberId}`);
                 setTestRecords(response.data);
                 setFilteredRecords(response.data); // 처음엔 전체 데이터로 설정
             } catch (error) {
