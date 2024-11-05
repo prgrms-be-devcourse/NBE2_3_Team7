@@ -239,26 +239,8 @@ class BoardService(
         val pageable: Pageable = pageRequestDTO.getPageable(Sort.by(Sort.Direction.DESC, "createdAt"))
         val boardResponseDTOs = mutableListOf<BoardResponseDTO>()
 
-        //Redis에서 조회
-        for (boardIdObj in redisTemplate.opsForHash<Any, BoardResponseDTO>().keys("board")) {
-            if (boardIdObj is String) {
-                val cachedBoard = readBoardFromRedis(boardIdObj)
-                if (cachedBoard != null && cachedBoard.memberId == memberId) {
-                    boardResponseDTOs.add(cachedBoard)
-                }
-            }
-        }
-
-        //Redis에 없을 경우 DB에서 조회
-        if (boardResponseDTOs.size < pageable.pageSize) {
-            val boards = boardRepository.findByMemberId(memberId, pageable)
-            boards.content.mapTo(boardResponseDTOs) { BoardResponseDTO(it) }
-
-            // 새로 조회된 게시글을 Redis에 저장
-            boards.content.forEach { board ->
-                redisTemplate.opsForHash<Any, BoardResponseDTO>().put("board", board.boardId.toString(), BoardResponseDTO(board))
-            }
-        }
+        val boards = boardRepository.findByMemberId(memberId, pageable)
+        boards.content.mapTo(boardResponseDTOs) { BoardResponseDTO(it) }
 
         boardResponseDTOs.sortByDescending { it.createdAt }
 
