@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import api from '../axios';
 import { AppBar, Toolbar, Badge, Typography, Grid, Button } from '@mui/material';
 import NotificationsIcon from '@mui/icons-material/Notifications';
+const apiUrl = process.env.REACT_APP_API_URL;
 
 const Header = () => {
     const [notifications, setNotifications] = useState([]);
@@ -36,7 +37,7 @@ const Header = () => {
         if (!memberId) return; // memberId가 없으면 SSE 구독하지 않음
 
         console.log("Subscribing to notifications for memberId:", memberId); // 디버깅 로그 추가
-        const eventSource = new EventSource(`http://localhost:8080/api/notification/subscribe/${memberId}`);
+        const eventSource = new EventSource(`${apiUrl}/api/notification/subscribe/${memberId}`);
 
         // SSE 이벤트 핸들링
         eventSource.onmessage = (event) => {
@@ -89,7 +90,7 @@ const Header = () => {
         if (notification.url.includes('/chat-room')) {
             window.location.href = notification.url;
         }else if(notification.url.includes('/follow')){
-            window.location.href = "http://localhost:3000/followForm";
+            window.location.href = `${apiUrl}:3000/followForm`;
         }else {
             window.location.href = notification.url;
         }

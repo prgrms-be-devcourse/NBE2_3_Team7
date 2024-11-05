@@ -81,6 +81,9 @@ dependencies {
     // LocalDateTime 역직렬화 해결
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 
+    // Javassist 라이브러리 추가
+    implementation("org.javassist:javassist:3.15.0-GA")
+
     // aws s3
     implementation("io.awspring.cloud:spring-cloud-aws-starter:3.1.0")
     implementation("io.awspring.cloud:spring-cloud-aws-starter-s3:3.1.0")
@@ -101,4 +104,3 @@ allOpen {
 tasks.withType<Test> {
     useJUnitPlatform()
 }
-

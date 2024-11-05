@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { TextField, Button, Container, Typography, Box, MenuItem, Select, FormControl, InputLabel } from '@mui/material';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+const apiUrl = process.env.REACT_APP_API_URL;
+// const apiUrl = 'http://localhost:8080'; // 임시로 변경해서 테스트
 
 const countries = [
     "대한민국", "미국", "영국", "일본", "중국",
@@ -43,32 +45,81 @@ const RegistrationForm = () => {
         e.preventDefault();
 
         try {
-            let imageUrl = null;
+            // FormData 객체 생성
+            const formData = new FormData();
 
-            // 이미지가 있는 경우 이미지 업로드 요청
-            if (image) {
-                const imageData = new FormData();
-                imageData.append('image', image);
-                const imageResponse = await axios.post('http://localhost:8080/api/members/uploads', imageData, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
-                    }
-                });
-                imageUrl = imageResponse.data;  // 업로드한 이미지 URL
-            }
-
-            // 회원가입 데이터 전송
-            await axios.post('http://localhost:8080/api/members/register', {
+            // memberInfo 객체 생성
+            const memberInfo = {
                 email,
                 password,
                 nickname,
                 country,
                 level,
-                image: imageUrl  // 이미지 URL 포함
+                image: null
+            };
+
+            // Blob으로 변환하여 추가
+            const memberInfoBlob = new Blob(
+                [JSON.stringify(memberInfo)],
+                { type: 'application/json' }
+            );
+
+            formData.append('memberInfo', memberInfoBlob);
+
+            // 이미지가 있는 경우에만 추가
+            if (image) {
+                formData.append('profileImage', image);
+            }
+
+            // axios 설정
+            const config = {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    'Accept': 'application/json',
+                    // CORS 관련 헤더 추가
+                    'Access-Control-Allow-Origin': '*'
+                }
+            };
+
+            console.log('전송 시도:', {
+                memberInfo: memberInfo,
+                hasImage: !!image
             });
 
-            navigate('/login');  // 회원가입 성공 시 로그인 페이지로 이동
+            const response = await axios.post(
+                `${apiUrl}/api/members/register`,
+                formData,
+                config
+            );
+
+            console.log('회원가입 성공:', response.data);
+            navigate('/login');
         } catch (error) {
+            console.error('=== 로그인 요청 실패 ===', {
+                message: error.message,
+                status: error.response?.status,
+                statusText: error.response?.statusText,
+                data: error.response?.data,
+                config: {
+                    url: error.config?.url,
+                    method: error.config?.method,
+                    headers: error.config?.headers,
+                    data: error.config?.data
+                }
+            });
+
+            // 네트워크 오류인지 확인
+            if (!error.response) {
+                console.error('=== 네트워크 오류 ===');
+                setError('서버에 연결할 수 없습니다.');
+                return;
+            }
+
+            // 401 에러 구체적 처리
+            if (error.response.status === 401) {
+                setError('이메일 또는 비밀번호가 올바르지 않습니다.');
+                return;
+            }
             setError('회원가입 실패. 다시 시도해주세요.');
         }
     };

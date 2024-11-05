@@ -49,7 +49,7 @@ class SecurityConfig(
             .cors { corsCustomizer ->
                 corsCustomizer.configurationSource {
                     CorsConfiguration().apply {
-                        allowedOrigins = listOf("http://localhost:3000")
+                        allowedOrigins = listOf("http://localhost:3000", "http://hunmin2.kro.kr:3000")
                         allowedMethods = listOf("*")
                         allowCredentials = true
                         allowedHeaders = listOf("*")
