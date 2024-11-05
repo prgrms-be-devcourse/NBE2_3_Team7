@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import api from '../axios';
+const apiUrl = process.env.REACT_APP_API_URL;
 
 const ChatComponent = ({ chatRoomId, setMessages, onMessageSend  }) => {
     const [message, setMessage] = useState('');
@@ -38,7 +39,7 @@ const ChatComponent = ({ chatRoomId, setMessages, onMessageSend  }) => {
     const stompConnect = () => {
         try {
             const token = localStorage.getItem('token');
-            const sock = new SockJS("http://localhost:8080/ws-stomp");
+            const sock = new SockJS(`${apiUrl}/ws-stomp`);
             const client = new Client({
                 webSocketFactory: () => sock,
                 connectHeaders: {

@@ -55,7 +55,7 @@ class FollowService(
             val notificationSendDTO: NotificationSendDTO = NotificationSendDTO(
                 message = owner.nickname + "님이 팔로우 요청을 보냈습니다.",
                 notificationType = NotificationType.FOLLOW,
-                url = "/follow"
+                url = "/followForm"
             ).apply {
                 this.memberId = receiverId
             }
