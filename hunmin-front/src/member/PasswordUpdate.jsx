@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { TextField, Button, Container, Typography, Box } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
+const apiUrl = process.env.REACT_APP_API_URL;
 
 const PasswordUpdate = () => {
     const [newPassword, setNewPassword] = useState('');
@@ -21,7 +22,7 @@ const PasswordUpdate = () => {
         }
 
         try {
-            const response = await axios.post('http://localhost:8080/api/members/password/update', {
+            const response = await axios.post(`${apiUrl}/api/members/password/update`, {
                 email: location.state.email,
                 nickname: location.state.nickname,  // 닉네임도 필요
                 newPassword

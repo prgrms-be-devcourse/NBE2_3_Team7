@@ -13,7 +13,7 @@ const CreateChatRoom = () => {
         }
 
         // 경로 파라미터로 닉네임 전달
-        api.post(`/api/chat-room/${nickname}`)
+        api.post(`/chat-room/${nickname}`)
             .then(response => {
                 alert(`채팅방 [${response.data.partnerName}]이 생성되었습니다.`);
                 setNickname('');

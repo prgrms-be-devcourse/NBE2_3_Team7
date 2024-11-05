@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { TextField, Button, Container, Typography, Box } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+const apiUrl = process.env.REACT_APP_API_URL;
 
 const PasswordVerify = () => {
     const [email, setEmail] = useState('');
@@ -13,7 +14,7 @@ const PasswordVerify = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post('http://localhost:8080/api/members/password/verify', {
+            const response = await axios.post(`${apiUrl}/api/members/password/verify`, {
                 email,
                 nickname
             });

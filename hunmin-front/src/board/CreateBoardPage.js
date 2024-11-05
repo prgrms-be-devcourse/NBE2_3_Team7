@@ -25,7 +25,7 @@ const CreateBoardPage = () => {
         formData.append('files', file);
 
         try {
-            const response = await axios.post(`${apiUrl}/api/board/uploadImage`, formData, {
+            const response = await axios.post(`${apiUrl}/board/uploadImage`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
