@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import axios from 'axios';
+const apiUrl = process.env.REACT_APP_API_URL;
 
 class BoardWrite extends Component {
     constructor(props) {
@@ -52,7 +53,7 @@ class BoardWrite extends Component {
                     formData.append('files', file); // 여러 파일 추가
                 });
 
-                const response = await axios.post('http://localhost:8080/api/board/uploadImage', formData, {
+                const response = await axios.post(`${apiUrl}/api/board/uploadImage`, formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
                     },
