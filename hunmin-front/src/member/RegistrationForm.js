@@ -87,7 +87,7 @@ const RegistrationForm = () => {
             });
 
             const response = await axios.post(
-                `${apiUrl}/members/register`,
+                `${apiUrl}/api/members/register`,
                 formData,
                 config
             );
