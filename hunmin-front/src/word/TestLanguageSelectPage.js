@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Container, Typography, Button, Table, TableHead, TableBody, TableRow, TableCell, Paper, Avatar } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
+const apiUrl = process.env.REACT_APP_API_URL;
 
 const TestLanguageSelectPage = () => {
     const navigate = useNavigate();
@@ -19,7 +20,7 @@ const TestLanguageSelectPage = () => {
     useEffect(() => {
         const fetchRankings = async () => {
             try {
-                const response = await fetch('/api/words/test/rankings');
+                const response = await fetch(`${apiUrl}/api/words/test/rankings`);
                 const data = await response.json();
                 setRankings(data);
                 setFilteredRankings(data);
