@@ -1,7 +1,7 @@
 package com.hunmin.domain.controller
 
+import CommentResponseDTO
 import com.hunmin.domain.dto.comment.CommentRequestDTO
-import com.hunmin.domain.dto.comment.CommentResponseDTO
 import com.hunmin.domain.dto.page.PageRequestDTO
 import com.hunmin.domain.exception.CommentException
 import com.hunmin.domain.repository.CommentRepository
