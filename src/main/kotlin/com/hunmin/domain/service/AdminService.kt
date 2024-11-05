@@ -1,11 +1,9 @@
 package com.hunmin.domain.service
 
+import CommentResponseDTO
 import com.hunmin.domain.dto.board.BoardResponseDTO
-import com.hunmin.domain.dto.comment.CommentResponseDTO
 import com.hunmin.domain.dto.member.MemberStatusDTO
 import com.hunmin.domain.dto.page.PageRequestDTO
-import com.hunmin.domain.entity.Board
-import com.hunmin.domain.entity.Comment
 import com.hunmin.domain.entity.Member
 import com.hunmin.domain.exception.AdminException
 import com.hunmin.domain.repository.BoardRepository

@@ -1,6 +1,6 @@
 package com.hunmin.domain.service
 
-import com.hunmin.domain.dto.comment.CommentResponseDTO
+import CommentResponseDTO
 import com.hunmin.domain.dto.notification.NotificationSendDTO
 import com.hunmin.domain.entity.*
 import com.hunmin.domain.exception.CommentException

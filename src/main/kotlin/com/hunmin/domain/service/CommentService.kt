@@ -1,7 +1,7 @@
 package com.hunmin.domain.service
 
+import CommentResponseDTO
 import com.hunmin.domain.dto.comment.CommentRequestDTO
-import com.hunmin.domain.dto.comment.CommentResponseDTO
 import com.hunmin.domain.dto.notification.NotificationSendDTO
 import com.hunmin.domain.dto.page.PageRequestDTO
 import com.hunmin.domain.entity.Comment
