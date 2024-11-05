@@ -100,10 +100,13 @@ const AdminMemberPostsAndComments = () => {
                                     작성일: {formatDate(post?.createdAt)} |
                                     작성자: {post?.nickname || '알 수 없음'}
                                 </Typography>
-                                <Typography variant="body1" sx={{ mb: 1 }}>
-                                    {post?.content?.substring(0, 100) || '내용 없음'}
-                                    {post?.content?.length > 100 ? '...' : ''}
-                                </Typography>
+                                <Typography
+                                    variant="body1"
+                                    sx={{ mb: 1 }}
+                                    dangerouslySetInnerHTML={{
+                                        __html: post?.content?.substring(0, 100) || '내용 없음'
+                                    }}
+                                />
                                 <Divider />
                             </ListItem>
                         ))

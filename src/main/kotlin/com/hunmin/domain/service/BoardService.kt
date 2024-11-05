@@ -201,7 +201,7 @@ class BoardService(
 
     //게시글 목록 조회
     fun readBoardList(pageRequestDTO: PageRequestDTO): Page<BoardResponseDTO> {
-        val pageable: Pageable = pageRequestDTO.getPageable(Sort.by(Sort.Direction.DESC, "createdAt"))
+        val pageable: Pageable = pageRequestDTO.getPageable(Sort.by(Sort.Direction.DESC, "boardId"))
         val boardResponseDTOs = mutableListOf<BoardResponseDTO>()
 
         //Redis에서 조회
@@ -225,7 +225,7 @@ class BoardService(
             }
         }
 
-        boardResponseDTOs.sortByDescending { it.createdAt }
+        boardResponseDTOs.sortByDescending { it.boardId }
 
         val start = pageable.offset.toInt()
         val end = Math.min(start + pageable.pageSize.toInt(), boardResponseDTOs.size)
@@ -236,13 +236,13 @@ class BoardService(
 
     //회원 별 작성글 목록 조회
     fun readBoardListByMember(memberId: Long, pageRequestDTO: PageRequestDTO): Page<BoardResponseDTO> {
-        val pageable: Pageable = pageRequestDTO.getPageable(Sort.by(Sort.Direction.DESC, "createdAt"))
+        val pageable: Pageable = pageRequestDTO.getPageable(Sort.by(Sort.Direction.DESC, "boardId"))
         val boardResponseDTOs = mutableListOf<BoardResponseDTO>()
 
         val boards = boardRepository.findByMemberId(memberId, pageable)
         boards.content.mapTo(boardResponseDTOs) { BoardResponseDTO(it) }
 
-        boardResponseDTOs.sortByDescending { it.createdAt }
+        boardResponseDTOs.sortByDescending { it.boardId }
 
         val start = pageable.offset.toInt()
         val end = Math.min(start + pageable.pageSize.toInt(), boardResponseDTOs.size)
