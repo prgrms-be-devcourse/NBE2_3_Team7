@@ -316,7 +316,7 @@ const BoardDetailPage = () => {
                         <Grid item xs={12}>
                             <div style={{display: 'flex', justifyContent: 'flex-end', gap: '8px'}}>
                             {/* 수정 및 삭제 버튼 표시 조건 추가 */}
-                                {memberId == originalMemberId && (
+                                {String(memberId) === String(originalMemberId) && (
                                     <>
                                         <Button variant="contained" color="primary" onClick={() => setIsEditMode(true)}>수정</Button>
                                         <Button variant="outlined" color="secondary" onClick={handleDelete}>삭제</Button>

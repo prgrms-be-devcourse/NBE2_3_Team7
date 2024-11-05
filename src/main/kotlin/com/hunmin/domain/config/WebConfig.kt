@@ -16,8 +16,8 @@ class WebConfig : WebMvcConfigurer {
             .allowCredentials(true)  // 인증 정보 허용 여부
     }
 
-    override fun addResourceHandlers(registry: ResourceHandlerRegistry) {
-        registry.addResourceHandler("/uploads/**")
-            .addResourceLocations("file:uploads/")
-    }
+//    override fun addResourceHandlers(registry: ResourceHandlerRegistry) {
+//        registry.addResourceHandler("/uploads/**")
+//            .addResourceLocations("file:uploads/")
+//    }
 }

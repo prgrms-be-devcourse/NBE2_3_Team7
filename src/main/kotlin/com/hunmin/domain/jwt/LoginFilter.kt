@@ -97,7 +97,7 @@ class LoginFilter(
         // 클라이언트 전송을 위한 추가 사용자 정보 추출
         val memberId: Long = customUserDetails.getMemberId()
         val nickname: String = customUserDetails.getNickname()
-        val image = "http://localhost:8080" + customUserDetails.getImage()
+        val image = customUserDetails.getImage()
         val level: MemberLevel = customUserDetails.getLevel()
         val country: String = customUserDetails.getCountry()
 

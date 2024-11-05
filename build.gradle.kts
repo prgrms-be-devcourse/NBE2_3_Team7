@@ -80,6 +80,12 @@ dependencies {
 
     // LocalDateTime 역직렬화 해결
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
+
+    // aws s3
+    implementation("io.awspring.cloud:spring-cloud-aws-starter:3.1.0")
+    implementation("io.awspring.cloud:spring-cloud-aws-starter-s3:3.1.0")
+    implementation("software.amazon.awssdk:s3:2.24.0")
+
 }
 
 kotlin {

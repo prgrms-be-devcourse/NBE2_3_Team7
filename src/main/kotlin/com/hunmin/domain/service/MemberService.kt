@@ -1,13 +1,11 @@
 package com.hunmin.domain.service
 
-import com.hunmin.domain.dto.member.CustomUserDetails
-import com.hunmin.domain.dto.member.MemberDTO
-import com.hunmin.domain.dto.member.PasswordFindRequestDto
-import com.hunmin.domain.dto.member.PasswordUpdateRequestDto
+import com.hunmin.domain.dto.member.*
 import com.hunmin.domain.entity.Member
 import com.hunmin.domain.entity.MemberLevel
 import com.hunmin.domain.entity.MemberRole
 import com.hunmin.domain.repository.MemberRepository
+import com.hunmin.global.s3.S3FileManagement
 import mu.KotlinLogging
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -28,7 +26,8 @@ import java.util.*
 @Transactional
 class MemberService(
     private val memberRepository: MemberRepository,
-    private val bCryptPasswordEncoder: BCryptPasswordEncoder
+    private val bCryptPasswordEncoder: BCryptPasswordEncoder,
+    private val s3FileManagement: S3FileManagement,
 ) : UserDetailsService {
 
     companion object {
@@ -52,7 +51,7 @@ class MemberService(
         val filePath = Paths.get(uploadDir, fileName)
         Files.copy(file.inputStream, filePath)
 
-        return "/uploads/$fileName"
+        return "https://project-hunmin.s3.ap-northeast-2.amazonaws.com/$fileName"
     }
 
     // 파일 확장자 추출
@@ -90,18 +89,31 @@ class MemberService(
     }
 
     // 회원 정보 업데이트
-    fun updateMember(id: Long, memberDTO: MemberDTO) {
+    fun updateMember(id: Long, updateDTO: MemberUpdateDTO) {
         val member = memberRepository.findById(id)
             .orElseThrow { NoSuchElementException("회원 정보를 찾을 수 없습니다: $id") }
 
+        // null이 아닌 필드만 업데이트
         with(member) {
-            if (memberDTO.password.isNotEmpty()) {
-                password = bCryptPasswordEncoder.encode(memberDTO.password)
+            updateDTO.password?.let {
+                password = bCryptPasswordEncoder.encode(it)
             }
-            nickname = memberDTO.nickname
-            country = memberDTO.country
-            level = memberDTO.level
-            memberDTO.image?.let { image = it }  // image만 nullable이므로 safe call 사용
+            updateDTO.nickname?.let { nickname = it }
+            updateDTO.country?.let { country = it }
+            updateDTO.level?.let { level = MemberLevel.valueOf(it) }
+
+            // 새 이미지 URL이 있는 경우
+            updateDTO.image?.let { newImageUrl ->
+                // 기존 이미지가 있다면 S3에서 삭제
+                image?.let { oldImageUrl ->
+                    try {
+                        s3FileManagement.delete(oldImageUrl)
+                    } catch (e: Exception) {
+                        logger.error("기존 이미지 삭제 실패: ${e.message}")
+                    }
+                }
+                image = newImageUrl
+            }
         }
 
         memberRepository.save(member)
