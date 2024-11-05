@@ -1,4 +1,3 @@
-// AdminMemberDetail.js
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import api from '../axios';
@@ -9,7 +8,8 @@ import {
     Paper,
     CircularProgress,
     Grid,
-    Divider
+    Divider,
+    Avatar
 } from '@mui/material';
 
 const AdminMemberDetail = () => {
@@ -47,12 +47,23 @@ const AdminMemberDetail = () => {
                 <Typography variant="h4" sx={{ mb: 3 }}>회원 상세 정보</Typography>
                 {memberInfo && (
                     <Grid container spacing={2}>
-                        <Grid item xs={12}>
-                            <Typography variant="h6">기본 정보</Typography>
-                            <Divider sx={{ my: 1 }} />
-                            <Typography>회원 ID: {memberInfo.memberId}</Typography>
-                            <Typography>이메일: {memberInfo.email}</Typography>
-                            <Typography>닉네임: {memberInfo.nickname}</Typography>
+                        <Grid item xs={12} container alignItems="center" spacing={2}>
+                            <Grid item xs>
+                                <Typography variant="h6">기본 정보</Typography>
+                                <Divider sx={{ my: 1 }} />
+                                <Typography>회원 ID: {memberInfo.memberId}</Typography>
+                                <Typography>이메일: {memberInfo.email}</Typography>
+                                <Typography>닉네임: {memberInfo.nickname}</Typography>
+                            </Grid>
+                            <Grid item>
+                                {memberInfo.image && (
+                                    <Avatar
+                                        alt={memberInfo.nickname}
+                                        src={memberInfo.image}
+                                        sx={{ width: 200, height: 200 }}
+                                    />
+                                )}
+                            </Grid>
                         </Grid>
                         <Grid item xs={12} sx={{ mt: 2 }}>
                             <Typography variant="h6">활동 정보</Typography>
@@ -79,4 +90,3 @@ const AdminMemberDetail = () => {
 };
 
 export default AdminMemberDetail;
-
