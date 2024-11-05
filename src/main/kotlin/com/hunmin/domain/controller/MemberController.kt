@@ -53,8 +53,8 @@ class MemberController(
     @PostMapping("/register")
     @Operation(summary = "회원 가입", description = "회원 가입할 때 사용하는 API")
     fun registerProcess(
-        @RequestPart("memberInfo") memberDTO: MemberDTO,
-        @RequestPart("profileImage", required = false) profileImage: MultipartFile?
+        @RequestPart(value="memberInfo") memberDTO: MemberDTO,
+        @RequestPart(value="profileImage", required = false) profileImage: MultipartFile?
     ): ResponseEntity<String> {
         return try {
             logger.info("=== 회원가입 시작: ${memberDTO.email} ===")
