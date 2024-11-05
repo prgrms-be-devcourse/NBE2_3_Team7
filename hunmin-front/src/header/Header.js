@@ -90,7 +90,7 @@ const Header = () => {
         if (notification.url.includes('/chat-room')) {
             window.location.href = notification.url;
         }else if(notification.url.includes('/follow')){
-            window.location.href = `${apiUrl}:3000/followForm`;
+            window.location.href = `/followForm`;
         }else {
             window.location.href = notification.url;
         }
