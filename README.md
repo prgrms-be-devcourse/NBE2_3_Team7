@@ -173,51 +173,6 @@
 <details>
 <summary>단어</summary>
 
-  <details>
-  <summary>단어 사전</summary>
-    ## 단어 사전
-    ![단어사전](https://github.com/user-attachments/assets/05f5ab93-d8fb-4e25-8c0f-954d51bf439f)
-    ## 단어 사전 시스템 구조
-    ![단어사전](https://github.com/user-attachments/assets/87fe5ff9-8bd4-4b4f-b1b7-f3097a30f988)
-    ### 단어 조회 및 단어 검색
-    - 사용자는 선택한 언어의 단어 목록을 조회하고 단어의 상세 정보를 조회할 수 있습니다.
-    - 검색 기능이 있으며 검색하고자하는 단어를 입력하고 언어를 선택해 조회합니다.
-    ### 단어 등록, 수정, 삭제
-    - 단어 등록, 수정, 삭제는 관리자 권한입니다.
-    - 관리자 권한이 없다면 403 Forbidden 에러 메세지를 반환합니다.
-  </details>
-
-  <details>
-  <summary>단어 학습</summary>
-    ## 단어 학습
-    ![단어학습](https://github.com/user-attachments/assets/3de16f58-4496-4bd1-954d-ceb2b6f39a5d)
-    ## 단어 학습 시스템 구조
-    ![단어학습_단어시험](https://github.com/user-attachments/assets/29eb57c2-21e8-416e-8476-b230e6d6dea3)
-    - 사용자가 언어와 레벨을 선택하고, 선택한 언어로 단어 30개가 주어집니다. 또한 선택한 레벨에 따라 학습 시간이 다르게 주어집니다.
-    - 학습 시간이 다 지나면 사용자는 주어진 단어의 뜻과 의미를 확인할 수 있습니다.
-  </details>
-
-  <details>
-  <summary>단어 시험</summary>
-    ## 단어 시험
-    ![단어시험](https://github.com/user-attachments/assets/6bdb22c7-1aa6-48e4-9dbb-a4f300e22c58)
-    ## 단어 시험 랭킹 및 개인 기록 조회
-    ![단어시험_랭킹_개인기록](https://github.com/user-attachments/assets/c8a4cabc-d122-4721-b104-feb0f5d08a47)
-    ### 단어 시험 시스템 구조
-    ![단어학습_단어시험](https://github.com/user-attachments/assets/29eb57c2-21e8-416e-8476-b230e6d6dea3)
-    - 사용자가 언어와 레벨을 선택합니다. 선택한 언어로 단어가 제공되며, 선택한 레벨에 따라 문제 수가 다르게 주어집니다.
-      Level1 = 25문제
-      Level2 = 50문제
-      Level3 = 100문제
-    - 시험을 제출하거나 시간이 다 지나면 사용자는 시험 점수와, 랭킹 점수, 정답 개수, 오답 개수를 확인할 수 있습니다. 
-      랭킹 점수는 선택한 레벨에 따라 패널티가 반영되어 계산된 후의 점수 입니다.
-      Level1 = 패널티 20%
-      Level2 = 패널티 10%
-      Level3 = 패널티 없음
-    - 랭킹 점수를 바탕으로 언어별 순위가 주어집니다. 또한 전체 및 언어별 TOP100 랭킹 순위를 확인할 수 있습니다.
-    - 사용자 개인 시험 기록을 확인할 수 있습니다.
-  </details>
-
 </details>
 
 <details>
