@@ -1,9 +1,16 @@
 
-# 코틀린 마이그레이션
+# 훈민정음 2.0 Kotlin 마이그레이션 프로젝트
 
 ## 훈민정음 2.0
 외국인 대상 한국어 학습 및 모임 서비스
 훈민정음 2.0은 세종대왕의 애민정신과 훈민정음 창제의 의미를 이어받아, 한국어를 널리 전파하고자 하는 마음으로 개발된 한국어 교육 서비스입니다. 이 프로젝트는 한국어 학습자들에게 효율적이고 즐거운 학습 경험을 제공하기 위해 다양한 기능을 제공합니다.
+
+
+#### 1차 개발 기간 (Java) <br> 
+2024/09/23 ~ 2024/10/10
+
+#### 2차 개발 및 마이그레이션 기간 (Kotlin) <br> 
+2024/10/18 ~ 2024/11/06
 
 ## 기능 목록
 
@@ -43,46 +50,52 @@
 <details>
   <summary>📦 패키지 구조</summary>
 
-├─ src<br/>
-│  ├─ main <br/>
-│  │  ├─ java <br/>
-│  │  │  └─ com <br/>
-│  │  │     └─ hunmin <br/>
-│  │  │        └─ domain <br/>
-│  │  │           ├─ config <br/>
-│  │  │           ├─ controller <br/>
-│  │  │           │  └─ advice     <br/>
-│  │  │           ├─ dto<br/>
-│  │  │           │  ├─ board <br/>
-│  │  │           │  ├─ chat  <br/>
-│  │  │           │  ├─ comment <br/>
-│  │  │           │  ├─ member <br/>
-│  │  │           │  ├─ notice <br/>
-│  │  │           │  ├─ notification <br/>
-│  │  │           │  ├─ page<br/>
-│  │  │           │  └─ word<br/>
-│  │  │           ├─ entity<br/>
-│  │  │           ├─ exception<br/>
-│  │  │           ├─ handler<br/>
-│  │  │           ├─ json<br/>
-│  │  │           ├─ jwt<br/>
-│  │  │           ├─ pubsub<br/>
-│  │  │           ├─ repository<br/>
-│  │  │           │  └─ search<br/>
-│  │  │           └─ service<br/>
-│  │  └─ resources<br/>
-│  │     ├─ static<br/>
-│  │     │  ├─ images<br/>
-│  │     └─ templates<br/>
-│  │        └─ message<br/>
-│  └─ test<br/>
-│     └─ java<br/>
-│        └─ com<br/>
-│           └─ hunmin<br/>
-│              └─ domain<br/>
-│                 ├─ repository<br/>
-│                 └─ service<br/>
+```  
+
+├─ src
+│  ├─ main
+│  │  ├─ kotlin
+│  │  │  └─ com
+│  │  │     └─ hunmin
+│  │  │        ├─ domain
+│  │  │        │  ├─ config
+│  │  │        │  ├─ controller
+│  │  │        │  │  └─ advice
+│  │  │        │  ├─ dto
+│  │  │        │  │  ├─ board
+│  │  │        │  │  ├─ chat
+│  │  │        │  │  ├─ comment
+│  │  │        │  │  ├─ follow
+│  │  │        │  │  ├─ member
+│  │  │        │  │  ├─ notice
+│  │  │        │  │  ├─ notification
+│  │  │        │  │  ├─ page
+│  │  │        │  │  └─ word
+│  │  │        │  ├─ entity
+│  │  │        │  ├─ exception
+│  │  │        │  ├─ handler
+│  │  │        │  ├─ jwt
+│  │  │        │  ├─ redis
+│  │  │        │  │  ├─ entity
+│  │  │        │  │  ├─ repository
+│  │  │        │  │  ├─ sendMessage
+│  │  │        │  │  └─ service
+│  │  │        │  └─ repositoy
+│  │  │        └─ global
+│  │  │           ├─ config
+│  │  │           ├─ exception
+│  │  │           ├─ s3
+│  │  │           └─ validate
+│  │  └─ resource
+│  └─ 
+│     └─ kotlin
+│        └─ com
+│           └─ hunmin
+│              └─ domain
+│                 ├─ repository
+│                 └─ service
 └─ uploads
+```
 
 </details>
 
@@ -90,7 +103,7 @@
 ![image](https://github.com/user-attachments/assets/f215a005-0a1f-4965-a7de-cc9c0ed1e705)
 
 전체 시스템 구조 - 관리자
-![image](https://github.com/user-attachments/assets/f6289385-2c9d-4d5c-b785-269c6f55425f)
+![image](https://github.com/user-attachments/assets/97f0242b-c178-48c3-ae68-a95105b4fd52)  
 
 
 <details>
@@ -237,6 +250,14 @@ ADMIN 권한이 없으면 -> 403 Forbidden + 에러 메시지 반환합니다.
 <summary>유스케이스 다이어그램</summary>
   
 ![USECASE  ](https://github.com/user-attachments/assets/61339a9e-571f-4370-8dbf-33f72ad329d0)
+
+</details>
+
+<details>
+<summary>플로우 차트</summary> 
+  
+![image](https://github.com/user-attachments/assets/48daf714-1a3d-44e5-8570-f0a49b066460)  
+
 
 </details>
 
