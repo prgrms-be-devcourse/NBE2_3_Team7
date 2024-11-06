@@ -199,6 +199,10 @@
   
 ![image](https://github.com/user-attachments/assets/46abbfea-a1ae-45e1-bc2a-9eeaca92690b)
 
+![ezgif com-video-to-gif-converter](https://github.com/user-attachments/assets/e48cae45-dac0-4523-8480-c247bf16c88a)  
+
+
+
 권한 검증 단계
 
 사용자가 AdminController의 메서드를 호출하면 @PreAuthorize("hasAuthority('ADMIN')") 애노테이션이 먼저 동작하여 Spring Security가 현재 사용자의 권한을 확인합니다 <br>
