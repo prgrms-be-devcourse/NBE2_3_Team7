@@ -127,8 +127,8 @@
 <details>
 <summary>로그인</summary>
   
-![image](https://github.com/user-attachments/assets/96eeda40-6137-411c-9079-340c68ba8ef9)
-![ezgif com-resize](https://github.com/user-attachments/assets/6a277246-c0db-4a2f-8558-216723b7968c)
+![스크린샷 2024-11-06 172728](https://github.com/user-attachments/assets/da745a1a-01ad-4923-8802-e958e5bf33cd)
+![2 0--Canva-Chrome2024-11-0617-34-58-ezgif com-video-to-gif-converter](https://github.com/user-attachments/assets/97159c2c-2e1b-41c3-bcbb-ad0804cf1ef1)
 
 </details>
 
