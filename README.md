@@ -211,7 +211,9 @@ ADMIN 권한이 없으면 -> 403 Forbidden + 에러 메시지 반환합니다.
 <details>
 <summary>클래스 다이어그램</summary>
 
-![hunmin](https://github.com/user-attachments/assets/566f6dd3-dcaf-4e60-ab9e-0138137f2aa6)
+![image](https://github.com/user-attachments/assets/41022f7d-af6f-4ce7-9511-10209a371daa)
+
+
 
 </details>
 
