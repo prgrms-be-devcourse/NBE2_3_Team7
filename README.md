@@ -228,7 +228,16 @@ ADMIN 권한이 없으면 -> 403 Forbidden + 에러 메시지 반환합니다.
 
 
 </details>
+<details>
+<summary>팔로우</summary>
 
+![image](https://github.com/user-attachments/assets/dc7c6c71-9212-4f00-a8d0-615c91ba867a)
+
+- 요청/수락으로 관계형성
+- 알림과 차단 기능으로 알림 차단가능
+
+
+</details>
 
 ## 다이어그램
 <details>
