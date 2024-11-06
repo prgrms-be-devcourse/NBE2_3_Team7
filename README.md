@@ -39,7 +39,7 @@
 
 
 ### 성능테스트
-<img src="https://img.shields.io/badge/JMeter-D22128?style=flat-square&logo=Apache-JMeter&logoColor=white">
+<img src="https://img.shields.io/badge/JMeter-D22128?style=flat-square&logo=Apache-JMeter&logoColor=white"> <img src="https://img.shields.io/badge/nGrinder-FFA500?style=flat-square&logo=nGrinder&logoColor=white"> 
 
 ### 문서/협업툴
 <img src="https://img.shields.io/badge/Notion-000000?style=flat-square&logo=notion&logoColor=white"> <img src="https://img.shields.io/badge/Slack-4A154B?style=flat-square&logo=slack&logoColor=white">
@@ -195,7 +195,7 @@
 </details>
 
 <details>
-<summary>유저 관리</summary>
+<summary>회원 관리</summary> 
   
 ![image](https://github.com/user-attachments/assets/46abbfea-a1ae-45e1-bc2a-9eeaca92690b)
 
