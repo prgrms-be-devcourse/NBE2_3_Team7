@@ -138,7 +138,8 @@
 ![스크린샷 2024-11-06 오후 5 40 21](https://github.com/user-attachments/assets/f89b9613-467d-48fc-88d7-d598941df349)
 - 게시판, 카카오맵 api
   
-![ezgif com-video-to-gif-converter (5)](https://github.com/user-attachments/assets/aea3caa1-df4f-4846-bfd3-77c66fc7d8f8)
+![CF67B4AC-F792-4A21-A7FF-DBB3DC834087-ezgif com-video-to-gif-converter](https://github.com/user-attachments/assets/208abec6-d847-4cbc-82c4-a6dd1193443f)
+
 - 북마크
   
 ![ezgif com-video-to-gif-converter (3)](https://github.com/user-attachments/assets/5795c419-7834-42e3-9aca-4506f6511277)
