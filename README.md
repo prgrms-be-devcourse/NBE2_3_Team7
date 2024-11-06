@@ -173,6 +173,21 @@
 </details>
 
 <details>
+<summary>유저 관리</summary>
+  
+![image](https://github.com/user-attachments/assets/46abbfea-a1ae-45e1-bc2a-9eeaca92690b)
+
+권한 검증 단계
+
+사용자가 AdminController의 메서드를 호출하면 @PreAuthorize("hasAuthority('ADMIN')") 애노테이션이 먼저 동작하여 Spring Security가 현재 사용자의 권한을 확인합니다 <br>
+ADMIN 권한이 있으면 -> AdminService 로직 실행 <br>
+ADMIN 권한이 없으면 -> 403 Forbidden + 에러 메시지 반환합니다.
+
+
+</details>
+
+
+<details>
 <summary>알림</summary>
 
 ![image](https://github.com/user-attachments/assets/9a2a6f92-4cfa-49dd-8116-aeada072c9b3)
