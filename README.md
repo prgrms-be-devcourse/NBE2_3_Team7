@@ -133,18 +133,26 @@
 </details>
 
 <details>
-<summary>게시판, 카카오맵 api</summary>
+<summary>게시판, 카카오맵 api, 북마크</summary>
 
-![image](https://github.com/user-attachments/assets/c2e09ee3-78ce-43b8-adac-10a4f99e22c7)
-![2-ezgif com-video-to-gif-converter](https://github.com/user-attachments/assets/de56f762-6238-406a-b4d1-f6c2848e99c5)
+![스크린샷 2024-11-06 오후 5 40 21](https://github.com/user-attachments/assets/f89b9613-467d-48fc-88d7-d598941df349)
+- 게시판, 카카오맵 api
+  
+![ezgif com-video-to-gif-converter (5)](https://github.com/user-attachments/assets/aea3caa1-df4f-4846-bfd3-77c66fc7d8f8)
+- 북마크
+  
+![ezgif com-video-to-gif-converter (3)](https://github.com/user-attachments/assets/5795c419-7834-42e3-9aca-4506f6511277)
+
+
 
 </details>
 
 <details>
-<summary>댓글</summary>
+<summary>댓글, 좋아요</summary>
 
-![image](https://github.com/user-attachments/assets/5eee0b1c-330b-4f47-b7ef-b3b62c6610ca)
-![ezgif com-video-to-gif-converter](https://github.com/user-attachments/assets/d77f8df5-d258-4002-9cb6-491f8951a871)
+![스크린샷 2024-11-06 오후 5 40 31](https://github.com/user-attachments/assets/dedeff46-148f-404c-bdc4-6daa6094007c)
+![ezgif com-video-to-gif-converter (2)](https://github.com/user-attachments/assets/be87858f-ebc7-42c9-ae13-c6160a49906a)
+
 
 </details>
 
@@ -191,20 +199,27 @@ ADMIN 권한이 없으면 -> 403 Forbidden + 에러 메시지 반환합니다.
 <summary>알림</summary>
 
 ![image](https://github.com/user-attachments/assets/9a2a6f92-4cfa-49dd-8116-aeada072c9b3)
+![18-ezgif com-video-to-gif-converter](https://github.com/user-attachments/assets/3a87ef69-9c16-4981-a9a3-6e031286f776)
 
-![image](https://github.com/user-attachments/assets/e94a41af-4d57-4c2a-ae2b-7aa22b46081f)
-
-![3-ezgif com-video-to-gif-converter](https://github.com/user-attachments/assets/28753421-d3b6-45e7-bb09-c3b299c94141)
-
+- 단방향 통신으로 이루어지는 단순 알림이므로 SSE 선택
 
 
 </details>
+
+<details>
+<summary>배포</summary>
+
+![스크린샷 2024-11-06 오후 5 41 15](https://github.com/user-attachments/assets/98fce945-2fe5-4f4f-9423-c1e611de919a)
+
+
+</details>
+
 
 ## 다이어그램
 <details>
 <summary>ERD</summary>
     
-![image](https://github.com/user-attachments/assets/7fd35a00-f121-44e2-9c33-302baefb44bd)
+![image (1)](https://github.com/user-attachments/assets/ca285d20-fa29-48fa-a021-380157ccb539)
 
 </details>
 
@@ -264,11 +279,11 @@ ADMIN 권한이 없으면 -> 403 Forbidden + 에러 메시지 반환합니다.
     <td><b>김동우</b></td>
   </tr>
   <tr>
-    <td><b>게시판, 댓글, 알림</b></td>
-    <td><b>회원</b></td>
-    <td><b>채팅</b></td>
-    <td><b>단어학습</b></td>
-    <td><b>공지사항</b></td>
+    <td><b>게시판, 댓글, 알림, CI/CD</b></td>
+    <td><b>회원, S3 이미지</b></td>
+    <td><b>채팅, 팔로잉, 게시글 검색</b></td>
+    <td><b>단어 사전, 단어 학습</b></td>
+    <td><b>공지사항, 회원 관리</b></td>
   </tr>
 </table>
 
