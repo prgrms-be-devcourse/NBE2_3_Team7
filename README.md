@@ -109,34 +109,13 @@
 <details>
 <summary>채팅</summary>
     
-채팅 시스템 구조
 ![image](https://github.com/user-attachments/assets/2366cd7f-a491-478d-a456-7da0d1a6f932)
 
-## 1. 채팅 구현 기술
 
-https://github.com/user-attachments/assets/b9ed1a0f-4172-487a-ae7d-6a4007862196
-
-
-### **WebSocket + STOMP + Redis Pub/Sub**
-
--  웹소켓 기술에 STOMP 기술을 곁들여 보다 편리한 메세지 전송을 구현
--  PUB/SUB 을 붙인 엔드포인트로 간단히 수신자/송신자를 구별
--  서버 확장성을 위한 redis를 이용, 서버간 데이터 전송을 구현 + 인메모리 영역 저장소 활용으로 빠른 성능을 기대
-
-- **특징**:
-    - 양방향 통신으로 편리한 서비스 구현
-    - 편리한 실시간 메세지 송수신 구현
-    - Redis를 이용한 빠른 성능 구현
-    - 서버간 데이터 전송으로 서버 확장성 구현
-      
-
-### 2. 데이터의 흐름
+https://github.com/user-attachments/assets/d5453fae-117c-471c-a0ea-dcb3ebbd9b72
 
 
- 데이터 흐름: 클라이언트 -> 웹소캣 -> 컨트롤러 -> 서비스 -> stomp handler -> security filter -> stomp.send -> redis -> server -> 클라이언트 
 
- 기술 흐름: Publisher -> 웹소캣 -> Stomp -> Redis -> data save -> Stomp -> 웹소캣 -> Subscriber
- 
  </details>
 
 <details>
