@@ -108,12 +108,9 @@
 
 <details>
 <summary>채팅</summary>
-    
+
 ![image](https://github.com/user-attachments/assets/2366cd7f-a491-478d-a456-7da0d1a6f932)
-
-
-https://github.com/user-attachments/assets/d5453fae-117c-471c-a0ea-dcb3ebbd9b72
-
+![-Clipchamp5-ezgif com-video-to-gif-converter](https://github.com/user-attachments/assets/a5c2649c-e125-4d4d-bff5-568a57bc660c)
 
 
  </details>
