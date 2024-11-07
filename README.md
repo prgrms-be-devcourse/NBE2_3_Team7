@@ -114,7 +114,9 @@
 
 ## 1. 채팅 구현 기술
 
-![-Clipchamp3-ezgif com-video-to-gif-converter](https://github.com/user-attachments/assets/9bba56e5-d283-49b9-901b-1828816deab4)
+https://github.com/user-attachments/assets/b9ed1a0f-4172-487a-ae7d-6a4007862196
+
+
 ### **WebSocket + STOMP + Redis Pub/Sub**
 
 -  웹소켓 기술에 STOMP 기술을 곁들여 보다 편리한 메세지 전송을 구현
