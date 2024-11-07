@@ -114,7 +114,7 @@
 
 ## 1. 채팅 구현 기술
 
-
+![-Clipchamp3-ezgif com-video-to-gif-converter](https://github.com/user-attachments/assets/9bba56e5-d283-49b9-901b-1828816deab4)
 ### **WebSocket + STOMP + Redis Pub/Sub**
 
 -  웹소켓 기술에 STOMP 기술을 곁들여 보다 편리한 메세지 전송을 구현
@@ -287,10 +287,19 @@ ADMIN 권한이 없으면 -> 403 Forbidden + 에러 메시지 반환합니다.
 <summary>팔로우</summary>
 
 ![image](https://github.com/user-attachments/assets/dc7c6c71-9212-4f00-a8d0-615c91ba867a)
+![-Clipchamp4-ezgif com-video-to-gif-converter](https://github.com/user-attachments/assets/22df1905-5424-469f-a486-abd869831ffb)
 
 - 요청/수락으로 관계형성
 - 알림과 차단 기능으로 알림 차단가능
 
+
+</details>
+<details>
+<summary>검색</summary>
+
+  ![화면 캡처 2024-11-07 194021](https://github.com/user-attachments/assets/82166345-da12-4a45-a5ec-8e7755951320)
+![-Clipchamp2-ezgif com-video-to-gif-converter](https://github.com/user-attachments/assets/b0c3a43d-81c7-4e65-b462-a02e6b351263)
+- 게시글/제목검색
 
 </details>
 
